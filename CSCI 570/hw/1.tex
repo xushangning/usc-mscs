@@ -1,0 +1,105 @@
+\documentclass{article}
+
+\usepackage{amsthm}
+
+\title{Answers to CSCI 570 - Fall 2021 - HW 1}
+\author{Shangning Xu}
+
+\begin{document}
+
+\maketitle
+
+\section*{2}
+
+False. A counterexample is given below.
+
+In the stable matching problem of between men $m_1$, $m_2$ and women $w_1$, $w_2$, where the preference lists are
+
+\begin{itemize}
+	\item $m_1$: $w_1 > w_2$
+	\item $m_2$: $w_2 > w_1$
+	\item $w_1$: $m_2 > m_1$
+	\item $w_2$: $m_1 > m_2$
+\end{itemize}
+
+In this instance, there are only two possible matchings: $(m_1, w_1)$ with $(m_2, w_2)$, and $(m_1, w_2)$ with $(m_2, w_1)$. One can verify that both are stable, as the former is optimal for men and the latter women. However, in either matching, there doesn't exist a pair where the man and woman rank their partners on the top of their preference lists.
+
+\section*{3}
+
+True.
+
+\begin{proof}
+	We will prove by contradiction.
+
+	Assume that there exists a stable matching $S$ to which the pair $(m, w)$ doesn't belong. Then, $m$ and $w$ must be matched to other people in $S$, denoted as the pairs $(m, w')$ and $(m', w)$. Since $m$ is on the top of $w$'s preference list, and vice versa for $w$, $(m, w)$ becomes an instability in $S$, making $S$ unstable, thus violating our assumption that $S$ is a stable matching.
+\end{proof}
+
+
+\section*{4}
+
+True.
+
+For any woman, she gets the worst valid partner in the algorithm where men propose and the best valid partner where women propose. If the best and the worst partner are the same, then there is really only one valid partner for every woman. It follows that there is only one stable matching for this instance of the stable marriage problem.
+
+\section*{5}
+
+A stable matching may not exist. Consider the following preference lists:
+
+\begin{itemize}
+	\item $a$: $c > b > d$
+	\item $b$: $a > c > d$
+	\item $c$: $b > a > d$
+	\item $d$: $d$'s preference doesn't matter.
+\end{itemize}
+
+Since their are only 3 possible roommate arrangements, we list all of them with their respective instability pairs:
+
+\begin{itemize}
+	\item $(a, b)$ $(c, d)$: $(a, c)$
+	\item $(a, c)$ $(b, d)$: $(c, b)$
+	\item $(a, d)$ $(b, c)$: $(a, b)$
+\end{itemize}
+
+\section*{6}
+
+There may not exist a pair of stable schedules for every sets of TV shows and ratings. Consider the instance of the problem when there are only two time slots, where network $A$ carries TV shows $a_1$ and $a_2$ and network $B$ carries $b_1$ and $b_2$, with their ratings ranked as $a_1 > b_1 > a_2 > b_2$. There are 4 possible pairs of schedules, but only 2 possible \emph{run-ups} of TV shows:
+
+\begin{enumerate}
+	\item $(a_1, b_1)$ and $(a_2, b_2)$
+	\item $(a_1, b_2)$ and $(a_2, b_1)$
+\end{enumerate}
+
+$A$ wins the most time slots among all possible pairs of schedules in the first run-up, and $B$ wins the most in the second. Moreover, if the current pair of schedules puts one network at a disadvantage, it can always swap its own TV shows to win one more time slot. Therefore, there will never be a stable pair of schedules.
+
+\section*{7}
+
+We prove that there is always a stable assignment by giving an algorithm that constructs one. Our algorithm has a slight modification over the G-S algorithm
+
+\begin{enumerate}
+	\item Men in G-S are replaced with hospitals and women with students;
+	\item When it's time for a hospital to ``propose'', it will try to fill all of its empty positions;
+	\item The loop exits when no hospital has vacancy.
+\end{enumerate}
+
+
+Then, we prove that our algorithm indeed returns a stable matching, with the following statements and their proofs:
+
+\begin{enumerate}
+	\item The algorithm terminates, as the loop goes through finite iterations.
+	\begin{enumerate}
+		\item Similar to (1.4) in the textbook, we states that if a hospital has empty positions at some point in the execution of the algorithm, then there is a student to whom it hasn't considered. The proof is similar to (1.4). Therefore, we won't keep finding hospitals with empty spots that have exhausted their preference lists.
+		\item The loop at most went through $mn$ iterations, where $m$ is the number of hospitals and $n$ the number of students. The proof is similar to (1.3).
+	\end{enumerate}
+	\item The matching returned is a stable matching, because
+	\begin{enumerate}
+		\item The matching is perfect for hospitals. Since the algorithm terminates only when there is no vacancy, all positions will be filled.
+		\item No first type of instability. If there is unassigned student $s'$ whom the hospital $h$ prefers to its current choice $s$, then it must has considered $s'$ before $s$, which contradicts with the statement that $s'$ is unassigned.
+		\item No second type of instability. The proof is similar to the one for (1.6).
+	\end{enumerate}
+\end{enumerate}
+
+\section*{8}
+
+
+
+\end{document}
