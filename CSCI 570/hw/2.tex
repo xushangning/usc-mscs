@@ -14,79 +14,79 @@
 \section{Graded Problems}
 
 \begin{enumerate}
-	\item $\Theta(n)$.
-	
-	Suppose that its worst-case runtime performance is $f(n)$. Note that
-	\[
-		f(2^{\lfloor\log_2 n\rfloor}) \le f(n) \le f(2^{\lceil\log_2 n\rceil}).
-	\]
-	
-	When $n = 2^k$ for $k \in \mathbb{Z}$, the total number of operations is
-	\[
-		n + \frac{n}{2} + \cdots + 2 = 2^k + 2^{k - 1} + \cdots + 2 = 2^{k + 1} - 2 = 2n - 2 = \Theta(n).
-	\]
-	
-	It follows that $f(2^{\lfloor\log_2 n\rfloor}) = \Theta(2^{\lfloor\log_2 n\rfloor})$ and $f(2^{\lceil\log_2 n\rceil}) = \Theta(2^{\lceil\log_2 n\rceil})$. These functions are further bounded by
-	\[
-		\frac{n}{2} \le 2^{\lfloor\log_2 n\rfloor} \le 2^{\lceil\log_2 n\rceil} \le 2n,
-	\]
-	giving $2^{\lfloor\log_2 n\rfloor}, 2^{\lceil\log_2 n\rceil} \in \Theta(n)$. Substituting these results into the very first inequality, we can see that $f(n) = \Theta(n)$.
-	\item $O(\log n) = O(\log(\log(n^n))) \subset O(2^{\log n}) \subset O(n\log(n^2)) \subset O(2^{3n}) \subset O(n^{n\log n}) \subset O(n^{n^2})$
-	\item
-	\begin{enumerate}
-		\item True.
-		\begin{proof}
-			Since $f_1(n) = O(g_1(n))$ and $f_2(n) = O(g_2(n))$, we have for $n \ge n_1$ and some $c_1 > 0$, $f_1(n) \le c_1g_1(n)$, and for $n \ge n_2$ and some $c_2 > 0$, $f_2(n) \le c_2g_2(n)$. Let $c = c_1c_2$ and $n_0 = \max(n_1, n_2)$, and we have $f_1(n)f_2(n) \le c_1c_2g_1(n)g_2(n) = cg_1(n)g_2(n)$ for $n \ge n_0$, which is the definition of $f_1(n)f_2(n) = O(g_1(n)g_2(n))$.
-		\end{proof}
-		\item True.
-		\begin{proof}
+    \item $\Theta(n)$.
+    
+    Suppose that its worst-case runtime performance is $f(n)$. Note that
+    \[
+        f(2^{\lfloor\log_2 n\rfloor}) \le f(n) \le f(2^{\lceil\log_2 n\rceil}).
+    \]
+    
+    When $n = 2^k$ for $k \in \mathbb{Z}$, the total number of operations is
+    \[
+        n + \frac{n}{2} + \cdots + 2 = 2^k + 2^{k - 1} + \cdots + 2 = 2^{k + 1} - 2 = 2n - 2 = \Theta(n).
+    \]
+    
+    It follows that $f(2^{\lfloor\log_2 n\rfloor}) = \Theta(2^{\lfloor\log_2 n\rfloor})$ and $f(2^{\lceil\log_2 n\rceil}) = \Theta(2^{\lceil\log_2 n\rceil})$. These functions are further bounded by
+    \[
+        \frac{n}{2} \le 2^{\lfloor\log_2 n\rfloor} \le 2^{\lceil\log_2 n\rceil} \le 2n,
+    \]
+    giving $2^{\lfloor\log_2 n\rfloor}, 2^{\lceil\log_2 n\rceil} \in \Theta(n)$. Substituting these results into the very first inequality, we can see that $f(n) = \Theta(n)$.
+    \item $O(\log n) = O(\log(\log(n^n))) \subset O(2^{\log n}) \subset O(n\log(n^2)) \subset O(2^{3n}) \subset O(n^{n\log n}) \subset O(n^{n^2})$
+    \item
+    \begin{enumerate}
+        \item True.
+        \begin{proof}
+            Since $f_1(n) = O(g_1(n))$ and $f_2(n) = O(g_2(n))$, we have for $n \ge n_1$ and some $c_1 > 0$, $f_1(n) \le c_1g_1(n)$, and for $n \ge n_2$ and some $c_2 > 0$, $f_2(n) \le c_2g_2(n)$. Let $c = c_1c_2$ and $n_0 = \max(n_1, n_2)$, and we have $f_1(n)f_2(n) \le c_1c_2g_1(n)g_2(n) = cg_1(n)g_2(n)$ for $n \ge n_0$, which is the definition of $f_1(n)f_2(n) = O(g_1(n)g_2(n))$.
+        \end{proof}
+        \item True.
+        \begin{proof}
             Note that for $n \ge n_0$ (Refer to (a) for notation.),
             \[
                 f_1(n) + f_2(n) \le c_1g_1(n) + c_2g_2(n) \le (c_1 + c_2)\max(g_1(n), g_2(n)).
             \]
         \end{proof}
-		\item True.
-		\begin{proof}
+        \item True.
+        \begin{proof}
             Since $0 \le f_1(n) \le c_1g_1(n)$, we have $f_1(n)^2 \le c_1^2g_1(n)^2$. Let $c_0 = c_1^2$ and we can see that $f_1(n)^2 = O(g_1(n)^2)$.
         \end{proof}
         \item False. Let $f_1(n) = \arctan n$ and $g_1(n) = 2\arctan n/\pi$. Note that $\log g_1(n) = \log 2\arctan n/\pi < 0$ for any $n \ge 0$, while for sufficiently large $n$, $\log f_1(n) = \log\arctan n > 0$. Therefore, for any $c > 0$, we will have $\log f_1(n) > c\log g_1(n)$.
-	\end{enumerate}
-	\item We use a breath-first search to visit every node in the graph. After visiting a node $v$, we will mark all nodes connected $v$ as visited. If a node $u$ is connected to $v$ and is already marked, then $G$ contains a cycle. If after visiting every node, we haven't encounter such a situation, then $G$ doesn't contain a cycle.
-	
-	The worst case happens when the graph doesn't contain a cycle and every node and edge are visited,  giving a runtime of $O(m + n)$.
+    \end{enumerate}
+    \item We use a breath-first search to visit every node in the graph. After visiting a node $v$, we will mark all nodes connected $v$ as visited. If a node $u$ is connected to $v$ and is already marked, then $G$ contains a cycle. If after visiting every node, we haven't encounter such a situation, then $G$ doesn't contain a cycle.
+    
+    The worst case happens when the graph doesn't contain a cycle and every node and edge are visited,  giving a runtime of $O(m + n)$.
 \end{enumerate}
 
 \section{Practice Problems}
 
 \begin{enumerate}
-	\item
-	\begin{enumerate}
-		\item The number of operations during one iteration of the inner loop is $j - i + 1$, so the total number of operations is
-		\[
-			\sum_{i = 1}^n \sum_{j = i + 1}^n (j - i + 1) = \sum_{i = 1}^n \frac{(n - i + 3)(n - i)}{2} = \Theta(n^3)
-		\]
-		
-		Therefore, the upper bound is $O(n^3)$.
-		
-		\item The proof for a lower bound of $\Omega(n^3)$ has been given in (a).
-		\item We present an algorithm with a runtime performance of $\Theta(n^2)$:
-		\begin{algorithmic}[1]
-			\For{$i \gets 1, \dots, n$}
-				\State $B[i, i] \gets A[i]$
-				\For{$j \gets i + 1, \dots, n$}
-					\State $B[i, j] \gets B[i, j - 1] + A[j]$
-				\EndFor
-			\EndFor
-		\end{algorithmic}
+    \item
+    \begin{enumerate}
+        \item The number of operations during one iteration of the inner loop is $j - i + 1$, so the total number of operations is
+        \[
+            \sum_{i = 1}^n \sum_{j = i + 1}^n (j - i + 1) = \sum_{i = 1}^n \frac{(n - i + 3)(n - i)}{2} = \Theta(n^3)
+        \]
+        
+        Therefore, the upper bound is $O(n^3)$.
+        
+        \item The proof for a lower bound of $\Omega(n^3)$ has been given in (a).
+        \item We present an algorithm with a runtime performance of $\Theta(n^2)$:
+        \begin{algorithmic}[1]
+            \For{$i \gets 1, \dots, n$}
+                \State $B[i, i] \gets A[i]$
+                \For{$j \gets i + 1, \dots, n$}
+                    \State $B[i, j] \gets B[i, j - 1] + A[j]$
+                \EndFor
+            \EndFor
+        \end{algorithmic}
 
-	\end{enumerate}
-	
-	\item
-	\begin{proof}
-		We will prove by contradiction.
-		
-		Suppose that $G$ does contain some edge $(x, y)$ in addition to ones it shares with $T$. Since $T$ is a DFS tree, by (3.7), we can assume, without loss of generality, that $x$ is $y$'s ancestor. As $T$ is also a BFS tree, the ancestor relationship shows that $y$ hasn't been discovered before $x$ is visited. Because of the edge $(x, y)$, $y$ will be discovered while iterating over $x$'s edges during BFS, adding $(x, y)$ to the BFS tree $T$. This contradicts with our assumption that $(x, y)$ is not in the tree $T$.
-	\end{proof}
+    \end{enumerate}
+    
+    \item
+    \begin{proof}
+        We will prove by contradiction.
+        
+        Suppose that $G$ does contain some edge $(x, y)$ in addition to ones it shares with $T$. Since $T$ is a DFS tree, by (3.7), we can assume, without loss of generality, that $x$ is $y$'s ancestor. As $T$ is also a BFS tree, the ancestor relationship shows that $y$ hasn't been discovered before $x$ is visited. Because of the edge $(x, y)$, $y$ will be discovered while iterating over $x$'s edges during BFS, adding $(x, y)$ to the BFS tree $T$. This contradicts with our assumption that $(x, y)$ is not in the tree $T$.
+    \end{proof}
 \end{enumerate}
 
 \end{document}
