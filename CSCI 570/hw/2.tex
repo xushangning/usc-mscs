@@ -49,7 +49,7 @@
         \begin{proof}
             Since $0 \le f_1(n) \le c_1g_1(n)$, we have $f_1(n)^2 \le c_1^2g_1(n)^2$. Let $c_0 = c_1^2$ and we can see that $f_1(n)^2 = O(g_1(n)^2)$.
         \end{proof}
-        \item False. Let $f_1(n) = \arctan n$ and $g_1(n) = 2\arctan n/\pi$. Note that $\log g_1(n) = \log 2\arctan n/\pi < 0$ for any $n \ge 0$, while for sufficiently large $n$, $\log f_1(n) = \log\arctan n > 0$. Therefore, for any $c > 0$, we will have $\log f_1(n) > c\log g_1(n)$.
+        \item False. Let $f_1(n) = 20$ and $g_1(n) = 1$. Note that $\log g_1(n) = 0$ for any $n \ge 0$, while $\log f_1(n) > 0$ for all $n$. Therefore, for any $c > 0$, we will have $\log f_1(n) > c\log g_1(n) = 0$.
     \end{enumerate}
     \item We use a breath-first search to visit every node in the graph. After visiting a node $v$, we will mark all nodes connected $v$ as visited. If a node $u$ is connected to $v$ and is already marked, then $G$ contains a cycle. If after visiting every node, we haven't encounter such a situation, then $G$ doesn't contain a cycle.
     
