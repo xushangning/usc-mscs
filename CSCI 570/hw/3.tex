@@ -1,0 +1,100 @@
+\documentclass{article}
+
+\usepackage[noend]{algpseudocode}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+
+\title{Answers to CSCI 570 - Fall 2021 - HW 3}
+\author{Shangning Xu}
+
+\begin{document}
+
+\maketitle
+
+\begin{enumerate}
+
+\item The algorithm is simple: We will keep finding and connecting the shortest two ropes until there is only one rope left.
+
+We can implement the search for shortest ropes with a min-heap. Since every time we connect two ropes, the total number of ropes will be reduced by one, the loop has $N - 1$ iterations in total, giving a runtime performance of $\sum_{i = 2}^N O(\log i) = O(N\log N)$.
+
+\item This is a fractional knapsack problem. Consider the following algorithm: First sort the liquid by their value per litre ($V_i/L_i$ for $i = 1, \dots, N$). Then, we successively pick the liquid with maximum value per litre and pour it into the bottle, until the bottle is filled or there is no unbottled liquid.
+
+\item You should only stop at a gas station if, by the time you reach it, your remaining gas are not enough for you to reach the next gas station.
+
+Now we prove that our strategy will yield an optimal set of gas stops that minimize the number of refills.
+
+\begin{proof}
+    We extend the notation so that the 0th ``gas station'' is USC and the $(n + 
+    1)$th is Santa Monica. Let $i_1, \dots, i_m$ with $i_1 = 0$ and $i_m = n + 1$ be a set of stops that minimize the number of refills and $j_1, j_2, \dots$ with $j_1 = 0$ be the set of stops we make when we apply our strategy.
+
+    First, we wish to prove that for $k = 1, \dots, m$, $j_k \ge i_k$ with mathematical induction.
+    \begin{enumerate}
+        \item The base case when $k = 1$ is apparent. We have $j_1 = 0 \ge i_1 = 0$.
+        \item Given $j_k \ge i_k$, we need to prove $j_{k + 1} \ge i_{k + 1}$. There are two cases here with regard to the relative placement of the gas stations $j_k$ and $i_{k + 1}$.
+        \begin{itemize}
+            \item If $j_k \ge i_{k + 1}$, then we easily have $j_{k + 1} > j_k \ge i_{k + 1}$.
+            \item If $j_k < i_{k + 1}$, the station $j_k$ is behind $i_{k + 1}$. Since $d_{i_{k + 1}} - d_{i_k} \le p$ and the gas station $j_k$ is not behind station $i_k$, we can reach $i_{k + 1}$ from $j_k$ while using the same amount as or even less gas than from $i_k$. By the time we reach $i_{k + 1}$ from $j_k$, either we still have enough gas to make it to the next station, giving $j_{k + 1} > i_{k + 1}$, or we simply can't make it, giving $j_{k + 1} = i_{k + 1}$. Either way, we have $j_{k + 1} \ge i_{k + 1}$.
+        \end{itemize}
+    \end{enumerate}
+    
+    Now that $j_k \ge i_k$ for $k = 1, \dots, m$, we have $j_m \ge i_m = n + 1$. As $j_k \le n + 1$ for all $k$, it must be the case that $j_m = i_m = n + 1$, showing that our strategy yield the same number of stops as an optimal set of gas stops.
+\end{proof}
+
+The time complexity of our algorithm is $\Theta(n)$, as the time to consider whether to stop for one gas station is constant and we need to consider for every gas station.
+
+\item
+\begin{enumerate}
+    \item The algorithm is as follows: To make change for $n$ cents, we make change in descending order of denomination. We will only use coins with a smaller denomination only if the change can be made in coins with larger denomination.
+    \item Consider using the set $\{15, 10, 1\}$ to make change for 20 cents. Our algorithm gives 6 coins with 1 15-cent and 6 pennies, but the optimal solution is two dimes.
+\end{enumerate}
+
+\item We modify the algorithm for computing a topological ordering of a DAG so that when it is run on an arbitrary graph and can't find a node without incoming edges to delete, it runs a cycle detection algorithm to output a cycle.
+
+The cycle detection algorithm works as follows: It runs a BFS over the original graph and, for every visited vertex $v$, marks any adjacent vertex $u$ that is discovered for the first time during the search as ``visited'' and records $u$'s parent in the resulting BFS tree as $v$. If there is a vertex $w$ adjacent to $v$ that has been marked as visited, then a cycle is detected. To cover the cycle itself, we can follow $v$ and $w$'s ancestor records to the BFS tree root. The two paths to the root and the edge $(w, v)$ forms a cycle.
+
+Since both BFS and recovering of the cycle have a time complexity of $O(m + n)$, the time complexity of the whole algorithm is $O(m + n)$.
+
+\item We present the following algorithm: For each event $e$ in the $S'$, we find the first event $e' = e$ in $S$, discard the part of $S$ from the beginning to $e'$ (including $e'$), and find the next matching event in $S$, until we reach the end of $S'$.
+
+\item We schedule the tasks' first parts on Computer A in descending order of their second parts' execution time, and schedule a task's second part on Computer B as soon as its first is completed.
+
+Now we prove that our algorithm yield an optimal schedule.
+\begin{proof}
+    In a schedule, define an inversion to be a pair of tasks $(i, j)$ where task $i$ is scheduled before $j$ on Computer A while $b_i < b_j$. Our algorithm returns a schedule without inversions, and we will prove that such a schedule is optimal, in the following propositions:
+    \begin{enumerate}
+        \item There is an optimal schedule without idle time.
+        
+        This is apparent, so the proof is omitted.
+    
+        \item All schedules without inversions have the same execution time.
+        
+        Two schedules, both without inversions, may differ in how they arrange two tasks with the same execution time in their second parts but different in first parts. Suppose that the two schedules differ in how they arrange tasks with their second part's execution time being $b$. Since these tasks' first parts are scheduled consecutively and the second parts are started as soon as their corresponding first parts are finished, the last task to finish is always the task's second part whose first part is ranked last on A, among the tasks whose second parts' execution time being $b$. That second part's finish time is always the total execution time of those tasks' first part plus $b$ and the total execution time of any tasks' first parts before them. The finish time is independent of the ordering of the tasks' first parts.
+
+        \item If a schedule has any inversion, it must have a pair of neighboring tasks that form an inversion.
+        
+        The proof is similar to (4.9) (a).
+
+        \item Swapping neighboring tasks in an inversion doesn't increase the total execution time of the schedule.
+        
+        To see why this is the case, consider an inversion $(i, j)$ where $i$ is scheduled immediately before $j$. Note that swapping neighboring tasks on Computer A doesn't change the total execution time of task $i$ and $j$'s first parts, so we are only concerned with the swap's effect on the finish time of tasks on Computer B. Let the first parts' finish time be $f$.
+
+        After the swap, task $j$'s second part is scheduled earlier, so we only need to consider task $i$'s second part. Let $f_i$ be task $i$'s second part's finish time before the swap and $f_i'$ after. We use $s_i$ and $s_i'$ similarly but for start time. Because we start a task's second part immediately after its first part finishes, we have $s_j = s_i' = f$. It follows that
+        $$
+            s_j = f_j - b_j = s_i' = f_i' - b_i.
+        $$
+
+        Rearranging the terms in the equality, we have
+        $$
+            f_i' = f_j - b_j + b_i < f_j,
+        $$
+        the last inequality due to the property of inversion, $b_i < b_j$. Thus, after the swap, the task $i$'s second part will actually finish before the task $j$'s second part before the swap, leading to no increase in the total execution time.
+    \end{enumerate}
+
+    Given these statements, consider any optimal schedule with no idle time. We can eliminate all inversions in the schedule using a bubble sort-like procedure, swapping neighboring tasks until there are no inversions. The resulting schedule is optimal and has no inversions. Since all schedules without inversions have the same total execution time, all schedules without inversions are optimal.
+\end{proof}
+
+The algorithm can be implemented with a max-heap that compare tasks based on their second parts' execution time, so the algorithm's time complexity is $O(N\log N)$.
+
+\end{enumerate}
+
+\end{document}
