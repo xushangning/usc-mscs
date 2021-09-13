@@ -45,6 +45,21 @@ The time complexity of our algorithm is $\Theta(n)$, as the time to consider whe
 \item
 \begin{enumerate}
     \item The algorithm is as follows: To make change for $n$ cents, we make change in descending order of denomination. We will only use coins with a smaller denomination only if the change can be made in coins with larger denomination.
+    
+    Now we prove the optimality of our algorithm.
+    \begin{proof}
+        Let $(c_1, c_2, c_3, c_4)$ be the change our algorithm returned for $n$ cents i.e., $c_1$ quarters, $c_2$ dimes, $c_3$ nickels and $c_4$ pennies, and $(c_1^*, c_2^*, c_3^*, c_4^*)$ be any set of coins that minimize the number of coins for $n$. We examine each denomination individually to show that they use the same number of coins.
+        \begin{enumerate}
+            \item Because we try to use maximum number of large denomination coins in our algorithm, we have $c_1^* \le c_1$. To prove their equality, we assume $c_1^* < c_1$ and show that we can always replace existing coins in the optimal solution with quarters to reduce the number of coins. As $c_1 > c_1^* \ge 0$, we have $c_1 \ge 1$ and $n \ge 25$.
+            \begin{enumerate}
+                \item When $c_1^* \ge 3$, we have more than 3 dimes in the optimal solution that can be replaced with a quarter and a nickel, reducing the total number of coins by one in the process and contradicting the optimality of the solution.
+                \item When $c_1^* < 3$, to make change for $n \ge 5$ without using more dimes, one has to add at least one nickel or five pennies, and we can always handpick another 20 cents from the rest of the coins and replace these 25 cents with a quarter, contradicting the optimality of the solution.
+            \end{enumerate}
+            Due to these contradictions, we have $c_1 = c_1^*$ for quarters.
+            \item Given $c_1 = c_1^*$ and our rule of using maximum number of coins of large denomination, we have $c_2 \ge c_2^*$ for dimes. We also assume, for the sake of contradiction, that $c_2 > c_2^*$. Because we use the same number of quarters in both solutions, we only need to consider $10 \le n < 25$. We apply the same argument above, that you can always find coins in the optimal solution worth 10 cents and replace it with a dime, contradicting the optimality of the solution.
+            \item With $c_1 = c_1^*$ and $c_2 = c_2^*$, we can follow the same outline of our arguments above and show that $c_3 = c_3^*$. Because we are making change for the same $n$, it must be the case that $c_4 = c_4^*$, completing our proof.
+        \end{enumerate}
+    \end{proof}
     \item Consider using the set $\{15, 10, 1\}$ to make change for 20 cents. Our algorithm gives 6 coins with 1 15-cent and 6 pennies, but the optimal solution is two dimes.
 \end{enumerate}
 
