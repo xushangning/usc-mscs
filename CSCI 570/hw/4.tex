@@ -1,0 +1,127 @@
+\documentclass{article}
+
+\usepackage[noend]{algpseudocode}
+\usepackage{amsthm}
+
+\title{Answers to CSCI 570 - Fall 2021 - HW 4}
+\author{Shangning Xu}
+
+\begin{document}
+
+\maketitle
+
+\section*{Section 1: Heaps}
+
+\subsection*{Problem 1}
+
+We use a max-heap $A.max$ and a min-heap $A.min$ to implement the data structure. The max-heap will contain the first half (and the median when the number of total elements is odd) of all elements and min-heap the other half.
+
+\begin{algorithmic}[1]
+    \Function{Find-Median}{$A$}
+        \If{$n$ is odd}
+            \State \Return $A.max[0]$
+        \Else
+            \State \Return $(A.max[0] + A.min[0])/2$
+        \EndIf
+    \EndFunction
+    \Function{Insert}{$A$, $k$}
+        \If{$n = 0$}
+            \State MAX-HEAP-INSERT($A.max$, $k$)
+        \ElsIf{$n$ is odd}
+            \If{$k < A.max[0]$}
+                \State $x \gets \textrm{HEAP-EXTRACT-MAX}(A.max)$
+                \State MIN-HEAP-INSERT($A.min$, $x$)
+                \State MAX-HEAP-INSERT($A.max$, $k$)
+            \Else
+                \State MIN-HEAP-INSERT($A.min$, $k$)
+            \EndIf
+        \ElsIf{$k > A.min[0]$}
+            \State $x \gets \textrm{HEAP-EXTRACT-MIN}(A.min)$
+            \State MAX-HEAP-INSERT($A.max$, $x$)
+            \State MIN-HEAP-INSERT($A.min$, $k$)
+        \Else
+            \State MAX-HEAP-INSERT($A.max$, $k$)
+        \EndIf
+        \State $n \gets n + 1$
+    \EndFunction
+\end{algorithmic}
+
+\subsection*{Problem 2}
+
+We will use a min-heap $A$ to track the $k$ largest numbers. The algorithm is as follows:
+\begin{algorithmic}[1]
+    \While{true}
+        \State Fetch a number from the stream and store it in $x$
+        \If{$A.heap\textrm{-}size < k$}
+            \State MIN-HEAP-INSERT($A$, $x$)
+        \ElsIf{$x > A[0]$}
+            \State EXTRACT-MIN($A$)
+            \State MIN-HEAP-INSERT($A$, $x$)
+        \EndIf
+    \EndWhile
+\end{algorithmic}
+
+\section*{Section 2: MST}
+
+\subsection*{Problem 3}
+
+\begin{proof}
+    We will prove by contradiction.
+
+    Assume that $G$ has two minimum spanning trees $T = (V, E)$ and $T' = (V, E')$, where they differ by an edge $(u, v)$. We can further assume, without loss of generality, that $(u, v)$ belongs to $E$ but not $E'$. Because $T'$ is a tree, $u$ and $v$ is connected by some simple path $p$ in $T'$. $p$ can't be present in $T$ as otherwise it would form a cycle with the edge $(u, v)$ and thus must have some missing edge $e$ that belongs to $T'$ but not $T$. Due to cost difference between edges, we can either replace $(u, v)$ with $e$ in $T$ or $e$ with $(u, v)$ in $T'$ and obtain a new spanning tree with less cost, contradicting our assumption that both $T$ and $T'$ are minimum spanning trees.
+\end{proof}
+
+\subsection*{Problem 4} 
+
+We present the following algorithm:
+\begin{algorithmic}[1]
+    \State Use BFS to construct a tree $(V, T)$ in $G$
+    \State $S \gets \{e| e \notin T\}$
+    \For{$(u, v) \in S$}
+        \State Find the path $p$ that connects $u$ and $v$ in $T$
+        \State Find the edge $e \in p$ with greatest weight
+        \If{$w(u, v) < w(e)$}
+            \State $T \gets T \cup \{(u, v)\} - \{e\}$
+        \EndIf
+        \State $S \gets S - \{(u, v)\}$
+    \EndFor
+\end{algorithmic}
+
+Because the time complexity of BFS and searching for a cycle is $O(n)$, and that there are at most 9 iterations in the loop, the algorithm runs in $O(n)$.
+
+\section*{Section 3: Shortest Path}
+
+\subsection*{Problem 5}
+
+\begin{enumerate}
+    \item False. Consider 3 vertices arranged in a triangle with edge weights 1, 2, 3. There are two shortest paths between the vertices connected by the weight-3 edge.
+    \item False. Again, consider 3 vertices arranged in a triangle with edge weights 1, 1, 3 and the shortest path between the vertices connected by the weight-3 edge. The shortest path distance is 2 before the increase and 5 after increasing each edge's weight by $k = 2$. The shortest path distance increases by 3, which is not a multiple of 2.
+    \item True.
+    \begin{proof}
+        Let $p$ be a shortest path before the weight decrease and $p'$ after. If $e \in p$, we will have $p = p'$, as for any other path to which $e$ doesn't belong, there is not decrease in weight, and for any other path to which $e$ does belong, its weight decrease is $k$, same as the decrease in $p$. As a result, the decrease in weight is $k$ when $e \in p$.
+
+        If $e \notin p$, we must have $e \in p'$ as for any path $q$ to which $e$ doesn't belong, we have $c(q) \ge c(p)$ due to $p$'s optimality. Given $p'$'s current optimality, we have $c(p') - k \le c(p)$ and thus $c(p') - c(p) \le k$.
+    \end{proof}
+    \item False. Again, consider 3 vertices arranged in a triangle with edge weights 2, 2, 3 and the shortest path between the vertices connected by the weight-3 edge. Before the change, the shortest path is the weight-3 edge. After the change, the shortest path is the path composed of two weight-2 edges.
+\end{enumerate}
+
+\subsection*{Problem 6}
+
+Let $\delta(s, v)$ for the normal shortest-path distance between $v$ and $s$, and $\delta'(s, v)$ for the shortest-path distance between $v$ and $s$ where one edge on a shortest path is set to zero. We can write the following recurrence:
+\[
+    \delta'(s, v) = \min_{(u, v) \in E}(\delta'(s, u) + c(u, v), \delta(s, u)).
+\]
+
+To compute $\delta'(s, t)$, we first run the Dijkstra algorithm to compute $\delta(s, v)$ for all vertices. Then, we run our modified Dijkstra algorithm with the following changes:
+\begin{enumerate}
+    \item We maintain $v.d'$ for all vertex $v$, an upper bound for $\delta'(s, v)$, as an array.
+    \item We will extract a vertex $u$ with minimum $u.d'$ and add it to the set $S$ of vertices whose $\delta'$ has been computed. Then we perform the following update for all vertex $v$ incident on $u$:
+    \[
+        v.d' \gets \min(v.d', u.d' + c(u, v), \delta(s, u)).
+    \]
+    \item The algorithm is terminated once the vertex $t$ is added to $S$.
+\end{enumerate}
+
+When the algorithm terminates, the value $t.d'$ is the shortest-path weight with one zero-cost edge between $s$ and $t$.
+
+\end{document}
