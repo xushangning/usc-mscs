@@ -110,7 +110,7 @@ Let $\delta(s, v)$ for the normal shortest-path distance between $v$ and $s$, an
 To compute $\delta'(s, t)$, we first run the Dijkstra algorithm to compute $\delta(s, v)$ for all vertices. Then, we run our modified Dijkstra algorithm with the following changes:
 \begin{enumerate}
     \item We maintain $v.d'$ for all vertex $v$, an upper bound for $\delta'(s, v)$, as an array.
-    \item We will extract a vertex $u$ with minimum $u.d'$ and add it to the set $S$ of vertices whose $\delta'$ has been computed. Then we perform the following update for all vertex $v$ incident on $u$:
+    \item We will extract a vertex $u$ with minimum $u.d'$ and add it to the set $S$ of vertices whose $\delta'$ has been computed. Then we perform the following update for all vertex $v$ adjacent to $u$:
     \[
         v.d' \gets \min(v.d', u.d' + c(u, v), \delta(s, u)).
     \]
