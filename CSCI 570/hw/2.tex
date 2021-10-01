@@ -51,9 +51,9 @@
         \end{proof}
         \item False. Let $f_1(n) = 20$ and $g_1(n) = 1$. Note that $\log g_1(n) = 0$ for any $n \ge 0$, while $\log f_1(n) > 0$ for all $n$. Therefore, for any $c > 0$, we will have $\log f_1(n) > c\log g_1(n) = 0$.
     \end{enumerate}
-    \item We use a breath-first search to visit every node in the graph. After visiting a node $v$, we will mark all nodes connected $v$ as visited. If a node $u$ is connected to $v$ and is already marked, then $G$ contains a cycle. If after visiting every node, we haven't encounter such a situation, then $G$ doesn't contain a cycle.
+    \item We use a breath-first search to visit every vertex in the graph. While exploring a vertex $v$ to discover its adjacent vertices, we will mark newly-discovered vertices e.g., $u$ as ``discovered'' and $u.\pi$, its parent in the BFS tree, to $v$. However, if a node $w$ adjacent to $v$ is already marked, then $G$ contains a cycle and the search is terminated. To recover the cycle, follow $u.\pi$ and $v.\pi$ to the BFS tree root $s$, and the cycle is formed by the edges $s \leadsto v$, $s \leadsto u$ and $(u, v)$. If after visiting every node, we haven't encounter such a situation, then $G$ doesn't contain a cycle.
     
-    The worst case happens when the graph doesn't contain a cycle and every node and edge are visited,  giving a runtime of $O(m + n)$.
+    As BFS and recovering of cycle have a time complexity of $O(m + n)$, visiting all nodes and edges if necessary, our algorithm has a run time of $O(m + n)$.
 \end{enumerate}
 
 \section{Practice Problems}
