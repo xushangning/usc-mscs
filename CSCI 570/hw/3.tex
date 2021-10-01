@@ -13,7 +13,7 @@
 
 \begin{enumerate}
 
-\item The algorithm is simple: We will keep finding and connecting the shortest two ropes until there is only one rope left.
+\item The algorithm is simple: We will keep finding, connecting the shortest two ropes, putting back the connected rope and resorting until there is only one rope left.
 
 We can implement the search for shortest ropes with a min-heap. Since every time we connect two ropes, the total number of ropes will be reduced by one, the loop has $N - 1$ iterations in total, giving a runtime performance of $\sum_{i = 2}^N O(\log i) = O(N\log N)$.
 
@@ -65,7 +65,7 @@ The time complexity of our algorithm is $\Theta(n)$, as the time to consider whe
 
 \item We modify the algorithm for computing a topological ordering of a DAG so that when it is run on an arbitrary graph and can't find a node without incoming edges to delete, it runs a cycle detection algorithm to output a cycle.
 
-The cycle detection algorithm works as follows: It runs a BFS over the original graph and, for every visited vertex $v$, marks any adjacent vertex $u$ that is discovered for the first time during the search as ``visited'' and records $u$'s parent in the resulting BFS tree as $v$. If there is a vertex $w$ adjacent to $v$ that has been marked as visited, then a cycle is detected. To cover the cycle itself, we can follow $v$ and $w$'s ancestor records to the BFS tree root. The two paths to the root and the edge $(w, v)$ forms a cycle.
+The cycle detection algorithm works as follows: Starting at any vertex, we keep following its incoming edge to a new vertex until we encountered a visited vertex. Because every vertex has incoming edges and the total number of vertices is finite, we will always end at a visited vertex.
 
 Since both BFS and recovering of the cycle have a time complexity of $O(m + n)$, the time complexity of the whole algorithm is $O(m + n)$.
 
