@@ -2,6 +2,7 @@
 
 \usepackage[noend]{algpseudocode}
 \usepackage{amsthm}
+\usepackage{amssymb}
 
 \title{Answers to CSCI 570 - Fall 2021 - HW 4}
 \author{Shangning Xu}
@@ -15,6 +16,8 @@
 \subsection*{Problem 1}
 
 We use a max-heap $A.max$ and a min-heap $A.min$ to implement the data structure. The max-heap will contain the first half (and the median when the number of total elements is odd) of all elements and min-heap the other half.
+
+Throughout all operations, the max-heap has either the same number of elements as the min-heap when the total number elements is even, or one more element than the min-heap when the total is odd. Our INSERT operation maintains this invariant.
 
 \begin{algorithmic}[1]
     \Function{Find-Median}{$A$}
@@ -102,21 +105,8 @@ Because the time complexity of BFS and searching for a cycle is $O(n)$, and that
 
 \subsection*{Problem 6}
 
-Let $\delta(s, v)$ for the normal shortest-path distance between $v$ and $s$, and $\delta'(s, v)$ for the shortest-path distance between $v$ and $s$ where one edge on a shortest path is set to zero. We can write the following recurrence:
-\[
-    \delta'(s, v) = \min_{(u, v) \in E}(\delta'(s, u) + c(u, v), \delta(s, u)).
-\]
+Use Dijkstra's algorithm to find the shortest-path weight from $s$ to all the other vertices, and then reverse all edges and find the shortest-path weight from all vertices to $t$. Now, for each edge $(u, v)$, we set it to zero and then the shortest-path weight from $s$ to $t$ through this edge is given by $\delta(s, u) + \delta(v, t)$. Find the minimum such sum among all edges and the modified shortest path is given by $s \leadsto u \to v \leadsto t$.
 
-To compute $\delta'(s, t)$, we first run the Dijkstra algorithm to compute $\delta(s, v)$ for all vertices. Then, we run our modified Dijkstra algorithm with the following changes:
-\begin{enumerate}
-    \item We maintain $v.d'$ for all vertex $v$, an upper bound for $\delta'(s, v)$, as an array.
-    \item We will extract a vertex $u$ with minimum $u.d'$ and add it to the set $S$ of vertices whose $\delta'$ has been computed. Then we perform the following update for all vertex $v$ adjacent to $u$:
-    \[
-        v.d' \gets \min(v.d', u.d' + c(u, v), \delta(s, u)).
-    \]
-    \item The algorithm is terminated once the vertex $t$ is added to $S$.
-\end{enumerate}
-
-When the algorithm terminates, the value $t.d'$ is the shortest-path weight with one zero-cost edge between $s$ and $t$.
+Our algorithm requires two invocations of Dijkstra's and $\Theta(E)$ to find the edge to remove (overshadowed by Dijkstra's run time), so its total run time is asymptotically equal to that of Dijkstra's algorithm.
 
 \end{document}
