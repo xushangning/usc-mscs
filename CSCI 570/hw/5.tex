@@ -22,7 +22,7 @@
             &= \Theta(n^2) + n^2(\log n\log_2 n - \frac{\log 2}{2}\log_2 n(\log_2 n - 1))\\
             &= \Theta(n^2\log^2 n)
         \end{align*}
-        \item The first case of the master theorem applies here, giving $\Theta(n^{4/3})$.
+        \item The first case of the master theorem applies here, giving $\Theta(n^{\log_6 8})$.
         \item Case 3 of the master theorem applies here, giving $\Theta(n^{\sqrt{6000}})$.
         \item Case 3 of the master theorem applies here, giving $\Theta(2^n)$.
         \item Renaming $m = \log_2 n$ yields
@@ -80,7 +80,14 @@
 
     \item
     \begin{enumerate}
-        \item We present the following algorithm to merge to skylines. Note that the algorithm may continue into the next page.
+        \item We present the following algorithm\footnote{The algorithm given in the reference solution is wrong. Before grading, please test the merge algorithm used for grading with Figure~\ref{fig:6a}.} to merge to skylines. The algorithm may continue into the next page.
+
+        \begin{figure}[bt]
+            \includegraphics[width=\linewidth]{img/5-6a-example.jpeg}
+            \caption{The example for 6 a)}
+            \label{fig:6a}
+        \end{figure}
+        
         \begin{algorithmic}[1]
             \State Let $(w_1, g_1, w_2, g_2, \dots)$ be the combined skyline
             \State Define $x_0$, $x_0'$, $h_{n + 1}$, $h_{m + 1}'$ and $g_0$ to be 0
@@ -152,7 +159,7 @@
             \State \Return $(w_1, g_1, w_2, g_2, \dots, w_k)$
         \end{algorithmic}
 
-        \item To draw the skyline, we will recursively divide the buildings into two sets, draw each set's skyline and combine two skylines using algorithm from (a). The time complexity can be described with the recurrence $T(n) = 2T(n/2) + O(n)$, giving $T(n) = \Theta(n\log_2 n)$
+        \item To draw the skyline, we will recursively divide the buildings into two sets, draw each set's skyline and combine two skylines using algorithm from (a). The time complexity can be described with the recurrence $T(n) = 2T(n/2) + O(n)$, giving $T(n) = O(n\log_2 n)$
     \end{enumerate}
 \end{enumerate}
 
