@@ -1,0 +1,156 @@
+\documentclass{article}
+
+\usepackage[noend]{algpseudocode}
+\usepackage{mathtools}
+
+\title{Answers to CSCI 570 - Fall 2021 - HW 6}
+\author{Shangning Xu}
+
+\begin{document}
+
+\maketitle
+
+\section*{Graded Problems}
+
+\subsection*{Problem 1}
+
+\begin{algorithmic}[1]
+    \State Let $r[i]$ be the maximum revenue of selling the rod of length $i$.
+    \State Initialize $r$ to be 0 for $i = 0, \dots, N$.
+    \For{$i \gets 1, \dots, N$}
+        \For{$j \gets 0, \dots, i - 1$}
+            \State $r[i] \gets \max(r[i], r[i] + p_{i - j})$
+        \EndFor
+    \EndFor
+    \State \Return $s_N$
+\end{algorithmic}
+
+The outer loop runs for $N$ iterations. In the $i$th iteration, the inner loop will run for $i$ iterations, giving a total of $N(1 + N)/2$ iterations. Therefore, the time complexity is $\Theta(N^2)$.
+
+\subsection*{Problem 2}
+
+\begin{algorithmic}[1]
+    \State $l \gets 1$
+    \State $r \gets N$
+    \State $d \gets 0$ \Comment{Difference in score.}
+    \State Sum all marbles' values and store it in $s$.
+    \State $t \gets \mathrm{TRUE}$ \Comment{TRUE if it's Tommy's turn.}
+    \While{$l \le r$}
+        \If{$m_l < m_r$} \Comment{Choose the marble with lower value.}
+            \State $s \gets s - m_l$
+            \State $l \gets l + 1$
+        \Else
+            \State $s \gets s - m_r$
+            \State $r \gets r - 1$
+        \EndIf
+        \If{$t$}
+            \State $d \gets d + s$
+            \State $t \gets \mathrm{FALSE}$
+        \Else
+            \State $d \gets d - s$
+            \State $t \gets \mathrm{TRUE}$
+        \EndIf
+    \EndWhile
+    \State \Return $d$
+\end{algorithmic}
+
+As the loop only runs for $N$ iterations and the time for summing marble values is $\Theta(N)$, the time complexity is $\Theta(N)$.
+
+\subsection*{Problem 3}
+
+\begin{algorithmic}[1]
+    \State // Compute $l[i]$, the length of the longest line of increasing heights that
+    \State // ends at the $i$th member and is formed by pulling out members.
+    \State $l[1] \gets 1$
+    \For{$i \gets 2$ \textbf{to} $n$}
+        \State $l[i] \gets 0$
+        \For{$j \gets 1$ \textbf{to} $i - 1$}
+            \If{$r_j < r_i$}
+                \State $l[i] \gets \max(l[i], l[j])$
+            \EndIf
+        \EndFor
+        \State $l[i] \gets l[i] + 1$
+    \EndFor
+    \State // Compute $r[i]$, the length of the longest line of decreasing heights that
+    \State // starts at the $i$th member and is formed by pulling out members.
+    \State $r[n] \gets 1$
+    \For{$i \gets n - 1$ \textbf{downto} $1$}
+        \State $r[i] \gets 0$
+        \For{$j \gets i + 1$ \textbf{to} $n$}
+            \If{$r_i < r_j$}
+                \State $r[i] \gets \max(r[i], r[j])$
+            \EndIf
+        \EndFor
+        \State $r[i] \gets r[i] + 1$
+    \EndFor
+    \State $s \gets 0$ \Comment{Length of the longest formation}
+    \For{$i \gets 1$ \textbf{to} $n$}
+        \State $s \gets \max(s, l[i] + r[i])$
+    \EndFor
+    \State $s \gets s - 1$
+    \State \Return $n - s$
+\end{algorithmic}
+
+The loops to compute the arrays $l$ and $r$ each run for $\Theta(n^2)$ iterations, and the last loop to compute $n$ runs for $n$ iterations, giving a time complexity of $\Theta(n^2)$.
+
+\subsection*{Problem 4}
+
+Assume $f$ to be the total fee for a pair of buy and sell actions.
+
+\begin{algorithmic}[1]
+    \State Let $p[i]$ be the maximum profit after $i$ days of trading.
+    \State $p[1] \gets 0$
+    \For{$i \gets 2$ \textbf{to} $N$}
+        \State $p[i] \gets p[i - 1]$
+        \For{$j \gets 1$ \textbf{to} $i - 1$}
+            \State $p[i] \gets \max(p[i], p[j] + prices[i] - prices[j] - f)$
+        \EndFor
+    \EndFor
+    \State \Return $p[N]$
+\end{algorithmic}
+
+The inner loop will run for $1, 2, \dots, N - 1$ iterations, giving a time complexity of $\Theta(N^2)$.
+
+\section*{Practice Problems}
+
+\subsection*{Problem 5}
+
+Let $p_i$ be the optimal value that can be obtained with a knapsack of capacity $i$. We have
+\[
+    p_i = \begin{dcases*}
+        0 & if $i < \min_{i = 1, \dots, n} w_i$,\\
+        \max_{i = 1, \dots, n} (p_{i - w_i} + v_i) & otherwise.\\
+    \end{dcases*}
+\]
+
+To compute $p_W$, we create and fill the array $p[0\dots W]$ according to the recurrence above, from index $\min_{i = 1, \dots, n} w_i$ to $W$.
+
+\subsection*{Problem 6}
+
+\subsection*{Problem 7}
+
+Let $p_{i, j}$ be the maximum quality for the segmentation of string $y_{i, j} = y_iy_{i + 1}{\cdots}y_{j - 1}$. We have
+\[
+    p_{i, j} = \begin{dcases*}
+        quality(y_i) & if $i + 1 = j$,\\
+        \max(quality(y_{i, j}), \max_{k = i + 1, \dots, j}(p_{i, k} + p_{k, j})) & otherwise.
+    \end{dcases*}
+\]
+
+We can compute the maximum quality $p_{1, n + 1}$ with memoization in the 2D array $p[1\dots n, 1\dots n]$.
+
+\subsection*{Problem 8}
+
+Let $p_{i, j}$ be the minimum sum of squares of slack when formatting the set of words $w_{i, j} = \{w_i, w_{i + 1}, \dots, w_{j - 1}\}$ and $l(w_{i, j})$ be the length of the line formed by words in $w_{i, j}$, that is
+\[
+    l(w_{i, j}) = \sum_{k = i}^{j - 2} (c_k + 1) + c_{j - 1}.
+\]
+We have
+\[
+    p_{i, j} = \begin{dcases*}
+        [L - l(w_{i, j})]^2 & if $l(w_{i, j}) \le L$,\\
+        \min_{l(w_{i, k} \le L)} \left[(L - l(w_{i, k}))^2 + p(k, j)\right] & otherwise.
+    \end{dcases*}
+\]
+
+\end{document}
