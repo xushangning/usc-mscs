@@ -127,6 +127,16 @@ To compute $p_W$, we create and fill the array $p[0\dots W]$ according to the re
 
 \subsection*{Problem 6}
 
+Let $s_{i, j}$ denote the maximum number of coins obtained by bursting balloon $i$ to $j$ and $v_i = nums[i]$. We have $s_{i, i} = v_i$, $s_{i, i + 1} = v_iv_{i + 1} + \max(v_i, v_{i + 1})$ and
+\[
+    s_{i, j} = \begin{dcases*}
+        s_{i + 1, j} + (v_i - 1)v_{i + 1}v_{i + 2} + v_iv_{i + 1}\\
+        \max_{k = i + 2, \dots, j - 2} (s_{i, k - 1} + s_{k + 1, j} + (v_k - 1)(v_{k - 2}v_{k - 1} + v_{k + 1}v_{k + 2}))\\
+        s_{i, j - 1} + v_{j - 2}v_{j - 1}(v_j - 1) + v_{j - 1}v_j
+    \end{dcases*}
+\]
+for all other cases.
+
 \subsection*{Problem 7}
 
 Let $p_{i, j}$ be the maximum quality for the segmentation of string $y_{i, j} = y_iy_{i + 1}{\cdots}y_{j - 1}$. We have
