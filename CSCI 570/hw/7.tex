@@ -1,0 +1,210 @@
+\documentclass{article}
+
+\usepackage{mathtools}
+\usepackage[noend]{algpseudocode}
+\usepackage{booktabs}
+\usepackage{enumitem}
+
+\title{Answers to Homework 7}
+\author{Shangning Xu}
+
+\begin{document}
+
+\maketitle
+
+\section{Graded Problems}
+
+\begin{enumerate}
+    \item Let $b_{i, j}$ indicate whether the substring $s[i..j - 1]$ can be segmented into dictionary words. The function $dict(s)$ has a value of TRUE if $s$ is the dictionary. We have
+    \[
+        b_{i, j} = \begin{dcases*}
+            dict(s[i]) & if $i + 1 = j$,\\
+            dict(s[i..j - 1]) \lor \bigvee_{k = i + 1}^{j - 1} (b_{i, k} \land b_{k, j}) & otherwise.
+        \end{dcases*}
+    \]
+
+    We present the following pseudocode. The value of $b_{i, j}$ is saved in the array $b[i, j]$.
+    \begin{algorithmic}[1]
+        \For{$l \gets 1$ \textbf{to} $s.length$}
+            \For{$i \gets 0$ \textbf{to} $s.length - l$}
+                \State $j \gets i + l$
+                \State $b[i, j] \gets dict(s[i..j - 1])$
+                \For{$k \gets i + 1$ \textbf{to} $j - 1$}
+                    \State $b[i, j] \gets b[i, j] \lor (b[i, k] \land b[k, j])$
+                \EndFor
+            \EndFor
+        \EndFor
+        \State \Return $b[0, s.length]$
+    \end{algorithmic}
+
+    Now we consider our algorithm's time complexity. The outmost loop runs for $n$ iterations. The second-level loop has $n - l + 1$ iterations for each $l$. The innermost loop runs for $l - 1$ iterations, segmenting a length-$l$ string in each of the $l - 1$ ways. The total number of operations is
+    \[
+        \sum_{l = 1}^{n} \Theta(l(n - l + 1)) = \Theta(n^3).
+    \]
+
+    \item \begin{enumerate}
+        \item Consider the following counterexample. The algorithm will return a suboptimal plan that starts the job on $A$, moves it to $B$ in minute 2 and stays there till the end, missing the opportunity to run the job on $A$ in minute 4 to simulate 100 steps.
+        \begin{table}[ht]
+            \centering
+            \begin{tabular}{@{}lllll@{}}
+                \toprule
+                Minute & 1 & 2 & 3  & 4   \\ \midrule
+                $A$    & 2 & 1 & 1  & 100 \\
+                $B$    & 1 & 1 & 20 & 1   \\ \bottomrule
+            \end{tabular}
+        \end{table}
+        \item Let $s_{A, i}$ denote the maximum value possible in the first $i$ minutes when the job last run on $A$ and $s_{B, i}$ similarly. We have
+        \[
+            s_{A, i} = \begin{dcases*}
+                a_1 & if $i = 1$,\\
+                a_1 + a_2 & if $i = 2$,\\
+                \max(s_{A, i - 1} + a_i, s_{B, i - 2} + b_i) & otherwise.
+            \end{dcases*}
+        \]
+        $s_{B, i}$ is defined by a similar recurrence.
+
+        We present the following algorithm.
+        \begin{algorithmic}[1]
+            \State // In the $i$th iteration, $s_{A, i - k}$ is stored in $s[0, k]$.
+            \State Allocate the array $s[0..1, 0..2]$.
+            \State $s[0, 1] \gets s_{A, 1}$
+            \State $s[0, 2] \gets s_{A, 2}$
+            \State $s[1, 1] \gets s_{B, 1}$
+            \State $s[2, 2] \gets s_{B, 2}$
+            \For{$i \gets 1$ \textbf{to} $n$}
+                \State $s[0, 0] \gets \max(s[0, 1] + a_i, s[1, 2] + b_i)$
+                \State $s[1, 0] \gets \max(s[1, 1] + b_i, s[0, 2] + a_i)$
+                \State $s[0, 2] \gets s[0, 1]$
+                \State $s[0, 1] \gets s[0, 0]$
+                \State $s[1, 2] \gets s[1, 1]$
+                \State $s[1, 1] \gets s[1, 0]$
+            \EndFor
+            \State \Return $\max(s[0, 0], s[1, 0])$
+        \end{algorithmic}
+
+        Due to the single loop, the time complexity is $\Theta(n)$.
+    \end{enumerate}
+
+    \item Let $v_i$ be the number registered for party A in the $i$th precinct and $s_{i, j, x, y} = \mathrm{TRUE}$ if it is possible to achieve exactly $x$ votes for party A in one district and $y$ votes in the other district by assigning $j$ of the first $i$ precincts to that district. We have
+    \[
+        s_{i, j, x, y} = \begin{dcases*}
+            x = v_i & if $i = 1$, $j = 1$ and $y = 0$,\\
+            y = v_i & if $i = 1$, $j = 0$ and $x = 0$,\\
+            s_{i - 1, j - 1, x - v_i, y} & if $i > 1$, $j > 1$, $x \ge v_i$ and $y \le v_i$,\\
+            s_{i - 1, j, x, y - v_i} & if $i > 1$, $j > 1$, $x \le v_i$ and $y \ge v_i$,\\
+            s_{i - 1, j - 1, x - v_i, y} \lor s_{i - 1, j, x, y - v_i} & if $i > 1$, $j > 1$, $x > v_i$ and $y > v_i$,\\
+            \mathrm{FALSE} & otherwise.
+        \end{dcases*}
+    \]
+
+    We present the following algorithm:
+    \begin{algorithmic}[1]
+        \State Swap parties if B is in the majority among overall population.
+        \State $n_v \gets \sum_{i = 1}^n v_i$\Comment{Max achieveable votes}
+        \State Initialize the array $s[1..n, 1..n/2, 0..n_v, 0..n_v]$ to all FALSE.
+        \State $s[1, 1, v_1, 0] \gets s[1, 0, 0, v_1] \gets \mathrm{TRUE}$
+        \For{$i \gets 2$ \textbf{to} $n$}
+            \For{$j \gets 0$ \textbf{to} $\min(i, n/2)$}
+                \For{$x \gets 0$ \textbf{to} $n_v$}
+                    \For{$y \gets 0$ \textbf{to} $n_v$}
+                        \If{$x \ge v_i$}
+                            \State $s[i, j, x, y] \gets s[i, j, x, y] \lor s[i - 1, j - 1, x - v_i, y]$
+                        \EndIf
+                        \If{$y \ge v_i$}
+                            \State $s[i, j, x, y] \gets s[i, j, x, y] \lor s[i - 1, j, x, y - v_i]$
+                        \EndIf
+                    \EndFor
+                \EndFor
+            \EndFor
+        \EndFor
+        \State // Search for a viable way of dividing precincts.
+        \For{$x \gets mn/4 + 1$ \textbf{to} $n_v$}
+            \For{$y \gets mn/4 + 1$ \textbf{to} $n_v$}
+                \If{$s[n, n/2, x, y]$}
+                    \State \Return TRUE
+                \EndIf
+            \EndFor
+        \EndFor
+        \State \Return FALSE
+    \end{algorithmic}
+
+    The number of subproblems is proportional to the array $s$'s size, $n^2n_v^2/2$. Since $n_v$ is the total number of votes of a majority party, $mn/2 < n_v \le mn$. Therefore, the time complexity is $\Theta(n^2n_v^2) = \Theta(m^2n^4)$.
+    
+    \item Let $b_{i, j}$ denote the element at $i$th row and $j$th column of the binary matrix and $s_{i, j}$ denote the side length of the largest square whose lower-right corner is at $b_{i, j}$. Then, the area of the largest square is simply $(\max_{i, j} s_{i, j})^2$. We have
+    \[
+        s_{i, j} = \begin{dcases*}
+            b_{i, j} & if $i = 1$ or $j = 1$,\\
+            \min(s_{i - 1, j - 1}, s_{i - 1, j}, s_{i, j - 1}) + 1 & otherwise.
+        \end{dcases*}
+    \]
+
+    We present the following algorithm:
+    \begin{algorithmic}[1]
+        \State Initialize the array $s[1..n]$ to zeroes.
+        \For{$i \gets 1$ \textbf{to} $m$}
+            \State $u \gets 0$
+            \For{$j \gets 1$ \textbf{to} $n$}
+                \State // $s[j - 1] = s_{i, j - 1}, u = s_{i - 1, j - 1}, s[j] = s_{i - 1, j}$
+                \State // Pairs for simultaneous assignment
+                \State $(u, s[j]) \gets (s[j], \min(u, s[j - 1], s[j]))$
+            \EndFor
+        \EndFor
+        \State \Return $s[n]^2$
+    \end{algorithmic}
+
+    Due to the existence of nested loops, the time complexity is $\Theta(mn)$. The space complexity is $\Theta(n)$ as only an extra array $s$ is used.
+\end{enumerate}
+
+\section{Practice Problems}
+
+\begin{enumerate}[resume]
+    \item \begin{enumerate}
+        \item \begin{algorithmic}[1]
+            \Function{validPalindrome}{$i, j, K$}
+                \If{$i \ge j$}
+                    \State \Return TRUE
+                \ElsIf{$s[i] = s[j]$}
+                    \State \Return validPalindrome($i + 1, j - 1, K$)
+                \ElsIf{$K > 0$}
+                    \State \Return $\mathrm{validPalindrome}(i + 1, j, K - 1) \lor \mathrm{validPalindrome}(i, j - 1, K - 1)$
+                \Else
+                    \State \Return FALSE
+                \EndIf
+            \EndFunction
+        \end{algorithmic}
+
+        \item \begin{algorithmic}[1]
+            \Function{validPalindrome}{$i, j$}
+                \If{$i \ge j$}
+                    \State \Return 0
+                \ElsIf{$s[i] = s[j]$}
+                    \State \Return validPalindrome($i + 1, j - 1$)
+                \Else
+                    \State \Return $1 + \min[\mathrm{validPalindrome}(i + 1, j), \mathrm{validPalindrome}(i, j - 1)]$
+                \EndIf
+            \EndFunction
+        \end{algorithmic}
+
+        \item The \texttt{answers} array will be filled up in ascending order of $\texttt{end index} - \texttt{start index}$.
+        \begin{algorithmic}[1]
+            \State // $answers[i, j]$ = The minimum number of characters to
+            \State // remove to make $s[i..j - 1]$ a palindrome.
+            \State Initialize $answers[0..s.length, 0..s.length]$ to zeroes.
+            \For{$l \gets 2$ \textbf{to} $s.length$}
+                \For{$i \gets 0$ \textbf{to} $s.length - l$}
+                    \State $j \gets i + l$
+                    \If{$s[i] = s[j - 1]$}
+                        \State $answers[i, j] \gets answers[i + 1, j - 1]$
+                    \Else
+                        \State $answers[i, j] \gets 1 + \min(answers[i, j - 1], answers[i - 1, j])$
+                    \EndIf
+                \EndFor
+            \EndFor
+            \State \Return $answers[0, s.length]$
+        \end{algorithmic}
+
+        The time complexity is $\Theta(n^2)$ due to the nested loops and the space complexity also $\Theta(n^2)$ induced by the 2D array $answers$.
+    \end{enumerate}
+\end{enumerate}
+
+\end{document}
