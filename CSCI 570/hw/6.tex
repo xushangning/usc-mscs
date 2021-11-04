@@ -15,14 +15,15 @@
 \subsection*{Problem 1}
 
 \begin{algorithmic}[1]
-    \State Let $r[i]$ be the maximum revenue of selling the rod of length $i$.
-    \State Initialize $r$ to be 0 for $i = 0, \dots, N$.
-    \For{$i \gets 1, \dots, N$}
-        \For{$j \gets 0, \dots, i - 1$}
-            \State $r[i] \gets \max(r[i], r[i] + p_{i - j})$
+    \State // $r[i]$ is the maximum revenue of selling a length-$i$ rod.
+    \State Allocate the array $r[0..N]$.
+    \For{$i \gets 1$ \textbf{to} $N$}
+        \State $r[i] \gets p_i$
+        \For{$j \gets 1$ \textbf{to} $i - 1$}
+            \State $r[i] \gets \max(r[i], p_j + r[i - j])$
         \EndFor
     \EndFor
-    \State \Return $s_N$
+    \State \Return $r[N]$
 \end{algorithmic}
 
 The outer loop runs for $N$ iterations. In the $i$th iteration, the inner loop will run for $i$ iterations, giving a total of $N(1 + N)/2$ iterations. Therefore, the time complexity is $\Theta(N^2)$.
@@ -98,18 +99,21 @@ The loops to compute the arrays $l$ and $r$ each run for $\Theta(n^2)$ iteration
 Assume $f$ to be the total fee for a pair of buy and sell actions.
 
 \begin{algorithmic}[1]
-    \State Let $p[i]$ be the maximum profit after $i$ days of trading.
-    \State $p[1] \gets 0$
-    \For{$i \gets 2$ \textbf{to} $N$}
-        \State $p[i] \gets p[i - 1]$
-        \For{$j \gets 1$ \textbf{to} $i - 1$}
-            \State $p[i] \gets \max(p[i], p[j] + prices[i] - prices[j] - f)$
-        \EndFor
+    \State // $b$ is the maximum profit one can make when they start trading on
+    \State // the ($n, n - 1, \dots, 1$)th day and don't own any stock.
+    \State // $s$ is the maximum profit one can make when they start trading on
+    \State // the ($n, n - 1, \dots, 1$)th day and own one unit of stock.
+    \State $b_\textrm{prev} \gets s_\textrm{prev} \gets 0$
+    \For{$i \gets n$ \textbf{down to} 1}
+        \State $b \gets \max(b_\textrm{prev}, s_\textrm{prev} - prices[i])$
+        \State $s \gets \max(s_\textrm{prev}, b_\textrm{prev} + prices[i] - f)$
+        \State $b_\textrm{prev} \gets b$
+        \State $s_\textrm{prev} \gets s$
     \EndFor
-    \State \Return $p[N]$
+    \State \Return $b$
 \end{algorithmic}
 
-The inner loop will run for $1, 2, \dots, N - 1$ iterations, giving a time complexity of $\Theta(N^2)$.
+The inner loop will run for $N$ iterations, giving a time complexity of $\Theta(N)$.
 
 \section*{Practice Problems}
 
@@ -118,12 +122,12 @@ The inner loop will run for $1, 2, \dots, N - 1$ iterations, giving a time compl
 Let $p_i$ be the optimal value that can be obtained with a knapsack of capacity $i$. We have
 \[
     p_i = \begin{dcases*}
-        0 & if $i < \min_{i = 1, \dots, n} w_i$,\\
-        \max_{i = 1, \dots, n} (p_{i - w_i} + v_i) & otherwise.\\
+        0 & if $i < \min_{j = 1, \dots, n} w_i$,\\
+        \max_{j = 1, \dots, n} (p_{i - w_j} + v_j) & otherwise.\\
     \end{dcases*}
 \]
 
-To compute $p_W$, we create and fill the array $p[0\dots W]$ according to the recurrence above, from index $\min_{i = 1, \dots, n} w_i$ to $W$.
+To compute $p_W$, we create and fill the array $p[0..W]$ according to the recurrence above, from index $\min_{i = 1, \dots, n} w_i$ to $W$.
 
 \subsection*{Problem 6}
 
@@ -137,27 +141,26 @@ Let $s_{i, j}$ denote the maximum number of coins obtained by bursting balloon $
 
 \subsection*{Problem 7}
 
-Let $p_{i, j}$ be the maximum quality for the segmentation of string $y_{i, j} = y_iy_{i + 1}{\cdots}y_{j - 1}$. We have
+Denote the substring $y_iy_{i + 1}{\cdots}y_{j - 1}$ as $y_{i, j}$ and let $p_j$ be the maximum quality for the segmentation of string $y_{1, j}$. We have
 \[
-    p_{i, j} = \begin{dcases*}
-        quality(y_i) & if $i + 1 = j$,\\
-        \max(quality(y_{i, j}), \max_{k = i + 1, \dots, j}(p_{i, k} + p_{k, j})) & otherwise.
+    p_j = \begin{dcases*}
+        0 & if $j = 1$,\\
+        \max_{i = 1, \dots, j - 1}(p_j + quality(y_{i, j})) & otherwise.
     \end{dcases*}
 \]
 
-We can compute the maximum quality $p_{1, n + 1}$ with memoization in the 2D array $p[1\dots n, 1\dots n]$.
-
 \subsection*{Problem 8}
 
-Let $p_{i, j}$ be the minimum sum of squares of slack when formatting the set of words $w_{i, j} = \{w_i, w_{i + 1}, \dots, w_{j - 1}\}$ and $l(w_{i, j})$ be the length of the line formed by words in $w_{i, j}$, that is
+Let $p_i$ be the minimum sum of squares of slack when formatting the set of words $W_i = \{w_i, w_{i + 1}, \dots, w_n\}$ and $l(W_{i, j})$ be the length of the line formed by words in $W_{i, j} = \{w_i, w_{i + 1}, \dots, w_j\}$, that is
 \[
-    l(w_{i, j}) = \sum_{k = i}^{j - 2} (c_k + 1) + c_{j - 1}.
+    l(W_{i, j}) = \sum_{k = i}^{j - 1} (c_k + 1) + c_j.
 \]
+
 We have
 \[
-    p_{i, j} = \begin{dcases*}
-        [L - l(w_{i, j})]^2 & if $l(w_{i, j}) \le L$,\\
-        \min_{l(w_{i, k} \le L)} \left[(L - l(w_{i, k}))^2 + p(k, j)\right] & otherwise.
+    p_i = \begin{dcases*}
+        0 & if $i = n + 1$,\\
+        \min_{j: l(W_{i, j}) \le L} \left[(L - l(W_{i, j}))^2 + p_{j + 1}\right] & otherwise.
     \end{dcases*}
 \]
 
