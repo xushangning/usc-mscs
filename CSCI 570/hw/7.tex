@@ -15,32 +15,28 @@
 \section{Graded Problems}
 
 \begin{enumerate}
-    \item Let $b_{i, j}$ indicate whether the substring $s[i..j - 1]$ can be segmented into dictionary words. The function $dict(s)$ has a value of TRUE if $s$ is the dictionary. We have
+    \item Let $b_j$ indicate whether the substring $s[0..j - 1]$ can be segmented into dictionary words. The function $dict(s)$ has a value of TRUE if $s$ is the dictionary. We have
     \[
-        b_{i, j} = \begin{dcases*}
-            dict(s[i]) & if $i + 1 = j$,\\
-            dict(s[i..j - 1]) \lor \bigvee_{k = i + 1}^{j - 1} (b_{i, k} \land b_{k, j}) & otherwise.
+        b_j = \begin{dcases*}
+            \mathrm{TRUE} & if $j = 0$,\\
+             \bigvee_{i = 0}^{j - 1} (b_i \land dict(s[i..j - 1])) & otherwise.
         \end{dcases*}
     \]
 
-    We present the following pseudocode. The value of $b_{i, j}$ is saved in the array $b[i, j]$.
+    We present the following pseudocode. The value of $b_j$ is saved in the array $b[j]$.
     \begin{algorithmic}[1]
-        \For{$l \gets 1$ \textbf{to} $s.length$}
-            \For{$i \gets 0$ \textbf{to} $s.length - l$}
-                \State $j \gets i + l$
-                \State $b[i, j] \gets dict(s[i..j - 1])$
-                \For{$k \gets i + 1$ \textbf{to} $j - 1$}
-                    \State $b[i, j] \gets b[i, j] \lor (b[i, k] \land b[k, j])$
-                \EndFor
+        \For{$j \gets 1$ \textbf{to} $s.length$}
+            \For{$i \gets 0$ \textbf{to} $j - 1$}
+                \State $b[j] \gets b[i] \lor dict(s[i..j - 1])$
+                \If{$b[j]$}
+                    \State \textbf{break}
+                \EndIf
             \EndFor
         \EndFor
-        \State \Return $b[0, s.length]$
+        \State \Return $b[s.length]$
     \end{algorithmic}
 
-    Now we consider our algorithm's time complexity. The outmost loop runs for $n$ iterations. The second-level loop has $n - l + 1$ iterations for each $l$. The innermost loop runs for $l - 1$ iterations, segmenting a length-$l$ string in each of the $l - 1$ ways. The total number of operations is
-    \[
-        \sum_{l = 1}^{n} \Theta(l(n - l + 1)) = \Theta(n^3).
-    \]
+    The nested loop gives a time complexity of $O(n^2)$.
 
     \item \begin{enumerate}
         \item Consider the following counterexample. The algorithm will return a suboptimal plan that starts the job on $A$, moves it to $B$ in minute 2 and stays there till the end, missing the opportunity to run the job on $A$ in minute 4 to simulate 100 steps.
@@ -58,7 +54,7 @@
             s_{A, i} = \begin{dcases*}
                 a_1 & if $i = 1$,\\
                 a_1 + a_2 & if $i = 2$,\\
-                \max(s_{A, i - 1} + a_i, s_{B, i - 2} + b_i) & otherwise.
+                a_i + \max(s_{A, i - 1}, s_{B, i - 2}) & otherwise.
             \end{dcases*}
         \]
         $s_{B, i}$ is defined by a similar recurrence.
@@ -66,14 +62,10 @@
         We present the following algorithm.
         \begin{algorithmic}[1]
             \State // In the $i$th iteration, $s_{A, i - k}$ is stored in $s[0, k]$.
-            \State Allocate the array $s[0..1, 0..2]$.
-            \State $s[0, 1] \gets s_{A, 1}$
-            \State $s[0, 2] \gets s_{A, 2}$
-            \State $s[1, 1] \gets s_{B, 1}$
-            \State $s[2, 2] \gets s_{B, 2}$
+            \State Initialize the array $s[0..1, 0..2]$ to zeroes.
             \For{$i \gets 1$ \textbf{to} $n$}
-                \State $s[0, 0] \gets \max(s[0, 1] + a_i, s[1, 2] + b_i)$
-                \State $s[1, 0] \gets \max(s[1, 1] + b_i, s[0, 2] + a_i)$
+                \State $s[0, 0] \gets a_i + \max(s[0, 1], s[1, 2])$
+                \State $s[1, 0] \gets b_i + \max(s[1, 1], s[0, 2])$
                 \State $s[0, 2] \gets s[0, 1]$
                 \State $s[0, 1] \gets s[0, 0]$
                 \State $s[1, 2] \gets s[1, 1]$
