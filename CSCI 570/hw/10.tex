@@ -1,0 +1,98 @@
+\documentclass{article}
+
+\usepackage{amsthm}
+\usepackage{enumitem}
+\usepackage{mathtools}
+
+\title{Answers to CSCI 570 - Fall 2021 - HW 10}
+\author{Shangning Xu}
+
+\begin{document}
+
+\maketitle
+
+\section*{Graded}
+
+\begin{enumerate}
+    \item \begin{proof}
+        The problem is polynomial-time verifiable with a truth assignment that satisfies at least $15k/16$ clauses, so it belongs to the complexity class NP.
+
+        To prove that it is NP-hard, consider the reduction from 3-Sat. For any instance of the 3-Sat problem with boolean formula $\phi$ of $k$ clauses, if $k < 16$, then it can be directly solved as a 3-Sat(15/16) problem, because satisfying at least $15k/16$ clauses is equivalent to satisfying at least $\lceil 15k/16\rceil$ clauses, as the number of clauses that can be satisfied given a truth assignment is always an integer. Noting that $\lceil 15k/16\rceil = k$, we can say that satisfying at least $15k/16$ clauses is equivalent to satisfying at least $k$ clauses.
+        
+        When $k \ge 16$, define the corresponding boolean formula $\phi'$ for the 3-Sat(15/16) problem to have $k'$ clauses, where
+        \[
+            k' = 16q = 16\left(\left\lfloor\frac{k}{14}\right\rfloor + 1\right).
+        \]
+        We introduce a new variable $x$ and let $A$ be the 3-literal clause $x \lor x \lor x$ that is equivalent to the single-literal clause $x$, and let $A_\textrm{neg}$ be the 3-literal clause $\neg x \lor \neg x \lor \neg x$ that is equivalent to the single-literal clause $\neg x$. Now we are ready to define the boolean formula $\phi'$, consisting of three parts:
+        \[
+            \phi' = \phi \land \underbrace{A_\textrm{neg} \land \cdots \land A_\textrm{neg}}_{q\textrm{ clauses}} \land \underbrace{A \land \cdots \land A}_{15q - k\textrm{ clauses}}.
+        \]
+
+        When there is a satisfying truth assignment for $\phi$, we can additionally assign TRUE to $x$ to satisfy the $(15q - k)$ $A$ clauses, thus satisfying $15q - k + k = 15q$ clauses of $\phi'$, out of $16q$ clauses in total, giving a satisfying assignment for the 3-Sat(15/16) problem.
+        
+        When $\phi'$ has a satisfying assignment, $x$ must be TRUE. Otherwise, the $(15q - k)$ $A$ clauses would not be satisfied. All the remaining $(k + q)$ clauses account for less than $15k'/16 = 15q$ clauses, as proved below:
+        \begin{align*}
+            k + q &= 15q + k - 14q\\
+            &= 15q + k - 14\left(\left\lfloor\frac{k}{14}\right\rfloor + 1\right)\\
+            &= 15q - 14\left(\left\lfloor\frac{k}{14}\right\rfloor + 1 - \frac{k}{14}\right)\\
+            &\le 15q,
+        \end{align*}
+        contradicting the existence of a satisfying assignment for $\phi'$.
+        Because $x$ must be TRUE when there exists a assignment that satisfies at least $15k'/16$ clauses, and the $q$ $A_\textrm{neg}$ clauses are all FALSE when $x$ is TRUE, the boolean formula $\phi$ and the $15q - k$ $A$ clauses must be all satisfied, demonstrating the existence of a satisfying assignment for $\phi$.
+    \end{proof}
+    \item \begin{proof}
+        The problem is polynomial-time verifiable with a satisfying truth assignment as a certificate, so it belongs to the complexity class NP.
+
+        To prove that it is NP-hard, consider the reduction from 3-SAT. For any instance of the 3-SAT problem with boolean formula $\phi$ of $m$ clauses, we introduce a variable $x$ and define the corresponding boolean formula $\phi'$ for the modified SAT' problem as follows:
+        \[
+            \phi' = \phi \land x \land x \land \neg x \land \neg x
+        \]
+        with $m' = m + 4$ clauses.
+        
+        We claim that, if there is a truth assignment for $\phi'$ such that exactly $m' - 2 = m + 2$ clauses are satisfied if and only if there exists a satisfying assignment for $\phi$. To see why, any truth assignment for $\phi'$ must assign TRUE or FALSE to $x$, so when $\phi'$ has a satisfying assignment, exactly $m' - 2 - 2 = m$ clauses in $\phi$ must be satisfied, and vice versa.
+    \end{proof}
+
+    \item \begin{proof}
+        The Dense Subgraph Problem is polynomial-time verifiable with a vertex subset $V'$ as a certificate, so it belongs to the complexity class NP.
+
+        It is NP-hard because it is a generalization of the clique problem. A clique of size $k$ exists in the graph $G = (V, E)$ if and only if there is a subset $V' \subseteq V$ whose size is at most $k$ and whose induced subgraph has at least $m = k(k - 1)/2$ edges.
+    \end{proof}
+\end{enumerate}
+
+\section*{Ungraded}
+
+\begin{enumerate}[resume]
+    \item \begin{proof}
+        The problem is polynomial-time verifiable with the set $X$ itself as a certificate, so it belongs to the complexity class NP.
+
+        To prove that it is NP-hard, we will reduce the 3D matching problem to it. Given the sets $X$, $Y$ and $Z$ of elements and the set $P$ of triples, let $U = P$ for $U$ in the Intersection Inference Problem and for each $e \in X \cup Y \cup Z$, define
+        \[
+            A_e = \{A \subseteq P| e \in A\}.
+        \]
+        That is, $A_e$ is the set of triples in $P$ that contain $e$. Let $c_i = 0$ and $d_i = 2$ for all $i$. If there exists a set $X \subseteq U = P$ such that for all $e \in X \cup Y \cup Z$, $0 < |X \cap A_e| < 2$ i.e., the cardinality is exactly 1, then $X$ must be a perfect matching for the 3D matching problem.
+        
+        The reduction algorithm runs in polynomial time. Its time complexity is dominated by the construction of the sets from $B = \{A_e| e \in X \cup Y \cup Z\}$, proportional to the total number of triples in $B$. Because each triple from $P$ is included by exactly three distinct sets from $B$, the total number of triples in $B$ is $3|P|$.
+    \end{proof}
+
+    \item \begin{proof}
+        The Strongly Independent Set Problem is polynomial-time verifiable with the vertex set $I$ as a certificate, so it belongs to the complexity class NP.
+
+        To prove that it is NP-hard, consider the reduction from the Independent Set Problem. For any instance of the Independent Set Problem with graph $G = (V, E)$, construct the graph $G' = (V', E')$ for the Strongly Independent Set Problem as follows:
+        \begin{enumerate}
+            \item For each edge $(u, w)$, split it into two edges $(u, v_{uw})$ and $(v_{uw}, w)$ connected by the new intermediate vertex $v_{uw}$.
+            \item Add an edge between every pair of intermediate vertices.
+        \end{enumerate}
+
+        The graph $G'$ has the following properties:
+        \begin{enumerate}
+            \item Every pair of intermediate vertices in $G'$ are adjacent.
+            \item The distance between any vertex $u \in V$ and any intermediate vertex is not greater than 2.
+            \item Two vertices in $G$ are adjacent if and only if their distance in $G'$ is exactly 2, as an intermediate vertex is added between them.
+            \item Two vertices in $G$ are not adjacent if and only if their distance in $G'$ is exactly 3, going through two intermediate vertices.
+        \end{enumerate}
+
+        Therefore, a strongly independent set in $G'$ consists of only vertices from $V$ and corresponds to an independent set in $G$. There exists an independent set in $G$ if and only if there exists a strongly independent set in $G'$.
+    \end{proof}
+\end{enumerate}
+
+\end{document}
