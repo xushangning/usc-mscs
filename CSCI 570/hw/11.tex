@@ -1,0 +1,64 @@
+\documentclass{article}
+
+\usepackage{amsthm}
+
+\title{Answers to CSCI 570 - Fall 2021 - HW 11}
+\author{Shangning Xu}
+
+\begin{document}
+
+\maketitle
+ 
+\section*{Graded Problems}
+
+\subsection*{Problem 1}
+
+\begin{proof}
+    The BIG-HAM-CYCLE problem is polynomial-time verifiable with a Hamiltonian cycle as a certificate, so it belongs to the complexity class NP.
+
+    To prove it is NP-hard, consider the reduction from HAM-CYCLE. For an input graph $G = (V, E)$, our algorithm for deciding the HAM-CYCLE problem iterates through every edge $e$ in $E$, assign weight $|E|$ to $e$ and unit weight to others, and decide whether there exists a ``big'' Hamiltonian cycle. Because every big Hamiltonian cycle must contain $e$ and we do this for every edge, there exists a Hamiltonian cycle in $G$ if and only if any call to the BIG-HAM-CYCLE decision algorithm returns true.
+\end{proof}
+
+\subsection*{Problem 2}
+
+\begin{proof}
+    The problem is polynomial-time verifiable with a vertex cover as a certificate, so it belongs to the complexity class NP.
+
+    To prove it is NP-hard, consider the reduction from VERTEX-COVER. For an input graph $G = (V, E)$ and $k$, we construct graph $G'$, a replicate of $G$ with three additional vertex $x$, $y$ and $z$, and edges that connect them to each other and connect $x$ to every odd-degree vertex in $G$. The degree of $x$, $x.degree$, is even if and only if the number of odd-degree vertices in $G$ is even. If there are odd number of odd-degree vertices, the sum of vertex degrees will otherwise be odd, contradicting the property that the sum of vertex degrees is $2|E|$.
+    
+    We claim that there is a vertex cover of at most size $k$ in $G$ if and only if there is a vertex cover of at most size $(k + 2)$ in $G'$, which only has even-degree vertices. Our claim directly follows the property that two vertices out of the triangle $\{x, y, z\}$ must be included in a vertex cover in $G'$. A vertex cover in $G$ can be obtained by removing the vertices $\{x, y, z\}$ from a vertex cover in $G'$, and vice versa.
+\end{proof}
+
+\subsection*{Problem 3}
+
+\begin{proof}
+    The problem is polynomial-time verifiable with a sequence of moves as a certificate, so it belongs to the complexity class NP.
+    
+    To prove it is NP-hard, consider the reduction from HAM-CYCLE. For any graph $G'$, we construct a graph $G$ on which the game will be played. $G$ is a replicate of $G'$ with an additional vertex $s$ and edges that connect $s$ to every vertex in $G'$. The game start with two tokens on $s$ and one token on every other vertex. We claim that there exists a Hamiltonian cycle in $G'$ if and only if there exists a sequence of game moves in $G$ such that there is exactly one token left in the whole graph.
+
+    When there exists a Hamiltonian cycle $C$ in $G'$, we start the game at $s$ and move tokens along edges in $C$. That is, we repeat the following move until we can't make any more moves: pick the only vertex $u$ with two tokens, remove two tokens from $u$, pick another vertex $v$ that has one token and satisfies $(u, v) \in C$, and add one token to $v$. This is a valid sequence of moves because we can always find one vertex with exactly two tokens and we never add more than one token to a vertex due to the cycle being Hamiltonian. When the game ends, there is exactly one token in the whole graph on $s$.
+
+    The same can be said when there exists a sequence $S$ of moves that leave exactly one token in $G$. The first move must start at $s$ as it is the only vertex with at least two tokens. The sequence of moves can't contain duplicate vertices (except for the last move), as the game will ended with more than one vertex left in the whole graph, contradicting the existence of $S$. The only problem is that the last move in $S$ may not add a token to $s$, making the path traversed not a cycle. Because $s$ is connected to every vertex in $G$, existence of $S$ implies existence of $S'$, where $S'$ is the same as $S$, except that a token is added to $s$ in the last move instead, completing a Hamiltonian cycle.
+\end{proof}
+
+\section*{Ungraded Problems}
+
+\subsection*{Problem 1}
+
+\begin{proof}
+    The problem is polynomial-time verifiable with a cycle as a certificate, so it belongs to the complexity class NP.
+
+    To prove it is NP-hard, consider the reduction from HAM-PATH. For any graph $G = (V, E)$, we construct a graph $G'$, a replicate of $G$ with an additional vertex $s$ and edges that connect $s$ to all vertices of $G$. Assign weight $-(|V| - 1)/2$ to edges incident on $s$ and unit weight to all other edges in $G'$. Then, there is a Hamiltonian path $p$ in $G$ if and only if there is a zero-weight cycle in $G'$.
+
+    When there exists a Hamiltonian path $p$ in $G$, the cycle $s \to p \to s$ is a zero-weight cycle as two edges incident on $s$ in the cycle has a total weight of $-(|V| - 1)$, and the path $p$ contains $(|V| - 1)$ unit-weight edges, giving a total weight of zero. When there exists a zero-weight cycle in $G'$, the cycle must contain $s$, as only edges incident on $s$ are negative. Because it is a simple cycle, it can only contain exactly two edges incident on $s$, whose negative weights must be offset by exactly $|V| - 1$ edges to give a total weight of zero. Therefore, the cycle must contain every vertex of $G$ and the path formed by removing $s$ and its two incident edges is thus Hamiltonian.
+\end{proof}
+
+\subsection*{Problem 2}
+
+\begin{proof}
+    The problem is polynomial-time verifiable with a color assignment for every vertex as a certificate, so it belongs to the complexity class NP.
+
+    To prove it is NP-hard, consider the reduction from 3-COLOR. For an input graph $G = (V, E)$, we construct a graph $G'$, a replicate of $G$ with two additional vertices $v_1$ and $v_2$ and edges that connect these two vertices to each other and to every vertex in $G$. $G$ is 3-colorable if and only if $G'$ is 5-colorable, as $v_1$ and $v_2$ must be colored in two different colors, which also can't be used to color vertices from $G$. Therefore, the graph $G$ must be colored in the remaining three colors.
+\end{proof}
+
+\end{document}
