@@ -15,21 +15,39 @@
 \section*{Problem 1.}
 
 \begin{enumerate}
-    \item We add a source vertex and connect it to all vertices with negative demand and a sink and connect all vertices with positive demand to it. The flow network has a feasible circulation if and only if its maximum flow value is equal to the sum of the positive demands.
-    \item To satisfy the lower bounds, We add a flow $f_0$ whose value is equal to the lower bound on each edge by modifying demands and edge capacities accordingly, as illustrated in the graph below.
-    \begin{center}
-        \tikz \graph [no placement, empty nodes, nodes={draw, circle}] {
-            a [y=1, "$(-5)$"] -> ["9"] b [x=2, y=2, "$(-7)$"] -> ["5" left] c [x=2.5, "(7)" below];
-            a -> ["2" below] c;
-            d [x=4, y=2.5, "$(-5)$"] -> ["6"] c;
-            e [x=5, y=1, "(1)" below] -> ["3" right] d;
-            b -> ["6"] e;
-            d -> ["8"] f [x=5.7, y=1.8, "(13)"];
-            e -> ["3" below right] f;
-        };
-    \end{center}
+    \item \tikz \graph [no placement, empty nodes, nodes={draw, circle}] {
+        a [y=1] -> ["10"] b [x=2, y=2] -> ["6" left] c [x=2.5];
+        a -> ["3" below] c;
+        d [x=4, y=2.5] -> ["7"] c;
+        e [x=5, y=1] -> ["4" right] d;
+        b -> ["7"] e;
+        d -> ["9"] f [x=5.7, y=1.8];
+        e -> ["4"] f;
 
-    With lower bounds removed, the circulation problem can be transformed into a maximum flow problem the same way as discussed in a).
+        s [x=1, y=3] -> ["7" left] a;
+        s -> ["8" left] b;
+        s -> ["6"] d;
+
+        c -> ["10"] t [x=5];
+        f -> ["11"] t;
+    };
+
+    \item \tikz \graph [no placement, empty nodes, nodes={draw, circle}] {
+        a [y=1] -> ["9"] b [x=2, y=2] -> ["5" left] c [x=2.5];
+        a -> ["2" below] c;
+        d [x=4, y=2.5] -> ["6"] c;
+        e [x=5, y=1] -> ["3" right] d;
+        b -> ["6"] e;
+        d -> ["8"] f [x=5.7, y=1.8];
+        e -> ["3"] f;
+
+        s [x=1, y=3] -> ["5" left] a;
+        s -> ["7" left] b;
+        s -> ["5"] d;
+
+        c -> ["10"] t [x=5];
+        f -> ["9"] t;
+    };
 \end{enumerate}
 
 \section*{Problem 2.}
@@ -54,6 +72,7 @@ The problem can be formulated as a circulation problem with lower bounds. Define
 \begin{enumerate}
     \item Add a vertex for each customer and product. Add a source and connect it to every customer vertex with capacity lower bound $c_i$ and upper bound $c_i'$ for customer $i$. Add a sink and connect every product vertex to it with capacity bounds $[p_i, p_i']$ for product $i$.
     \item Add an edge $(u, v)$ with unit capacity between customer $u$ and product $v$ if $u$ has purchased the product $v$.
+    \item Add an edge from sink to source of infinity capacity.
 \end{enumerate}
 
 The problem has a solution if and only if the corresponding circulation problem with lower bounds has a feasible circulation, which can be converted into a maximum flow problem.
@@ -66,7 +85,7 @@ The problem can be formulated as a maximum flow problem. Define the correspondin
     \item Add an edge $(u, v)$ with unit capacity between client $u$ and base station $v$ if $u$ is within the range of $v$.
 \end{enumerate}
 
-Every client can be simultaneously connected if and only if the maximum flow on the corresponding flow network has a value of $n$.
+Every client can be simultaneously connected if and only if the maximum flow on the corresponding flow network has a value of $n$. The corresponding flow network has $\Theta(n + k)$ vertices and $O(nk)$ edges, so both construction of the graph and computing the maximum flow takes polynomial time.
 
 \section*{Problem 5.}
 
