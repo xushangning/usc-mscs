@@ -43,7 +43,7 @@
     \item \begin{proof}
         The problem is polynomial-time verifiable with a satisfying truth assignment as a certificate, so it belongs to the complexity class NP.
 
-        To prove that it is NP-hard, consider the reduction from 3-SAT. For any instance of the 3-SAT problem with boolean formula $\phi$ of $m$ clauses, we introduce a variable $x$ and define the corresponding boolean formula $\phi'$ for the modified SAT' problem as follows:
+        To prove that it is NP-hard, consider the reduction from SAT. For any instance of the SAT problem with boolean formula $\phi$ of $m$ clauses, we introduce a variable $x$ and define the corresponding boolean formula $\phi'$ for the modified SAT' problem as follows:
         \[
             \phi' = \phi \land x \land x \land \neg x \land \neg x
         \]
