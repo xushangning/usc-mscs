@@ -100,6 +100,10 @@ Then, we prove that our algorithm indeed returns a stable matching, with the fol
 
 \section*{8}
 
+First, Almanzo proposes to Laura. If Laura rejects Almanzo, then Almanzo will still be engaged with Nelly and the original matching is returned.
 
+If Laura accepts the proposal, her fiance, say Adam, will be free. Create a pool and add Adam, Nelly and men previously rejected by Nelly to the pool. For each man previously rejected by Nelly, also add their fiance to the pool. For these newly added fiances, also add men previously rejected by them. We will recursively expand the pool until no more men and women can be added. In the worst case, everyone will end up in the pool.
+
+Then, execute the G-S algorithm on the pool with the following modification: a man will only propose to women in the pool in the order of his preference, skipping women not in the pool. Note that all women in the pool that he will propose to have previously rejected him at least once.  It is possible that he has proposed to every woman in the pool without being accepted, in which case he will propose to women outside the pool, those who he has never proposed to throughout previous matching process. When there is a match, the woman he successfully proposes to will break free with her current fiance and the pool must be expanded accordingly.
 
 \end{document}
