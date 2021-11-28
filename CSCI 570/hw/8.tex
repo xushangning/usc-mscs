@@ -4,6 +4,7 @@
 \usetikzlibrary{graphs.standard, quotes}
 \usepackage{amsthm}
 \usepackage{enumitem}
+\usepackage{mathtools}
 
 \title{CSCI 570 - Fall 2021 - HW 8}
 \author{Shangning Xu}
@@ -64,11 +65,32 @@
 
         Our algorithm runs the Ford-Fulkerson method over the flow network to obtain a maximum flow. If the maximum flow value is exactly $mn$, then all students can be enrolled as full-time students.
 
-        The algorithm is correct because for each integer-valued flow, we can intuitively construct an assignment of students to classes so that the flow between the source and $s_j$ is the number of classes they can sign up for within class capacity. When the maximum flow value is $mn$, each source-to-student edge must have flow $m$, meaning that it is possible for every student to be enrolled in $m$ classes.
+        To prove the correctness of our algorithm, we first lay out some definition. We define a \emph{valid enrollment} to be a set of student-course pairs $(s_i, c_j)$ such that student $s_i$ is enrolled in class $c_j$ where the number of students enrolled in a class is within the class's capacity. Let $n_i$ be the number of classes student $s_i$ enrolled in and $m_i$ be the number of students enrolled in class $c_i$.
         
+        First, we prove the following proposition: there is a valid enrollment of size $N$ if and only if there is an integer-valued flow $f$ in the corresponding flow network such that $|f| = N$.
+        \begin{proof}
+            \begin{description}
+                \item[$\implies$]: If there is a valid enrollment, define the flow $f$ as follows:
+                \[
+                    f(u, v) = \begin{dcases*}
+                        n_i & if $u = s$ and $v = s_i$,\\
+                        1 & if student $u$ is enrolled in class $v$,\\
+                        m_i & if $u = c_i$ and $v = t$,\\
+                        0 & otherwise.
+                    \end{dcases*}
+                \]
+
+                One can easily verify that $f$ satisfy capacity constraint and flow conservation. The flow across the cut $(\{s\}, E - \{s\})$ is $\sum_{i = 1}^n n_i = N = |f|$.
+
+                \item[$\impliedby$]: Given an integer-valued flow $f$, define the valid enrollment to be $\{(s_i, c_j)| f(s_i, c_j) > 0\}$. For any vertex $s_i$, $f(s, s_i) < p_i$ is exactly the number of classes student $s_i$ enrolled in due to flow conservation, and $f(c_i, t) < q_i$ is the number of students in class by the same argument. Therefore, the enrollment induced by flow $f$ is valid and the total number of classes all students enrolled in is exactly $N = \sum_{i = 1}^n f(s, s_i) = |f|$.
+            \end{description}
+        \end{proof}
+
+        Then, if there exists an integer-valued flow $f$ whose value is $mn$, then the size of enrollment induced by $f$ is $mn$ and every student is a full-time student as they are enrolled in exactly $m$ classes, as mandated by the cut $(s, V - \{s\})$. Because the cut $(s, V - \{s\})$ has capacity $mn$, a flow of value $mn$ is also a maximum flow.
+
         \item We tweak the flow network in (a) by removing edges between students and classes when the student is not enrolled in the class, change capacity of edges between source and students to $r$ and capacity of edges between classes and sink to 1. We solve for the maximum flow value on the new flow network. If the flow value is exactly the number of classes, then the required selection exists.
         
-        The algorithm is correct because given an integer-valued flow, we construct a selection of student representative by assigning a student to a class if there is flow between the corresponding edge. When the flow value is exactly the number of classes, it means that every class has a representative and no student is a representative to more than $r$ classes.
+        The prove of correctness of our algorithm is similar to the one in (a).
     \end{enumerate}
 
     \item
@@ -81,8 +103,15 @@
             };
         \end{center}
 
-        \item True. By definition, there is at most one $D$-scaling phase for any $D$ in the capacity-scaling algorithm, so an edge $e$ can be present in $G_f(D)$ in at most one $D$-scaling phase.
-    
+        \item False. The edge $(x, t)$ is present in two scaling phases.
+        \begin{center}
+            \tikz \graph [math nodes, nodes={draw, circle}] {
+                subgraph I_n [V={v, x, u, s}, clockwise];
+                s -> ["8"] v -> ["6"] x -> ["10"] t [right of=x];
+                s -> ["2"] u -> ["2"] x;
+            };
+        \end{center}
+
         \item True.
         \begin{proof}
             After all edges are multiplied by $k$, for any cut $(S, T)$ of the flow network, its new capacity
@@ -103,9 +132,16 @@
         \end{center}
     \end{enumerate}
 
-    \item We can repeatedly run the Ford-Fulkerson method on the flow network to find the maximum flow, delete any edge from the corresponding minimum cut and find a new maximum flow, until $k$ edges are deleted from the graph.
-    
-    When the edges don't have unit capacities, we can delete the edge with maximum capacity that crosses the minimum cut during each iteration.
+    \item To decrease the maximum flow by as much as possible by deleting at most $k$ edges, find a minimum cut in the flow network and delete $k$ (or as many as possible) edges from the cut. The algorithm runs in polynomial time as a minimum cut can be found in polynomial time, and deleting edges takes linear time.
+
+    When not all edges have unit capacities, our algorithm doesn't guarantee that the maximum flow is decreased by as much as possible. Consider the following graph with $k = 2$ as an example:
+    \begin{center}
+        \tikz \graph [math nodes, nodes={draw, circle}] {
+            s -> ["2" above] {a -> ["1"] c, b -> ["1"] t};
+            a -> ["1" above] t;
+            c -> ["1"] t;
+        };
+    \end{center}
 \end{enumerate}
 
 \section*{Ungraded}
@@ -126,11 +162,9 @@
         \item Assign unit capacity to each edge.
     \end{enumerate}
 
-    We run the Ford-Fulkerson method on the flow network to obtain a maximum flow. If the maximum flow value is exactly $k$, then there exists an arrangement for the private showings where no client will see each other.
+    We run the Ford-Fulkerson method on the flow network to obtain a maximum flow. If the maximum flow value is exactly $k$, then there exists an arrangement for the private showings where no client will see each other. Proof correctness for our algorithm is similar to the one in Question 2 (a).
 
-    \item The minimum vertex cover for a bipartite graph is the smallest vertex set between the two vertex sets that partition the graph. Therefore, our algorithm first partitions the graph into two disjoint vertex sets and compare the size of the smaller set to $k$. The graph has a vertex cover of at most size $k$ if and only if the size of the smaller set is less than $k$.
-    
-    To partition the graph and compute the size of both sets, we run BFS from any vertex and note that levels in the BFS tree alternate between the two sets in the bipartite graph. Therefore, we only need to count the number of vertices in alternating levels to compute the set size.
+    \item By Kőnig's theorem, the number of edges in a maximum matching equals the number of vertices in a minimum vertex cover in any bipartite graph. Therefore, we just need to find a maximum matching in the bipartite graph with maximum flow algorithm. The graph has a vertex cover of at most size $k$ if and only if the value of the maximum flow is not greater than $k$.
 \end{enumerate}
 
 \end{document}
