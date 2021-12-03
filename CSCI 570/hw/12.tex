@@ -15,7 +15,8 @@
 
 \begin{align*}
     \textrm{maximize}&\quad \sum_{i = 1}^9 \alpha_i(C_i - S_i),\\
-    \textrm{subject to}&\quad 0 \le S_i \le \frac{C_i}{2}, i = 1, \dots, 9.
+    \textrm{subject to}&\quad 0 \le S_i \le \frac{C_i}{2}, i = 1, \dots, 9,\\
+    &\sum_{i = 1}^9 S_i = 800.
 \end{align*}
 
 \subsection*{Problem 2}
@@ -34,33 +35,14 @@ Since three edges are added to $S$ for each triangle in $A$, we have $|S| = 3|A|
 
 \subsection*{Problem 3}
 
-We assume that the objective is to maximize the total profit. Let $x_{ij}$ be the number of units of product $j$ produced by plant $i$. In the following formulation, ``$*$'' denotes element-wise matrix multiplication, inequality operators in constraints denote element-wise inequality, and \textbf{1} rendered in bold is a column vector of all ones of appropriate length.
+We assume that the objective is to maximize the total profit. Define $X = (x_{ij})$, where $x_{ij}$ is the number of units of product $i$ produced by plant $j$. Let $A$ be the production time per unit matrix and $P$ be the profit per unit matrix, with elements arranged in exactly the same way as the tables given in the question.
+
+In the following formulation, ``$*$'' denotes element-wise matrix multiplication, inequality operators in constraints denote element-wise inequality, and \textbf{1} rendered in bold is a column vector of all ones of appropriate length.
 
 \begin{align*}
-    \textrm{maximize}\quad &\left(\begin{bmatrix}
-        10 & 8 & 6 & 9\\
-        18 & 20 & 15 & 17\\
-        15 & 16 & 13 & 17
-    \end{bmatrix}
-    * \begin{bmatrix}
-        x_{11} & x_{21} & x_{31} & x_{41}\\
-        x_{12} & x_{22} & x_{32} & x_{42}\\
-        x_{13} & x_{23} & x_{33} & x_{43}
-    \end{bmatrix}\right)
-    \mathbf{1},\\
-    \textrm{subject to}\quad &\left(\begin{bmatrix}
-        5 & 6 & 13\\
-        7 & 12 & 14\\
-        4 & 8 & 9\\
-        10 & 15 & 17
-    \end{bmatrix}
-    * \begin{bmatrix}
-        x_{11} & x_{12} & x_{13}\\
-        x_{21} & x_{22} & x_{23}\\
-        x_{31} & x_{32} & x_{33}\\
-        x_{41} & x_{42} & x_{43}
-    \end{bmatrix}\right) \mathbf{1}
-    \le 35 \cdot 60 \cdot \mathbf{1},\\
+    \textrm{maximize}\quad &\mathbf{1}^\textrm{T}(A * X)\mathbf{1},\\
+    \textrm{subject to}\quad &(P * X)^\textrm{T} \mathbf{1} \le 35 \cdot 60 \cdot \mathbf{1},\\
+    & X\mathbf{1} \ge [100, 150, 100]^\textrm{T},\\
     & x_{ij} \ge 0, i = 1, \dots, 3, j = 1, \dots, 4.
 \end{align*}
 
@@ -75,5 +57,26 @@ Let $\alpha_i$ be the fraction of object $i$ that will be put in the knapsack. W
     &\sum_{i = 1}^n \alpha_iv_i = V,\\
     &0 \le \alpha_i \le 1, i = 1, \dots, n.
 \end{align*}
+
+\subsection*{Problem 2}
+
+Start with empty sets $A$ and $B$ and in each iteration, add any pair of vertices $(u, v)$ to $A$ or $B$ according which choice maximizes $|E(A, B)|$. That is, if
+\[
+    |E(A \cup \{u\},B \cup \{v\})| \ge |E(A \cup \{v\},B \cup \{u\})|,
+\]
+then add $u$ to $A$ and $v$ to $B$, vice versa.
+
+Let $N_{Av}$ and $N_{Bv}$ be the number of vertices adjacent to $v$ in $A$ and $B$ before $v$ is added to either $A$ or $B$, respectively. Let $I_{uv}$ be the indicator variable for the edge $(u, v)$: if there is an edge $(u, v)$, $I_{uv} = 1$, and 0 otherwise. For any pair of vertices $(u, v)$ added during an iteration, we have
+\[
+    \max(N_{Av} + N_{Bu}, N_{Au} + N_{Bv}) + I_{uv} \ge \frac{1}{2}(N_{Av} + N_{Bu} + N_{Au} + N_{Bv} + I_{uv}).
+\]
+
+Summing both sides on the pairs of vertices added in each iteration, we have
+\begin{align*}
+    E_(A, B) &= \sum_{(u, v)} [\max(N_{Av} + N_{Bu}, N_{Au} + N_{Bv}) + I_{uv}]\\
+    &\ge \sum_{(u, v)} \frac{1}{2}(N_{Av} + N_{Bu} + N_{Au} + N_{Bv} + I_{uv})\\
+    &= \frac{1}{2}|E|,
+\end{align*}
+which proves that the approximation ratio is 1/2.
 
 \end{document}
