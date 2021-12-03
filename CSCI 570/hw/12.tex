@@ -1,0 +1,79 @@
+\documentclass{article}
+
+\usepackage{mathtools}
+
+\title{Answers to CSCI 570 - Fall 2021 - HW 12}
+\author{Shangning Xu}
+
+\begin{document}
+
+\maketitle
+
+\section*{Graded Problems}
+
+\subsection*{Problem 1}
+
+\begin{align*}
+    \textrm{maximize}&\quad \sum_{i = 1}^9 \alpha_i(C_i - S_i),\\
+    \textrm{subject to}&\quad 0 \le S_i \le \frac{C_i}{2}, i = 1, \dots, 9.
+\end{align*}
+
+\subsection*{Problem 2}
+
+We present the following algorithm for the triangle removal problem: for each combination of three vertices from $V$, remove all three edges between the three vertices if they form a triangle. The time complexity is $O(n(n - 1)(n - 2)/6)$, so the algorithm is strongly polynomial.
+
+Proving that the algorithm has an approximation ratio of 3 is similar to proving that the approximation algorithm for vertex cover has an approximation ratio of 2. Let $A$ be a set of triangles selected by our algorithm, where a triangle is represented by a triple of three edges sharing endpoints, then no triangle in $A$ share edges. Let $S^*$ be an optimal subset of edges to remove and $S$ be a set of edges returned by our algorithm. Because removing all edges from $S^*$ leads to complete removal of all triangles in $G$, for each triangle in $A$, at least one edge from the triangle must be in $S^*$, yielding
+\[
+    |A| \le |S^*|.
+\]
+
+Since three edges are added to $S$ for each triangle in $A$, we have $|S| = 3|A|$. Combining the equations gives
+\[
+    |S| = 3|A| \le 3|S^*|.
+\]
+
+\subsection*{Problem 3}
+
+We assume that the objective is to maximize the total profit. Let $x_{ij}$ be the number of units of product $j$ produced by plant $i$. In the following formulation, ``$*$'' denotes element-wise matrix multiplication, inequality operators in constraints denote element-wise inequality, and \textbf{1} rendered in bold is a column vector of all ones of appropriate length.
+
+\begin{align*}
+    \textrm{maximize}\quad &\left(\begin{bmatrix}
+        10 & 8 & 6 & 9\\
+        18 & 20 & 15 & 17\\
+        15 & 16 & 13 & 17
+    \end{bmatrix}
+    * \begin{bmatrix}
+        x_{11} & x_{21} & x_{31} & x_{41}\\
+        x_{12} & x_{22} & x_{32} & x_{42}\\
+        x_{13} & x_{23} & x_{33} & x_{43}
+    \end{bmatrix}\right)
+    \mathbf{1},\\
+    \textrm{subject to}\quad &\left(\begin{bmatrix}
+        5 & 6 & 13\\
+        7 & 12 & 14\\
+        4 & 8 & 9\\
+        10 & 15 & 17
+    \end{bmatrix}
+    * \begin{bmatrix}
+        x_{11} & x_{12} & x_{13}\\
+        x_{21} & x_{22} & x_{23}\\
+        x_{31} & x_{32} & x_{33}\\
+        x_{41} & x_{42} & x_{43}
+    \end{bmatrix}\right) \mathbf{1}
+    \le 35 \cdot 60 \cdot \mathbf{1},\\
+    & x_{ij} \ge 0, i = 1, \dots, 3, j = 1, \dots, 4.
+\end{align*}
+
+\section*{Ungraded Problems}
+
+\subsection*{Problem 1}
+
+Let $\alpha_i$ be the fraction of object $i$ that will be put in the knapsack. We have
+\begin{align*}
+    \textrm{maximize}\quad &\sum_{i = 1}^n \alpha_im_i,\\
+    \textrm{subject to}\quad &\sum_{i = 1}^n \alpha_im_i \le W,\\
+    &\sum_{i = 1}^n \alpha_iv_i = V,\\
+    &0 \le \alpha_i \le 1, i = 1, \dots, n.
+\end{align*}
+
+\end{document}
