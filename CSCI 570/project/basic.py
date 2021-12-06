@@ -3,6 +3,8 @@ import sys
 import os
 import time
 import psutil
+import argparse
+
 
 def generate_string(input):
     """Read from input and return two generated sequences."""
