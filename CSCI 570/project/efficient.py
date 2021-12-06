@@ -4,6 +4,7 @@ import sys
 import os
 import time
 import psutil
+import argparse
 
 
 def generate_string(input_string):
@@ -155,5 +156,10 @@ def test(match_string_func, input_file, output_file):
 
 
 if __name__ == '__main__':
-    test(match_string_func=match_string_dp, input_file="input2.txt", output_file="output2_dp.txt")
-    test(match_string_func=match_string_dp, input_file="input2.txt", output_file="output2_dc.txt")
+    OUTPUT_FILE_NAME = 'output.txt'
+    
+    parser = argparse.ArgumentParser()
+    parser.add_argument('input_file')
+    args = parser.parse_args()
+    test(match_string_func=match_string_dp, input_file=args.input_file, output_file=OUTPUT_FILE_NAME)
+    test(match_string_func=match_string_dc, input_file=args.input_file, output_file=OUTPUT_FILE_NAME)

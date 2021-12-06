@@ -76,6 +76,12 @@ def calc_memory():
     return memory
 
 def main():
+    OUTPUT_FILE_NAME = 'output.txt'
+    
+    parser = argparse.ArgumentParser()
+    parser.add_argument('input_file')
+    args = parser.parse_args()
+
     start_time = time.process_time()
     start_memory = calc_memory()
     delta = 30
@@ -83,7 +89,7 @@ def main():
                           'C': {'A': 110, 'C': 0, 'G': 118, 'T': 48},
                           'G': {'A': 48, 'C': 118, 'G': 0, 'T': 110},
                           'T': {'A': 94, 'C': 48, 'G': 110, 'T': 0}})
-    input = pd.read_csv("input1.txt", header=None)
+    input = pd.read_csv(args.input_file, header=None)
     base_1, base_2 = generate_string(input)
     alignment = match_string(base_1, base_2, alpha, delta)
     end_memory = calc_memory()
@@ -92,7 +98,7 @@ def main():
     runtime = end_time - start_time
     output = (alignment[0] + ' ' + alignment[1], alignment[2] + ' ' + alignment[3], runtime, memory)
     output = pd.DataFrame(output)
-    output.to_csv("output1_dp.txt", index=0, header=0) #The form of output here is identical to that given by TA (see "output1.txt").
+    output.to_csv(OUTPUT_FILE_NAME, index=0, header=0) #The form of output here is identical to that given by TA (see "output1.txt").
 
 if __name__ == '__main__':
     main()
