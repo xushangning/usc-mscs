@@ -117,9 +117,9 @@ def match_string_dc(x, y, alpha, delta):
             g.iloc[i, 0] = g.iloc[i, 1]
     q = 0
     for i in range(m + 1):
-        if f.iloc[i, 0] + g.iloc[i, 0] < f.iloc[q, 0] + g.iloc[q, 0]:
+        if f.iloc[i, 0] + g.iloc[m - i, 0] < f.iloc[q, 0] + g.iloc[m - q, 0]:
             q = i
-    print(f.iloc[q, 0] + g.iloc[q, 0])
+    print(f.iloc[q, 0] + g.iloc[m - q, 0])
     alignment_x1, alignment_y1 = match_string_dc(x[:q], y[:n // 2], alpha, delta)
     alignment_x2, alignment_y2 = match_string_dc(x[q:], y[n // 2:], alpha, delta)
     return alignment_x1 + alignment_x2, alignment_y1 + alignment_y2
