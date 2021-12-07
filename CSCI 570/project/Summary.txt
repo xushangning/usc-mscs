@@ -1,0 +1,19 @@
+# Summary
+
+## Results
+
+We implement two version of the sequence alignment algorithms in Python: the original DP version and the improved version based on divide-and-conquer.
+
+We plot the algorithms' execution time and memory used against problem size, product of input strings' lengths. For memory usage, we choose the difference of unique set sizes (USS) between program end and program start, to better characterize memory usage by algorithms themselves. All experiments are run on a MacBook Pro (Early-2015) with maxed-out specification and macOS Monterey. Each experiment is repeated for three times with warm-up.
+
+## Observations and Insights
+
+We use log scales for both axes. For the CPU plot, CPU time grows linearly for both versions as the problem size increases, which is consistent with their asymptotic time complexity. The divide-and-conquer version has consistently worse run time than the basic version, which may be explained by overhead in recursive function calls.
+
+The case for the memory plot is more interesting. The plot for the divide-and-conquer version is almost horizontal, compared with the basic version's piecewise-linear behavior, indicating memory saving. The basic version's behavior may be explained by preallocation i.e., a constant amount of memory is preallocated to save allocation cost. When the program runs out of preallocated memory, the memory allocator kicks in and allocates additional memory for the dynamic programming value table.
+
+## Contribution
+
+- Yaxing Cai: Implementing the version of the sequence alignment algorithm based on divide-and-conquer
+- Shangning Xu: Testing, plotting and report writing
+- Qingyang Yin: Implementing the basic version of the sequence alignment algorithm
