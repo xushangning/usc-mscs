@@ -79,7 +79,7 @@ def calc_memory():
     pid = os.getpid()
     p = psutil.Process(pid)
     info = p.memory_full_info()
-    memory = info.uss
+    memory = info.uss / 1000
     return memory
 
 def main():

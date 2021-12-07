@@ -40,7 +40,7 @@ def match_string_dp(x, y, alpha, delta):
             x_idx = (x[i - 1] == 'A') * 0 + (x[i - 1] == 'C') * 1 + (x[i - 1] == 'G') * 2 + (x[i - 1] == 'T') * 3
             y_idx = (y[j - 1] == 'A') * 0 + (y[j - 1] == 'C') * 1 + (y[j - 1] == 'G') * 2 + (y[j - 1] == 'T') * 3
             opt[i, j] = min(opt[i - 1, j - 1] + alpha[x_idx][y_idx], opt[i - 1, j] + delta, opt[i, j - 1] + delta)
-    print(opt[m, n])
+    #print(opt[m, n])
     i = len(x)
     j = len(y)
     alignment_x_inv = ''
@@ -115,7 +115,7 @@ def match_string_dc(x, y, alpha, delta):
     for i in range(m + 1):
         if f[i, 0] + g[m - i, 0] < f[q, 0] + g[m - q, 0]:
             q = i
-    print(f[q, 0] + g[m - q, 0])
+    # print(f[q, 0] + g[m - q, 0])
     alignment_x1, alignment_y1 = match_string_dc(x[:q], y[:n // 2], alpha, delta)
     alignment_x2, alignment_y2 = match_string_dc(x[q:], y[n // 2:], alpha, delta)
     return alignment_x1 + alignment_x2, alignment_y1 + alignment_y2
@@ -126,7 +126,7 @@ def calc_memory():
     pid = os.getpid()
     p = psutil.Process(pid)
     info = p.memory_full_info()
-    memory = info.uss
+    memory = info.uss / 1000
     return memory
 
 
@@ -151,5 +151,5 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('input_file')
     args = parser.parse_args()
-    test(match_string_func=match_string_dp, input_file=args.input_file, output_file=OUTPUT_FILE_NAME)
+    # test(match_string_func=match_string_dp, input_file=args.input_file, output_file=OUTPUT_FILE_NAME)
     test(match_string_func=match_string_dc, input_file=args.input_file, output_file=OUTPUT_FILE_NAME)
