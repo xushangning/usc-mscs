@@ -1,9 +1,9 @@
 ACTG
 2
-3
 4
-31
-TACGTAC
 1
-7
-15
+16
+TACGTAC
+2
+2
+16
