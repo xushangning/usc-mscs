@@ -8,9 +8,9 @@ We plot the algorithms' execution time and memory used against problem size, pro
 
 ## Observations and Insights
 
-We use log scales for both axes. For the CPU plot, CPU time grows linearly for both versions as the problem size increases, which is consistent with their asymptotic time complexity. The divide-and-conquer version has consistently worse run time than the basic version, which may be explained by overhead in recursive function calls.
+We use log scales for both axes. For the CPU plot, CPU time grows linearly for both versions as the problem size increases, which is consistent with their asymptotic time complexity. The fact that two plots have nearly identical slopes in a log-log plot shows that the polynomials in their time complexity have the same degree. The divide-and-conquer version has consistently worse run time than the basic version, which shows up as difference in the intercepts.
 
-The case for the memory plot is more interesting. The plot for the divide-and-conquer version is almost horizontal, compared with the basic version's piecewise-linear behavior, indicating memory saving. The basic version's behavior may be explained by preallocation i.e., a constant amount of memory is preallocated to save allocation cost. When the program runs out of preallocated memory, the memory allocator kicks in and allocates additional memory for the dynamic programming value table.
+The case for the memory plot is more interesting. The plot for the divide-and-conquer version is almost horizontal, compared with the basic version's piecewise-linear behavior, indicating memory saving. The basic version's behavior may be explained by preallocation i.e., a constant amount of memory is preallocated to save allocation cost. When the program runs out of preallocated memory (problem size is greater than 500 in our case), the memory allocator kicks in and allocates additional memory for the dynamic programming value table. After that, the significant difference in slopes between two plots shows that the polynomials in space complexity between the basic and the efficient algorithm have difference degrees.
 
 ## Contribution
 
