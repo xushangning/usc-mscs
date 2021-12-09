@@ -6,6 +6,11 @@ We implement two version of the sequence alignment algorithms in Python: the ori
 
 We plot the algorithms' execution time and memory used against problem size, product of input strings' lengths. For memory usage, we choose the difference of unique set sizes (USS) between program end and program start, to better characterize memory usage by algorithms themselves. All experiments are run on a MacBook Pro (Early-2015) with maxed-out specification and macOS Monterey. Each experiment is repeated for three times with warm-up.
 
+The following files are included in addition to submission requirements to help with evaluation.
+
+- workbench.ipynb: Python code for test case generation, data processing and visualization.
+- requirements.txt: Run-time dependencies for basic.py and efficient.py.
+
 ## Observations and Insights
 
 We use log scales for both axes. For the CPU plot, CPU time grows linearly for both versions as the problem size increases, which is consistent with their asymptotic time complexity. The fact that two plots have nearly identical slopes in a log-log plot shows that the polynomials in their time complexity have the same degree. The divide-and-conquer version has consistently worse run time than the basic version, which shows up as difference in the intercepts.
