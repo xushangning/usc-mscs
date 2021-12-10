@@ -40,7 +40,6 @@ def match_string_dp(x, y, alpha, delta):
             x_idx = (x[i - 1] == 'A') * 0 + (x[i - 1] == 'C') * 1 + (x[i - 1] == 'G') * 2 + (x[i - 1] == 'T') * 3
             y_idx = (y[j - 1] == 'A') * 0 + (y[j - 1] == 'C') * 1 + (y[j - 1] == 'G') * 2 + (y[j - 1] == 'T') * 3
             opt[i, j] = min(opt[i - 1, j - 1] + alpha[x_idx][y_idx], opt[i - 1, j] + delta, opt[i, j - 1] + delta)
-    #print(opt[m, n])
     i = len(x)
     j = len(y)
     alignment_x_inv = ''
@@ -75,7 +74,7 @@ def match_string_dp(x, y, alpha, delta):
                 j = j - 1
         alignment_x = alignment_x_inv[::-1]
         alignment_y = alignment_y_inv[::-1]
-    return alignment_x, alignment_y
+    return (alignment_x, alignment_y), opt[m, n]
 
 
 def match_string_dc(x, y, alpha, delta):
@@ -115,10 +114,9 @@ def match_string_dc(x, y, alpha, delta):
     for i in range(m + 1):
         if f[i, 0] + g[m - i, 0] < f[q, 0] + g[m - q, 0]:
             q = i
-    # print(f[q, 0] + g[m - q, 0])
-    alignment_x1, alignment_y1 = match_string_dc(x[:q], y[:n // 2], alpha, delta)
-    alignment_x2, alignment_y2 = match_string_dc(x[q:], y[n // 2:], alpha, delta)
-    return alignment_x1 + alignment_x2, alignment_y1 + alignment_y2
+    alignment_x1, alignment_y1 = match_string_dc(x[:q], y[:n // 2], alpha, delta)[0]
+    alignment_x2, alignment_y2 = match_string_dc(x[q:], y[n // 2:], alpha, delta)[0]
+    return (alignment_x1 + alignment_x2, alignment_y1 + alignment_y2), f[q, 0] + g[m - q, 0]
 
 
 def calc_memory():
@@ -137,13 +135,13 @@ def test(match_string_func, input_file, output_file):
     alpha = np.array([[0, 110, 48, 94], [110, 0, 118, 48], [48, 118, 0, 110], [94, 48, 110, 0]])
     input_string = np.loadtxt(input_file, dtype=str)
     base_1, base_2 = generate_string(input_string)
-    alignment = match_string_func(base_1, base_2, alpha, delta)
+    alignment, cost = match_string_func(base_1, base_2, alpha, delta)
     end_memory = calc_memory()
     memory = end_memory - start_memory
     end_time = time.process_time()
     runtime = end_time - start_time
     output = (
-    alignment[0][:50] + ' ' + alignment[0][-50:], alignment[1][:50] + ' ' + alignment[1][-50:], runtime, memory)
+    alignment[0][:50] + ' ' + alignment[0][-50:], alignment[1][:50] + ' ' + alignment[1][-50:], cost, runtime, memory)
     np.savetxt(output_file, output, fmt='%s', newline='\n')
 
 if __name__ == '__main__':

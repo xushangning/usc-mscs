@@ -71,7 +71,7 @@ def match_string(x, y, alpha, delta) :
                 j = j - 1
         alignment_x = alignment_x_inv[::-1]
         alignment_y = alignment_y_inv[::-1]
-    return (alignment_x[0:50], alignment_x[-50:], alignment_y[0:50], alignment_y[-50:])
+    return (alignment_x[0:50], alignment_x[-50:], alignment_y[0:50], alignment_y[-50:]), opt[len(x), len(y)]
 
 
 def calc_memory():
@@ -95,12 +95,12 @@ def main():
     alpha = np.array([[0, 110, 48, 94], [110, 0, 118, 48], [48, 118, 0, 110], [94, 48, 110, 0]])
     input = np.loadtxt(args.input_file, dtype=str)
     base_1, base_2 = generate_string(input)
-    alignment = match_string(base_1, base_2, alpha, delta)
+    alignment, cost = match_string(base_1, base_2, alpha, delta)
     end_memory = calc_memory()
     memory = end_memory - start_memory
     end_time = time.process_time()
     runtime = end_time - start_time
-    output = (alignment[0] + ' ' + alignment[1], alignment[2] + ' ' + alignment[3], runtime, memory)
+    output = (alignment[0] + ' ' + alignment[1], alignment[2] + ' ' + alignment[3], cost, runtime, memory)
     output = np.array(output)
     np.savetxt(OUTPUT_FILE_NAME, output, fmt='%s', newline='\n')
 
