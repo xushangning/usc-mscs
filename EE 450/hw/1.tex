@@ -14,29 +14,29 @@
 
 \begin{enumerate}
     \item[P4.] \begin{enumerate}
-        \item Because at most four hosts can be attached to each switch at any time, the maximum number of simultaneous connections is eight.
-        \item 4
-        \item No, we can't, because all four connections between A and C will use up all four circuits in each link connected to B or D, making it impossible to reserve circuits for connections between B and D.
+        \item We can have 4 connections between each pair of adjacent switches, giving a total of 16 connections.
+        \item 8, with 4 connections passing through the lower-left switch and 4 through upper-right.
+        \item Yes. We can route 2 connections between A and C through B and the other 2 through D, and route connections between B and D through A and C.
     \end{enumerate}
 
     \item[P5.] \begin{enumerate}
-        \item The total delay consists of the time to travel 150 km, two total nodal delays, and the time to clear the third toll booth. The textbook has shown that the total nodal delay is 62 min, so the total delay is
+        \item The textbook has shown that the transmission delay is \SI{2}{min} through each tollbooth, and the caravan propagates for a total of \SI{150}{km}, so the end-to-end delay is
         \[
-            \SI{150}{km} / (\SI{100}{km/h}) + \SI{62}{min} \cdot 2 + \SI{2}{min} = \SI{216}{min}.
+            \SI{150}{km} / (\SI{100}{km/h}) + \SI{2}{min} \cdot 3 = \SI{96}{min}.
         \]
-        \item With only eight cars, the transmission delay is now $8 / (\SI{5}{/min}) = \SI{1.6}{min}$ and the total delay $\SI{60}{min} + \SI{1.6}{min} = \SI{61.6}{min}$. The total delay is
+        \item With only eight cars, the transmission delay is now $8 / (\SI{5}{/min}) = \SI{1.6}{min}$, so the end-to-end delay is
         \[
-            \SI{150}{km} / (\SI{100}{km/h}) + \SI{61.6}{min} \cdot 2 + \SI{1.6}{min} = \SI{214.8}{min}.
+            \SI{150}{km} / (\SI{100}{km/h}) + \SI{1.6}{min} \cdot 3 = \SI{94.8}{min}.
         \]
     \end{enumerate}
 
     \item[P6.] \begin{enumerate}
-        \item $d_\textrm{prop} = m/s$
-        \item $d_\textrm{trans} = L/R$
-        \item $L/R + m/s$
+        \item $d_\textrm{prop} = m/s$ seconds
+        \item $d_\textrm{trans} = L/R$ seconds
+        \item $(L/R + m/s)$ seconds
         \item It is at A's end of the link.
         \item It is still in the link.
-        \item It is at B's end of the link.
+        \item The first bit has reached Host B.
         \item We have
         \[
             \frac{m}{2.5 \cdot 10^8} = \frac{120\textrm{ bits}}{56\textrm{ kbps}}.
@@ -44,21 +44,21 @@
         Solving for $m$, we get $m \approx 5.4 \cdot 10^5$.
     \end{enumerate}
 
-    \item[P7.] The end-to-end delay for a packet is $\SI{56}{b} / \SI{2}{Mbps} + \SI{10}{ms} = \SI{10.028}{ms}$. However, bits in a packet are not created at the same time. The first bit in the packet is created $\SI{56}{b} / \SI{64}{kbps} = \SI{7.2}{ms}$ before the last bit. Therefore, 10.028--17.228 ms elapses from the time a bit is created until it is decoded.
+    \item[P7.] The end-to-end delay for a packet is $\SI{56}{B} / \SI{2}{Mbps} + \SI{10}{ms} = \SI{10.224}{ms}$. However, bits in a packet are not created at the same time. The first bit in the packet is created $\SI{56}{B} / \SI{64}{kbps} = \SI{7}{ms}$ before the last bit. Therefore, 10.224--17.224 ms elapses from the time a bit is created until it is decoded.
 
     \item[P10.] The end-to-end delay is
     \[
         2d_\textrm{proc} + \sum_{i = 1}^3 \left(\frac{L}{R_i} + \frac{d_i}{s_i}\right).
     \]
-    Substituting actual values into the formula, we obtain 48.25 ms for the end-to-end delay.
+    Substituting actual values into the formula, we obtain 64 ms for the end-to-end delay.
 
-    \item[P12.] The queuing delay is $\SI{1500}{b} \cdot 4.5 / \SI{2}{Mbps} = \SI{3.375}{ms}$. Similarly, the queuing delay for the general case is $(nL + x)/R$.
+    \item[P12.] The queuing delay is $\SI{1500}{B} \cdot 4.5 / \SI{2}{Mbps} = \SI{27}{ms}$. Similarly, the queuing delay for the general case is $(nL + L - x)/R$.
     
     \item[P20.] $\min\{R_s, R_c, R/M\}$
     
     \item[P21.] If the server can only use one path, the maximum throughput is
     \[
-        \min_{k = 1, \dots, M} \min_{i = 1, \dots, N} R_i^k.
+        \max_{k = 1, \dots, M} \min_{i = 1, \dots, N} R_i^k.
     \]
     If the server can use all $M$ paths, the maximum throughput is
     \[
