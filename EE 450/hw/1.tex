@@ -74,15 +74,15 @@
     \end{enumerate}
 
     \item[P28.] \begin{enumerate}
-        \item The total transmission time is
+        \item The total time it takes to send the file is
         \[
             \SI{800000}{b} / \SI{2}{Mbps} + \SI{20000}{km} / (\SI{2.5d8}{m/s}) = \SI{0.48}{s}.
         \]
-        \item The new total transmission time is now
+        \item Because the transmission time of the acknowledgement packet is ignored, we only need to consider its propagation delay. The new total time it takes to send the file is now
         \[
-            20(\SI{40000}{b} / \SI{2}{Mbps} + \SI{20000}{km} / (\SI{2.5d8}{m/s})) = \SI{2}{s}.
+            20(\SI{40000}{b} / \SI{2}{Mbps} + \SI{20000}{km} / (\SI{2.5d8}{m/s}) \cdot 2) = \SI{3.6}{s}.
         \]
-        \item After the file is broken up into packets, transmission time is now more than 4 times as long as before, because propagation of bits across different packets no longer overlaps, contributing to large increase in total propagation time.
+        \item After the file is broken up into packets, transmission time is now 7.5 times as much as before, because propagation of file bits across different packets no longer overlaps and there is an extra propagation delay for each packet due to the acknowledgement packet, contributing to large increase in total propagation time.
     \end{enumerate}
 \end{enumerate}
 
