@@ -1,0 +1,72 @@
+\documentclass{article}
+
+\usepackage{enumitem}
+\setlist[enumerate, 2]{label=\alph*.}
+
+\usepackage{siunitx}
+
+\title{EE 450 Homework 2}
+\author{Shangning Xu}
+
+\begin{document}
+
+\maketitle
+
+\section*{Chapter 1}
+
+\begin{enumerate}
+    \item[P23.] \begin{enumerate}
+        \item Because the bottleneck link is the first link between the server and the client, it is impossible to have queuing delay at the switch. Therefore, the inter-arrival time is solely determined by the queuing delay at the server, which is $L/R_s$.
+        \item There may be queuing delay at the input queue of the second link when the second packet has arrived at the switch in whole while the first packet is still being transmitted into the second link. Consider the case where the last bit of the first packet is transmitted into the second link the moment the last bit of the second packet arrives at the switch. In this case, the inter-arrival time between the packets at the switch is exactly the same as the transmission time of the first packet into the second link, which gives
+        \[
+            \frac{L}{R_s} = \frac{L}{R_c}.
+        \]
+        Therefore, queuing will happen at the input queue of the second link when $R_s > R_c$.
+
+        The $T$-second artificial delay adds to the inter-arrival time to match the transmission time, so there won't be any queuing delay when
+        \[
+            T \ge \frac{L}{R_c} - \frac{L}{R_s}.
+        \]
+    \end{enumerate}
+
+    \item[P31.] \begin{enumerate}
+        \item The time it takes to move the message from the source host to the first switch is the transmission time of the message into the first link, given by $\SI{8d6}{b} / \SI{2}{Mbps} = \SI{4}{s}$. The total time is \SI{12}{s}, triple the transmission time.
+        \item The time it takes to move the packet from the source host to the first switch is $\SI{1d4}{b} / \SI{2}{Mbps} = \SI{5}{ms}$. The transmission of the second packet starts right after the first packet is fully transmitted, so at $\SI{5}{ms} \cdot 2 = \SI{10}{ms}$ after transmission starts will the second packet be fully received at the first switch.
+        \item The time it takes to move the message from source host to destination with message segmentation is
+        \[
+            \SI{5}{ms} \cdot (799 + 3) = \SI{4.01}{s}.
+        \]
+        The total time is significantly less than the case without message segmentation because bits in different packets are transmitted in parallel among different switches.
+        \item The buffer size in switches is limited. Message segmentation breaks up the message so that packets will fit in the buffer.
+        \item Message segmentation significantly increases the probability of packet loss.
+    \end{enumerate}
+\end{enumerate}
+
+\section*{Chapter 2}
+
+\begin{enumerate}
+    \item[P7.] $2\mathrm{RTT}_0 + \mathrm{RTT}_1 + \mathrm{RTT}_2 + \cdots + \mathrm{RTT}_n$
+
+    \item[P8.] \begin{enumerate}
+        \item Each transmission of the objects is preceded by the handshake, adding one $\mathrm{RTT}_0$ to the total time, so the total time is $8 \cdot 2\mathrm{RTT}_0 = 16\mathrm{RTT}_0$.
+        \item Because transmission can now happens over 5 parallel connections, at most two objects must be transmitted in serial. The total time is $2 \cdot 2\mathrm{RTT}_0 = 4\mathrm{RTT}_0$.
+        \item There is no handshake for objects, so the total time is $8\mathrm{RTT}_0$.
+    \end{enumerate}
+
+    \item[P10.] Because the link is short, we can ignore propagation delay and thus the RTT is almost zero. We only need to consider transmission delays. In the case of parallel downloads via non-persistent HTTP, additional connections only increase the total number of bits that need to be transmitted due to additional handshake without offering any other benefit. Therefore, parallel downloads via non-persistent HTTP don't make sense here.
+
+    The same argument can be said of the comparison between serial and parallel downloads via persistent HTTP, so we only consider the case of serial downloads with persistent HTTP here. Because the size of a control packet is only 0.2\% of the size of a data packet, it is unlikely that reducing the number of control packets through persistent HTTP will yield significant gains.
+\end{enumerate}
+
+\section*{Chapter 6}
+
+\begin{enumerate}
+    \item[P27.] \begin{enumerate}
+        \item The packetization delay is $8L / 128 = 0.0625L$ ms.
+        \item Substituting $L$ for actual numbers in the formula above, we get \SI{93.75}{ms} when $L = 1500$ and \SI{3.125}{ms} when $L = 50$.
+        \item The store-and-forward delay is given by $(L + 5)/R$. Substituting $L$ for actual values again, we get \SI{19.36}{\micro\second} when $L = 1500$ and \SI{0.707}{\micro\second} when $L = 50$.
+        \item Using a small packet size reduces the packetization delay, thereby reducing echo. It also reduces the voice call latency, that is, the delay between one person speaks and the other hears the words, because transmission of smaller packets is faster.
+    \end{enumerate}
+\end{enumerate}
+
+\end{document}
