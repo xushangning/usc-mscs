@@ -37,8 +37,16 @@
             \SI{5}{ms} \cdot (799 + 3) = \SI{4.01}{s}.
         \]
         The total time is significantly less than the case without message segmentation because bits in different packets are transmitted in parallel among different switches.
-        \item The buffer size in switches is limited. Message segmentation breaks up the message so that packets will fit in the buffer.
-        \item Message segmentation significantly increases the probability of packet loss.
+        \item Without message segmentation,
+        \begin{enumerate}
+            \item a single message may be too large to fit in the switch buffer;
+            \item if there is no other guard against bit errors, the whole message has to be retransmitted if there is a single bit error;
+            \item smaller packets have to queue behind large messages in the queue and suffer unfair delays.
+        \end{enumerate}
+        \item \begin{enumerate}
+            \item Packets have to be put in sequence at the destination.
+            \item Segmentation increases the total number of bits to transfer, as a header must be added to each packet.
+        \end{enumerate}
     \end{enumerate}
 \end{enumerate}
 
@@ -48,9 +56,22 @@
     \item[P7.] $2\mathrm{RTT}_0 + \mathrm{RTT}_1 + \mathrm{RTT}_2 + \cdots + \mathrm{RTT}_n$
 
     \item[P8.] \begin{enumerate}
-        \item Each transmission of the objects is preceded by the handshake, adding one $\mathrm{RTT}_0$ to the total time, so the total time is $8 \cdot 2\mathrm{RTT}_0 = 16\mathrm{RTT}_0$.
-        \item Because transmission can now happens over 5 parallel connections, at most two objects must be transmitted in serial. The total time is $2 \cdot 2\mathrm{RTT}_0 = 4\mathrm{RTT}_0$.
-        \item There is no handshake for objects, so the total time is $8\mathrm{RTT}_0$.
+        \item Each transmission of the objects is preceded by the handshake, adding one $\mathrm{RTT}_0$ to the total time, so the total time is
+        \[
+            2\mathrm{RTT}_0 + \sum_{i = 1}^n \mathrm{RTT}_i + 8 \cdot 2\mathrm{RTT}_0 = 18\mathrm{RTT}_0 + \sum_{i = 1}^n \mathrm{RTT}_i.
+        \]
+        \item Because transmission can now happens over 5 parallel connections, at most two objects must be transmitted in serial. The total time is
+        \[
+            2\mathrm{RTT}_0 + \sum_{i = 1}^n \mathrm{RTT}_i + 2 \cdot 2\mathrm{RTT}_0 = 6\mathrm{RTT}_0 + \sum_{i = 1}^n \mathrm{RTT}_i.
+        \]
+        \item There is no handshake for objects, so the total time is
+        \[
+            2\mathrm{RTT}_0 + \sum_{i = 1}^n \mathrm{RTT}_i + 8\mathrm{RTT}_0 = 10\mathrm{RTT}_0 + \sum_{i = 1}^n \mathrm{RTT}_i
+        \]
+        for persistent connections without pipelining. If pipelining is used, all objects can be transferred within one $\mathrm{RTT}_0$:
+        \[
+            2\mathrm{RTT}_0 + \sum_{i = 1}^n \mathrm{RTT}_i + \mathrm{RTT}_0 = 3\mathrm{RTT}_0 + \sum_{i = 1}^n \mathrm{RTT}_i
+        \]
     \end{enumerate}
 
     \item[P10.] Because the link is short, we can ignore propagation delay and thus the RTT is almost zero. We only need to consider transmission delays. In the case of parallel downloads via non-persistent HTTP, additional connections only increase the total number of bits that need to be transmitted due to additional handshake without offering any other benefit. Therefore, parallel downloads via non-persistent HTTP don't make sense here.
