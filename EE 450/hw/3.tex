@@ -1,0 +1,87 @@
+\documentclass{article}
+
+\usepackage{enumitem}
+\setlist[enumerate, 2]{label=\alph*.}
+
+\usepackage{siunitx}
+\usepackage{booktabs}
+
+\title{EE 450 Homework 3}
+\author{Shangning Xu}
+
+\begin{document}
+
+\maketitle
+
+\section*{Chapter 6}
+
+\begin{enumerate}
+    \item[P18.] Note that because CSMA/CD is used for this broadcast channel, and B begins transmission before A finishes, B must start transmission before the frame transmitted by A reaches B. Otherwise, B will detect signal energy from its adapter and postpone transmission. Therefore, B starts transmission between $t = 0$ and 325 bit times and the frame reaches A between $t = 325$ and 750 bit times. As a result, A can finish transmitting before it detects that B has transmitted when the frame size is in the range of \SIrange{325}{750}{b}.
+    
+    In the worst case, B starts transmission simultaneously with A, and its signal reaches A at $t = 325$ bit times.
+
+    \item[P19.] Consider the example in the question. B schedules its retransmission at $t = 245 + 512 = 757$ bit times. When A detects that B has transmitted, B has transmitted \SI{245}{b} into the channel and A has to wait for these bits to die down, so A will begin retransmission at $t = 245 + 245 = 490$ bit times and its signal will reach B at $t = 490 + 245 = 735$ bit times. B will refrain from retransmission at its scheduled time A's signal arrives before the scheduled time.
+ 
+    \item[P22.] 
+    \begin{tabular}{@{}lllll@{}}
+        \toprule
+        Question & \begin{tabular}[c]{@{}l@{}}Source\\ MAC\end{tabular} & \begin{tabular}[c]{@{}l@{}}Destination\\ MAC\end{tabular} & \begin{tabular}[c]{@{}l@{}}Source\\ IP\end{tabular} & \begin{tabular}[c]{@{}l@{}}Destination\\ IP\end{tabular} \\ \midrule
+        \textit{(i)} & A & Right Router & A & F \\
+        \textit{(ii)} & A & Right Router & A & F \\
+        \textit{(iii)} & Right Router & F & A & F \\ \bottomrule
+    \end{tabular}
+
+    \item[P23.] The maximum total aggregate throughput is \SI{1100}{Mbps}, because every link is fully duplex and hosts connected to the same switch can transfer data in a ring.
+
+    \item[P24.] The maximum total aggregate throughput is now \SI{500}{Mbps}, where two servers can still maintain a bidirectional throughput of \SI{200}{Mbps} while among hosts connected to a departmental hub, there is only one host that can be sending data at a time as hosts connected to a hub form a broadcast LAN.
+ 
+    \item[P25.] The maximum total aggregate throughput is now \SI{100}{Mbps}, because there is only one host that can be sending data at a time as every bit sent will be broadcast to every host in the LAN.
+    
+    \item[P26.] The switch tables shown below are the state of the table after an event in the given question occurs.
+    \begin{enumerate}[label=\textit{(\roman*)}]
+        \item The frame is broadcast to all links except the one connected to B, because the switch table doesn't have an entry for E.
+        
+        \begin{tabular}{@{}lll@{}}
+            \toprule
+            MAC Address & Interface & Time \\ \midrule
+            B & B & \textit{(i)} \\ \bottomrule
+        \end{tabular}
+
+        \item The frame is forwarded only to B's link, as the switch table has an entry for B created when the frame sent by B went through the switch.
+        
+        \begin{tabular}{@{}lll@{}}
+            \toprule
+            MAC Address & Interface & Time \\ \midrule
+            B & B & \textit{(i)} \\
+            E & E & \textit{(ii)} \\ \bottomrule
+        \end{tabular}
+
+        \item The frame is forwarded only to B's link as before.
+        
+        \begin{tabular}{@{}lll@{}}
+            \toprule
+            MAC Address & Interface & Time \\ \midrule
+            B & B & \textit{(i)} \\
+            E & E & \textit{(ii)} \\
+            A & A & \textit{(iii)} \\ \bottomrule
+        \end{tabular}
+
+        \item The frame is forwarded only to A's link because the switch took note of A's MAC address and its link when it sent a frame to B.
+        
+        \begin{tabular}{@{}lll@{}}
+            \toprule
+            MAC Address & Interface & Time \\ \midrule
+            B & B & \textit{(iv)} \\
+            E & E & \textit{(ii)} \\
+            A & A & \textit{(iii)} \\ \bottomrule
+        \end{tabular}
+    \end{enumerate}
+\end{enumerate}
+
+\section*{Chapter 7}
+
+\begin{enumerate}
+    \item[P5.] 
+\end{enumerate}
+
+\end{document}
