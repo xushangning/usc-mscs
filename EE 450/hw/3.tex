@@ -16,19 +16,25 @@
 \section*{Chapter 6}
 
 \begin{enumerate}
-    \item[P18.] Note that because CSMA/CD is used for this broadcast channel, and B begins transmission before A finishes, B must start transmission before the frame transmitted by A reaches B. Otherwise, B will detect signal energy from its adapter and postpone transmission. Therefore, B starts transmission between $t = 0$ and 325 bit times and the frame reaches A between $t = 325$ and 750 bit times. As a result, A can finish transmitting before it detects that B has transmitted when the frame size is in the range of \SIrange{325}{750}{b}.
+    \item[P18.] First, B must start transmission before the frame transmitted by A reaches B, because the question requires that B begins transmission before A finishes. Otherwise, B will detect signal energy from its adapter and postpone transmission.
     
-    In the worst case, B starts transmission simultaneously with A, and its signal reaches A at $t = 325$ bit times.
+    Therefore, B starts transmission between $t = 0$ and 325 bit times and the frame reaches A between $t = 325$ and 750 bit times. As a result, A can finish transmitting before it detects that B has transmitted when the size of the frame transmitted by A is in the range of \SIrange{325}{750}{b}.
+    
+    In the worst case, A transmits a minimum-sized frame of 576 bits and B starts transmission just before the first bit of A's frame reaches B. B's signal reaches A just before $t = 750$ bit times.
 
-    \item[P19.] Consider the example in the question. B schedules its retransmission at $t = 245 + 512 = 757$ bit times. When A detects that B has transmitted, B has transmitted \SI{245}{b} into the channel and A has to wait for these bits to die down, so A will begin retransmission at $t = 245 + 245 = 490$ bit times and its signal will reach B at $t = 490 + 245 = 735$ bit times. B will refrain from retransmission at its scheduled time A's signal arrives before the scheduled time.
+    \item[P19.] Consider the example in the question. B schedules its retransmission at $t = 245 + 48 + 512 = 805$ bit times.
+    
+    A will begin retransmission at $t = 245 + 48 + 245 + 96 = 634$ bit times, because when A detects at $t = 245$ bit times that B has transmitted, A has to wait for bits in the channel (\SI{245}{b} and the 48-bit jam signal) to die down.
+    
+    Its signal will reach B at $t = 634 + 245 = 879$ bit times. B will refrain from retransmission at its scheduled time A's signal arrives before the scheduled time.
  
     \item[P22.] 
     \begin{tabular}{@{}lllll@{}}
         \toprule
         Question & \begin{tabular}[c]{@{}l@{}}Source\\ MAC\end{tabular} & \begin{tabular}[c]{@{}l@{}}Destination\\ MAC\end{tabular} & \begin{tabular}[c]{@{}l@{}}Source\\ IP\end{tabular} & \begin{tabular}[c]{@{}l@{}}Destination\\ IP\end{tabular} \\ \midrule
-        \textit{(i)} & A & Right Router & A & F \\
-        \textit{(ii)} & A & Right Router & A & F \\
-        \textit{(iii)} & Right Router & F & A & F \\ \bottomrule
+        \textit{(i)} & A & \begin{tabular}[c]{@{}l@{}}Right Router's\\ Left NIC\end{tabular} & A & F \\
+        \textit{(ii)} & A & \begin{tabular}[c]{@{}l@{}}Right Router's\\ Left NIC\end{tabular} & A & F \\
+        \textit{(iii)} & \begin{tabular}[c]{@{}l@{}}Right Router's\\ Right NIC\end{tabular} & F & A & F \\ \bottomrule
     \end{tabular}
 
     \item[P23.] The maximum total aggregate throughput is \SI{1100}{Mbps}, because every link is fully duplex and hosts connected to the same switch can transfer data in a ring.
@@ -81,7 +87,10 @@
 \section*{Chapter 7}
 
 \begin{enumerate}
-    \item[P5.] 
+    \item[P5.] \begin{enumerate}
+        \item The protocol will not break down. When two stations, each associated with a different ISP, attempt to transmit at the same time, their will coordinate transmission with CSMA/CA. An ISP's AP may receive frames addressed the other AP because the wireless channel is a broadcast channel. These frames will be dropped by the AP. The channel's capacity will also be shared by two APs.
+        \item There will be less collision and and each AP will be able to use the full capacity of its channel.
+    \end{enumerate}
 \end{enumerate}
 
 \end{document}
