@@ -1,0 +1,181 @@
+\documentclass{article}
+
+\usepackage{minted}
+\usepackage{xcolor}
+\usepackage{graphicx}
+
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{siunitx}
+\usepackage{hyperref}
+
+\title{EE 450 Wireshark Lab: 802.11 WiFi Report}
+\author{Shangning Xu}
+
+\begin{document}
+
+\maketitle
+\newpage
+
+\begin{abstract}
+    We answer assigned questions in this report for the Wireshark Lab: 802.11 WiFi using the Wireshark\_802\_11.pcap trace provided with the lab with Wireshark 3.6.2 under macOS 12.3.
+\end{abstract}
+
+\section{Answers to Questions}
+
+\begin{enumerate}
+    \item The SSIDs of the two APs that are issuing most of the beacon frames in this trace are ``30 Munroe St'' and ``linksys12,'' as shown in the table below with SSIDs ranked by the number of beacon frame they generated. The table is produced by Wireshark's Wireless LAN Statistics.
+    
+    \begin{tabular}{@{}lll@{}}
+        \toprule
+        BSSID & SSID & Beacons \\ \midrule
+        00:16:b6:f7:1d:51 & 30 Munroe St & 718 \\
+        00:06:25:67:22:94 & linksys12 & 30 \\
+        00:18:39:f5:ba:bb & linksys\_SES\_24086 & 6 \\
+        00:18:39:93:b9:bb & linksys\_SES\_24086 & 1 \\
+        19:02:25:c7:78:94 & \textless{}Broadcast\textgreater{} & 1 \\
+        43:31:36:af:83:73 & \textless{}Broadcast\textgreater{} & 1 \\
+        50:2b:25:67:22:94 & linksys12 & 1 \\ \bottomrule
+    \end{tabular}
+
+    \item The intervals of time between the transmissions of the beacon frames are \SI{0.1024}{s} as shown below.
+\begin{minted}[breaklines, escapeinside=!!]{text}
+IEEE 802.11 Wireless Management
+    Fixed parameters (12 bytes)
+        Timestamp: 6351991193998
+        Beacon Interval: !\colorbox{yellow}{0.102400}! [Seconds]
+        Capabilities Information: 0x0011
+    Tagged parameters (68 bytes)
+        Tag: SSID parameter set: linksys_SES_24086
+\end{minted}
+
+    \item The source MAC address on the beacon frame is 00:16:b6:f7:1d:51 as shown below.
+\begin{minted}[breaklines, escapeinside=!!]{text}
+Receiver address: Broadcast (ff:ff:ff:ff:ff:ff)
+Destination address: Broadcast (ff:ff:ff:ff:ff:ff)
+Transmitter address: Cisco-Li_f7:1d:51 (00:16:b6:f7:1d:51)
+Source address: Cisco-Li_f7:1d:51 (!\colorbox{yellow}{00:16:b6:f7:1d:51}!)
+BSS Id: Cisco-Li_f7:1d:51 (00:16:b6:f7:1d:51)
+\end{minted}
+
+    \item The destination MAC address on the beacon frame is ff:ff:ff:ff:ff:ff as shown in the answer to the previous question.
+
+    \item The MAC BSS id on the beacon frame is 00:16:b6:f7:1d:51, also shown in the answer to Question 4.
+    
+    \item The supported data rates are shown below.
+\begin{minted}[breaklines, escapeinside=!!]{text}
+Tag: Supported Rates !\colorbox{yellow}{1(B), 2(B), 5.5(B), 11(B)}!, [Mbit/sec]
+Tag: Extended Supported Rates !\colorbox{yellow}{6(B), 9, 12(B), 18, 24(B), 36, 48, 54}!, [Mbit/sec]
+\end{minted}
+
+    \item The packet that contains the TCP SYN segment is the 474th packet in the trace. The three MAC addresses in the 802.11 frame are shown below. The MAC address that corresponds to the wireless host is 00:13:02:d1:b6:4f. The MAC address that corresponds to the access point is 00:16:b6:f7:1d:51. The MAC address that corresponds to the first-hop router is 00:16:b6:f4:eb:a8.
+\begin{minted}[breaklines, escapeinside=!!]{text}
+Receiver address: Cisco-Li_f7:1d:51 (!\colorbox{yellow}{00:16:b6:f7:1d:51}!)
+Transmitter address: IntelCor_d1:b6:4f (!\colorbox{yellow}{00:13:02:d1:b6:4f}!)
+Destination address: Cisco-Li_f4:eb:a8 (!\colorbox{yellow}{00:16:b6:f4:eb:a8}!)
+\end{minted}
+
+    The IP address of the wireless host sending this TCP segment is 192.168.1.109. The destination IP address is 128.119.245.12, which corresponds to the server of gaia.cs.umass.edu. We know that the destination IP address corresponds to gaia.cs.umass.edu because this is indicated in the lab handout.
+\begin{minted}[breaklines, escapeinside=!!]{text}
+Source Address: !\colorbox{yellow}{192.168.1.109}!
+Destination Address: !\colorbox{yellow}{128.119.245.12}!
+\end{minted}
+
+    \item The packet that contains the TCP SYNACK segment is the 476th packet in the trace. The three MAC addresses in the 802.11 frame are shown below. The MAC address that corresponds to the host is 91:2a:b0:49:b6:4f. The MAC address that corresponds to the access point is 00:16:b6:f7:1d:51. The MAC address that corresponds to the first-hop router is 00:16:b6:f4:eb:a8.
+\begin{minted}[breaklines, escapeinside=!!]{text}
+Receiver address: 91:2a:b0:49:b6:4f (!\colorbox{yellow}{91:2a:b0:49:b6:4f}!)
+Transmitter address: Cisco-Li_f7:1d:51 (!\colorbox{yellow}{00:16:b6:f7:1d:51}!)
+Source address: Cisco-Li_f4:eb:a8 (!\colorbox{yellow}{00:16:b6:f4:eb:a8}!)
+\end{minted}
+
+    The sender MAC address in the frame does not correspond to the IP address of the device that sent the TCP segment, because the IP address corresponds to gaia.cs.umass.edu and the sender MAC address corresponds to the first-hop router.
+
+    \item The host sent a DHCP release message to release its IP address and a deauthentication frame, as shown below:
+\begin{minted}[breaklines, escapeinside=!!]{text}
+No.     Time           Source                Destination           Protocol Length Info
+   1733 49.583615      192.168.1.109         192.168.1.1           DHCP     390    DHCP Release  - Transaction ID 0xea5a526
+   1735 49.609617      IntelCor_d1:b6:4f     Cisco-Li_f7:1d:51     802.11   54     Deauthentication, SN=1605, FN=0, Flags=........C
+\end{minted}
+    I expected a disassociation frame but didn't see one in the trace.
+
+    \item 15 AUTHENTICATION messages were sent to the linksys\_ses\_24086 AP as shown below.
+    
+    \begin{tabular}{@{}llll@{}}
+        \toprule
+        No. & Time & Source & Destination \\ \midrule
+        1740 & 49.638857 & IntelCor\_d1:b6:4f & Cisco-Li\_f5:ba:bb \\
+        1741 & 49.639700 & IntelCor\_d1:b6:4f & Cisco-Li\_f5:ba:bb \\
+        1742 & 49.640702 & IntelCor\_d1:b6:4f & Cisco-Li\_f5:ba:bb \\
+        1744 & 49.642315 & IntelCor\_d1:b6:4f & Cisco-Li\_f5:ba:bb \\
+        1746 & 49.645319 & IntelCor\_d1:b6:4f & Cisco-Li\_f5:ba:bb \\
+        1749 & 49.649705 & IntelCor\_d1:b6:4f & Cisco-Li\_f5:ba:bb \\
+        1821 & 53.785833 & IntelCor\_d1:b6:4f & Cisco-Li\_f5:ba:bb \\
+        1822 & 53.787070 & IntelCor\_d1:b6:4f & Cisco-Li\_f5:ba:bb \\
+        1921 & 57.889232 & IntelCor\_d1:b6:4f & Cisco-Li\_f5:ba:bb \\
+        1922 & 57.890325 & IntelCor\_d1:b6:4f & Cisco-Li\_f5:ba:bb \\
+        1923 & 57.891321 & IntelCor\_d1:b6:4f & Cisco-Li\_f5:ba:bb \\
+        1924 & 57.896970 & IntelCor\_d1:b6:4f & Cisco-Li\_f5:ba:bb \\
+        2122 & 62.171951 & IntelCor\_d1:b6:4f & Cisco-Li\_f5:ba:bb \\
+        2123 & 62.172946 & IntelCor\_d1:b6:4f & Cisco-Li\_f5:ba:bb \\
+        2124 & 62.174070 & IntelCor\_d1:b6:4f & Cisco-Li\_f5:ba:bb \\ \bottomrule
+    \end{tabular}
+        
+    \item The host wanted the authentication to be open, as shown below in the wireless management frame body of the 1740th packet.
+\begin{minted}[breaklines, escapeinside=!!]{text}
+IEEE 802.11 Wireless Management
+    Fixed parameters (6 bytes)
+        Authentication Algorithm: !\colorbox{yellow}{Open System}! (0)
+        Authentication SEQ: 0x0001
+        Status code: Successful (0x0000)
+\end{minted}
+
+    \item There is no reply AUTHENTICATION from the linksys\_ses\_24086 AP in the trace.
+    
+    \item The AUTHENTICATION frame from the host to the 30 Munroe St AP was sent at \SI{63.168087}{s} and the reply AUTHENTICATION frame was received at \SI{63.169071}{s} as shown below.
+\begin{minted}[breaklines, escapeinside=!!]{text}
+No.     Time           Source                Destination           Protocol Length Info
+   2156 !\colorbox{yellow}{63.168087}!     IntelCor_d1:b6:4f     Cisco-Li_f7:1d:51     802.11   58     Authentication, SN=1647, FN=0, Flags=........C
+   2158 !\colorbox{yellow}{63.169071}!     Cisco-Li_f7:1d:51     IntelCor_d1:b6:4f     802.11   58     Authentication, SN=3726, FN=0, Flags=........C
+\end{minted}
+
+    \item The ASSOCIATE REQUEST was sent from host to the ``30 Munroe St'' AP at \SI{63.169910}{s} and the corresponding ASSOCIATE REPLY was received at \SI{63.192101}{s} as shown below.
+\begin{minted}[breaklines, escapeinside=!!]{text}
+No.     Time           Source                Destination           Protocol Length Info
+   2162 !\colorbox{yellow}{63.169910}!     IntelCor_d1:b6:4f     Cisco-Li_f7:1d:51     802.11   89     Association Request, SN=1648, FN=0, Flags=........C, SSID=30 Munroe St
+   2166 !\colorbox{yellow}{63.192101}!     Cisco-Li_f7:1d:51     IntelCor_d1:b6:4f     802.11   94     Association Response, SN=3728, FN=0, Flags=........C
+\end{minted}
+
+    \item The host was willing to use 1, 2, 5.5, 11, 6, 9, 12, 18, 24, 36, 48 and 54 Mbps as shown below in the association request frame.
+\begin{minted}[breaklines, escapeinside=!!]{text}
+Tag: Supported Rates !\colorbox{yellow}{1(B), 2(B), 5.5(B), 11(B), 6(B), 9, 12(B), 18}!, [Mbit/sec]
+Tag: Extended Supported Rates !\colorbox{yellow}{24(B), 36, 48, 54}!, [Mbit/sec]
+\end{minted}
+    The AP was willing to use the same rates as shown below in the association response frame.
+\begin{minted}[breaklines, escapeinside=!!]{text}
+Tag: Supported Rates !\colorbox{yellow}{1(B), 2(B), 5.5(B), 11(B)}!, [Mbit/sec]
+Tag: Extended Supported Rates !\colorbox{yellow}{6(B), 9, 12(B), 18, 24(B), 36, 48, 54}!, [Mbit/sec]
+\end{minted}
+
+    \item Probe requests were only sent from two MAC addresses. The sender MAC addresses are 00:12:f0:1f:57:13 and 00:13:02:d1:b6:4f. The receiver and BSS ID MAC addresses are both ff:ff:ff:ff:ff:ff, the broadcast address. These addresses are shown below in the first probe requset frames sent by either of the two MAC addresses.
+\begin{minted}[breaklines, escapeinside=!!]{text}
+No.     Time           Source                Destination           Protocol Length Info
+     50 2.297613       !\colorbox{yellow}{IntelCor\_1f:57:13}!    !\colorbox{yellow}{Broadcast}!             802.11   79     Probe Request, SN=576, FN=0, Flags=........C, SSID=Home WIFI
+   1594 46.586825      !\colorbox{yellow}{IntelCor\_d1:b6:4f}!    !\colorbox{yellow}{Broadcast}!             802.11   94     Probe Request, SN=1575, FN=0, Flags=........C, SSID=30 Munroe St
+\end{minted}
+    
+    All probe response frames were sent from 00:16:b6:f7:1d:51, which belongs to the ``30 Munroe St'' AP. These frame were sent in response to the probe request frames sent by the two MAC addresses mentioned in the answer to the previous question. The BSS ID MAC address is the same as the sender MAC address. Two representative frames below illustrated the probe response frames sent from 00:16:b6:f7:1d:51.
+\begin{minted}[breaklines, escapeinside=!!]{text}
+No.     Time           Source                Destination           Protocol Length Info
+     27 1.212185       !\colorbox{yellow}{Cisco-Li\_f7:1d:51}!    !\colorbox{yellow}{IntelCor\_d1:b6:4f}!     802.11   177    Probe Response, SN=2867, FN=0, Flags=........C, BI=100, SSID=30 Munroe St
+     51 2.300697       !\colorbox{yellow}{Cisco-Li\_f7:1d:51}!    !\colorbox{yellow}{IntelCor\_1f:57:13}!     802.11   177    Probe Response, SN=2878, FN=0, Flags=........C, BI=100, SSID=30 Munroe St
+\end{minted}
+
+    The probe request frames are sent by a device for active scanning and the probe response frames are sent by the APs in response to probe request frames.
+
+\end{enumerate}
+
+\section{Conclusion}
+
+From the lab, I've observed that the wireless link is a much less reliable channel than a wired link, because the trace includes much more retransmission and ``Malformed Packet'' than traces analyzed in previous labs. I also observed that Wireshark didn't anontate 802.11 management frames with color in the packet list, unlike ARP packets.
+
+\end{document}
