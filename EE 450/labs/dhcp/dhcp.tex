@@ -70,7 +70,7 @@ Option: (53) DHCP Message Type (Request)
     DHCP: Request (3)
 \end{verbatim}
 
-    \item For the first four messages the Transaction-ID is 0xefaf8ff2 and for the second set 0xefaf8ff3, as shown in the following list of DHCP packets.
+    \item For the first four messages the Transaction-ID is 0xefaf8ff2 and for the second set 0xefaf8ff3, as shown in the following list of DHCP packets. The purpose of the Transaction-ID field is for the server to differentiate client requests.
     
     \begin{tabular}{@{}lllll@{}}
     \toprule
@@ -89,7 +89,7 @@ Option: (53) DHCP Message Type (Request)
 
     \item The source and destination IP addresses for each DHCP message have been indicated in the timing diagram in the answer to Question 2.
     
-    \item The DNS server's IP address is 10.17.14.11, indicated in the following DHCP offer message:
+    \item The DHCP server's IP address is 10.17.14.11, indicated in the following DHCP offer message:
 \begin{minted}[breaklines, escapeinside=!!]{text}
 Option: (53) DHCP Message Type (Offer)
 Option: (54) DHCP Server Identifier (!\colorbox{yellow}{10.17.14.11}!)
