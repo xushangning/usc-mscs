@@ -1,0 +1,92 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <Folder>
+      <name>Home</name>
+      <Placemark>
+        <name>Home</name>
+        <Point>
+          <coordinates>-118.282471,34.03135997222222,0.0</coordinates>
+        </Point>
+      </Placemark>
+    </Folder>
+    <Folder>
+      <name>Waterworks</name>
+      <Placemark>
+        <name>Bloom Walk</name>
+        <Point>
+          <coordinates>-118.28677897222222,34.018943,0.0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Viterbi</name>
+        <Point>
+          <coordinates>-118.28900197222222,34.020638999999996,36.837</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Prentiss</name>
+        <Point>
+          <coordinates>-118.284683,34.020539972222224,26.259</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Generations</name>
+        <Point>
+          <coordinates>-118.28316397222223,34.022283,23.019</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Marshall</name>
+        <Point>
+          <coordinates>-118.28413499999999,34.0189,0.0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>P &amp; F Shumway</name>
+        <Point>
+          <coordinates>-118.284964,34.020429,0.0</coordinates>
+        </Point>
+      </Placemark>
+    </Folder>
+    <Folder>
+      <name>Libraries</name>
+      <Placemark>
+        <name>Leavey</name>
+        <Point>
+          <coordinates>-118.28297997222222,34.021549972222225,31.265</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>G &amp; T</name>
+        <Point>
+          <coordinates>-118.28252499999999,34.01882797222222,0.0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Helen Topping</name>
+        <Point>
+          <coordinates>-118.287873,34.019097,0.0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Doheny</name>
+        <Point>
+          <coordinates>-118.28437097222222,34.02022,9.874</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>I &amp; P Affairs</name>
+        <Point>
+          <coordinates>-118.283798,34.021085972222224,0.0</coordinates>
+        </Point>
+      </Placemark>
+      <Placemark>
+        <name>Sci and Engr</name>
+        <Point>
+          <coordinates>-118.28867997222223,34.019671,0.0</coordinates>
+        </Point>
+      </Placemark>
+    </Folder>
+  </Document>
+</kml>
