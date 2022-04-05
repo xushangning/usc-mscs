@@ -88,5 +88,37 @@
         </Point>
       </Placemark>
     </Folder>
+    <Folder>
+      <name>Derived</name>
+      <Placemark>
+        <name>Convex Hull</name>
+        <LinearRing>
+          <coordinates>
+            -118.28252499999999,34.01882797222222,0
+            -118.28677897222222,34.018943,0
+            -118.287873,34.019097,0
+            -118.28867997222223,34.019671,0
+            -118.28900197222222,34.020638999999996,36.837
+            -118.282471,34.03135997222222,0
+            -118.28252499999999,34.01882797222222,0
+          </coordinates>
+        </LinearRing>
+      </Placemark>
+      <Placemark>
+        <name>Nearest Neighbor</name>
+        <LineString>
+          <coordinates>
+            -118.282471,34.03135997222222,0.0
+            -118.28316397222223,34.022283,23.019
+          </coordinates>
+        </LineString>
+      </Placemark>
+      <Placemark>
+        <name>Centroid</name>
+        <Point>
+          <coordinates>-118.28503267948719,34.02104198931624</coordinates>
+        </Point>
+      </Placemark>
+    </Folder>
   </Document>
 </kml>
