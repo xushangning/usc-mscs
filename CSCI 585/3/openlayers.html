@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.14.1/css/ol.css" type="text/css">
+        <style>
+            .map {
+                height: 800px;
+                width: 800px;
+            }
+        </style>
+        <title>OpenLayers</title>
+    </head>
+    <body>
+        <div id="map" class="map"></div>
+
+        <script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.14.1/build/ol.js"></script>
+        <script>
+            (async () => {
+                const mapContainer = document.getElementById('map');
+                if (window.location.href.startsWith('file')) {
+                    mapContainer.innerHTML = '<p>This map will work only when served over HTTP. You may start a web server with <code>python3 -m http.server 8000</code> at the directory that contains this HTML file, and then navigate to <a href="http://localhost:8000/openlayers.html">this link</a>.</p>';
+                } else {
+                    let myData = JSON.parse(window.localStorage.getItem('my_data'));
+                    if (!myData) {
+                        myData = {'coordinates': []};
+
+                        const resp = await fetch(new Request('imgs.kml'));
+                        // We could have let OpenLayers parse the KML, but this is what the instructor wants...
+                        const kml = (new DOMParser()).parseFromString(await resp.text(), 'text/xml');
+                        for (const folder of kml.getElementsByTagName('Folder')) {
+                            const name = folder.getElementsByTagName('name')[0].textContent;
+                            if (name === 'Derived') {                                
+                                const centroid = folder.querySelector('Point > coordinates');
+                                myData.viewCenter = centroid.textContent.split(',').map(parseFloat);
+                            } else {
+                                for (const coord of folder.getElementsByTagName('coordinates')) {
+                                    const coords = coord.textContent.split(',').slice(0, 2).map(parseFloat);
+                                    myData.coordinates.push(coords);
+                                };
+                            }
+                        }
+                        window.localStorage.setItem('my_data', JSON.stringify(myData));
+                    }
+
+                    const map = new ol.Map({
+                        target: mapContainer,
+                        layers: [
+                            new ol.layer.Tile({
+                                source: new ol.source.OSM()
+                            })
+                        ],
+                        view: new ol.View({
+                            center: ol.proj.fromLonLat(myData.viewCenter),
+                            zoom: 15
+                        })
+                    });
+                    map.addLayer(new ol.layer.Vector({
+                        source: new ol.source.Vector({
+                            features: myData.coordinates.map(coord => new ol.Feature({
+                                geometry: new ol.geom.Point(ol.proj.fromLonLat(coord))
+                            }))
+                        })
+                    }));
+                }
+            })();
+        </script>
+</html>
