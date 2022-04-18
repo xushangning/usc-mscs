@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 #include <fstream>
-#include <string_view>
 
 class TransactionLog {
 public:
@@ -18,7 +17,7 @@ private:
   std::vector<Transaction> log;
 
 public:
-  explicit TransactionLog(const std::string_view &block_file = {}) {
+  explicit TransactionLog(const std::string &block_file = {}) {
     if (block_file.empty())
       return;
 
@@ -32,7 +31,7 @@ public:
       log.push_back(t);
   }
 
-  void GetTransactions(const std::string_view &user_name_regex, std::vector<Transaction> &transactions) {
+  void GetTransactions(const std::string &user_name_regex, std::vector<Transaction> &transactions) {
     if (user_name_regex == ".+") {
       transactions = log;
       return;
