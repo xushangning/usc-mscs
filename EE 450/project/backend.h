@@ -41,6 +41,8 @@ public:
       if (t.sender == user_name_regex || t.receiver == user_name_regex)
         transactions.push_back(t);
   }
+
+  void CreateTransaction(const Transaction &t) { log.push_back(t); }
 };
 
 #endif // BACKEND_H_
