@@ -1,0 +1,79 @@
+#ifndef ALICHAIN_SOCKET_H_
+#define ALICHAIN_SOCKET_H_
+
+#include <iostream>
+
+#include <sys/socket.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <ext/stdio_filebuf.h>
+
+namespace alichain {
+
+/**
+ * @brief This class converts socket descriptors to C++ iostream.
+ */
+class SocketStream {
+  // Even though stdio_filebuf accepts the open mode "in | out", we have to
+  // create separate filebufs for I/O, because if there is only one filebuf,
+  // it will attempt to call lseek(fd, 0, SEEK_CUR) on the socket descriptor
+  // during an input operation if that operation is preceded by an output
+  // operation.
+  __gnu_cxx::stdio_filebuf<char> filebuf_in_, filebuf_out_;
+
+public:
+  std::istream in;
+  std::ostream out;
+
+  explicit SocketStream(int descriptor) :
+    filebuf_in_(descriptor, std::ios_base::in),
+    filebuf_out_(descriptor, std::ios_base::out),
+    in(&filebuf_in_), out(&filebuf_out_) {}
+};
+
+/**
+ * @brief A transparent OOP wrapper for Linux sockets (You can intuitively
+ * understand the implementation by reading function names.)
+ *
+ * @details The API assumes that all IP addresses are localhost, so the
+ * functions don't have parameters for IP addresses.
+ */
+class Socket {
+private:
+  int descriptor_;
+
+public:
+  int descriptor() const noexcept { return descriptor_; }
+
+  explicit Socket(int type) {
+    descriptor_ = socket(AF_INET, type, 0);
+    if (descriptor_ == -1)
+      throw std::system_error(errno, std::system_category());
+  }
+
+  ~Socket() { close(descriptor()); }
+
+  void bind(uint16_t port) const {
+    struct sockaddr_in addr{
+      .sin_family = AF_INET,
+      .sin_port = htons(port),
+      .sin_addr = {inet_addr("127.0.0.1")}
+    };
+    if (::bind(descriptor(), reinterpret_cast<const struct sockaddr *>(&addr), sizeof(addr)) == -1)
+      throw std::system_error(errno, std::system_category());
+  }
+
+  void connect(uint16_t port) const {
+    struct sockaddr_in addr{
+      .sin_family = AF_INET,
+      .sin_port = htons(port),
+      .sin_addr = {inet_addr("127.0.0.1")}
+    };
+    if (::connect(descriptor(), reinterpret_cast<const struct sockaddr *>(&addr), sizeof(addr)) == -1)
+      throw std::system_error(errno, std::system_category());
+  }
+};
+
+}
+
+#endif // ALICHAIN_SOCKET_H_
