@@ -63,6 +63,22 @@ public:
       throw std::system_error(errno, std::system_category());
   }
 
+  void listen(int backlog) const {
+    if (::listen(descriptor(), backlog) == -1)
+      throw std::system_error(errno, std::system_category());
+  }
+
+  int accept(uint16_t *client_port = nullptr) const {
+    struct sockaddr_in addr;
+    socklen_t addrlen = sizeof(addr);
+    int connfd = ::accept(descriptor(), reinterpret_cast<struct sockaddr *>(&addr), &addrlen);
+
+    if (client_port)
+      *client_port = ntohs(addr.sin_port);
+
+    return connfd;
+  }
+
   void connect(uint16_t port) const {
     struct sockaddr_in addr{
       .sin_family = AF_INET,
@@ -70,6 +86,12 @@ public:
       .sin_addr = {inet_addr("127.0.0.1")}
     };
     if (::connect(descriptor(), reinterpret_cast<const struct sockaddr *>(&addr), sizeof(addr)) == -1)
+      throw std::system_error(errno, std::system_category());
+  }
+
+  template <typename T>
+  void set_option(int optname, T optval) const {
+    if (::setsockopt(descriptor(), SOL_SOCKET, optname, &optval, sizeof(optval)) == -1)
       throw std::system_error(errno, std::system_category());
   }
 };

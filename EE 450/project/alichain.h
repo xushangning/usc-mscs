@@ -10,4 +10,13 @@ enum class BackendOperations {
   kCreateTransaction
 };
 
+enum class ServerOperations {
+  kCheckWallet
+};
+
+enum class ResponseStatus {
+  kSuccess,
+  kUserOrSenderNotFound
+};
+
 #endif // ALICHAIN_H_
