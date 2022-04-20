@@ -24,11 +24,9 @@ int main() {
   server.set_option(SO_REUSEADDR, 1);
   server.bind(25000 + kUscId3Digits);
   server.listen(1024);
-
-  alichain::BackendClient backend_client;
-
   cout << "The main server is up and running.\n";
 
+  alichain::BackendClient backend_client;
   while (true) {
     uint16_t client_port;
     int connfd = server.accept(&client_port);
