@@ -12,7 +12,8 @@ enum class BackendOperations {
 
 enum class ServerOperations {
   kCheckWallet,
-  kTxCoins
+  kTxCoins,
+  kTxList
 };
 
 enum class ResponseStatus {

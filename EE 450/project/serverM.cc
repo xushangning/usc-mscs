@@ -1,5 +1,7 @@
-#include <iostream>
+#include <fstream>
 #include <string>
+#include <algorithm>
+#include <iomanip>
 
 #include "alichain.h"
 #include "backend_client.h"
@@ -104,6 +106,46 @@ int main() {
         client_stream.out << static_cast<int>(status) << '\n'
           << balance - amount << std::endl;
         cout << "The main server sent the result of the transaction to client A.\n";
+        break;
+      }
+
+      case ServerOperations::kTxList: {
+        vector<Transaction> transactions;
+        backend_client.GetTransactions(".+", transactions);
+        // Calculate field widths.
+        int widths[4]{0, 0, 0, 0};
+        for (const auto &t: transactions) {
+          using std::max;
+          widths[0] = max(
+            widths[0],
+            static_cast<int>(std::to_string(t.serial_no).size())
+          );
+          widths[1] = max(widths[1], static_cast<int>(t.sender.size()));
+          widths[2] = max(widths[2], static_cast<int>(t.receiver.size()));
+          widths[3] = max(
+            widths[3],
+            static_cast<int>(std::to_string(t.amount).size())
+          );
+        }
+        for (auto &w : widths)
+          w = (w / 4 + 1) * 4 - 1;
+
+        typedef vector<Transaction>::const_iterator Iter;
+        vector<Iter> sorted_transactions(transactions.size());
+        std::iota(sorted_transactions.begin(), sorted_transactions.end(), transactions.begin());
+        std::sort(
+          sorted_transactions.begin(), sorted_transactions.end(),
+          [](const Iter &a, const Iter &b) { return a->serial_no < b->serial_no; }
+        );
+
+        std::ofstream fout("alichain.txt");
+        if (!fout.is_open())
+          throw std::system_error(errno, std::system_category());
+        for (const auto &i : sorted_transactions)
+          fout << std::setw(widths[0]) << i->serial_no << ' '
+            << std::setw(widths[1]) << std::left << i->sender << ' '
+            << std::setw(widths[2]) << i->receiver << ' '
+            << std::setw(widths[3] + 1) << std::right << i->amount << '\n';
         break;
       }
 
