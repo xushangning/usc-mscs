@@ -11,12 +11,16 @@ enum class BackendOperations {
 };
 
 enum class ServerOperations {
-  kCheckWallet
+  kCheckWallet,
+  kTxCoins
 };
 
 enum class ResponseStatus {
   kSuccess,
-  kUserOrSenderNotFound
+  kUserOrSenderNotFound,
+  kReceiverNotFound,
+  kSenderAndReceiverNotFound,
+  kInsufficientFunds
 };
 
 #endif // ALICHAIN_H_

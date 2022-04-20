@@ -13,7 +13,10 @@ int main() {
   sock.connect(24000 + kUscId3Digits);
   alichain::SocketStream server_stream(sock.descriptor());
 
-  TransactionLog log("block1.txt");
+  int next_serial_no;
+  TransactionLog log(&next_serial_no, "block1.txt");
+  server_stream.out << next_serial_no << std::endl;
+
   while (true) {
     int operation;
     server_stream.in >> operation;
@@ -44,6 +47,7 @@ int main() {
         server_stream.in.get();
 
         log.CreateTransaction(t);
+        server_stream.out << 0 << std::endl;
         break;
       }
       default:

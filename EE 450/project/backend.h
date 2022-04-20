@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <cassert>
 
 class TransactionLog {
 public:
@@ -17,7 +18,9 @@ private:
   std::vector<Transaction> log;
 
 public:
-  explicit TransactionLog(const std::string &block_file = {}) {
+  explicit TransactionLog(int *next_serial_no, const std::string &block_file = {}) {
+    assert(next_serial_no);
+    *next_serial_no = 1;
     if (block_file.empty())
       return;
 
@@ -27,8 +30,13 @@ public:
       throw std::system_error(errno, std::system_category());
 
     Transaction t;
-    while (block_fin >> t.serial_no >> t.sender >> t.receiver >> t.amount)
+    int max_serial_no = 0;
+    while (block_fin >> t.serial_no >> t.sender >> t.receiver >> t.amount) {
+      if (max_serial_no < t.serial_no)
+        max_serial_no = t.serial_no;
       log.push_back(t);
+    }
+    *next_serial_no = max_serial_no + 1;
   }
 
   void GetTransactions(const std::string &user_name_regex, std::vector<Transaction> &transactions) {
