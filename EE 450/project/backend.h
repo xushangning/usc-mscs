@@ -6,6 +6,9 @@
 #include <fstream>
 #include <cassert>
 
+#include "Socket.h"
+#include "alichain.h"
+
 class TransactionLog {
 public:
   struct Transaction {
@@ -53,4 +56,19 @@ public:
   void CreateTransaction(const Transaction &t) { log.push_back(t); }
 };
 
+namespace alichain {
+
+class Backend {
+  char name_;
+  uint16_t port_;
+  Socket sock_;
+public:
+  explicit Backend(char name) :
+    name_(name),
+    port_(kBackendPorts[name - 'A']),
+    sock_(Socket::Type::kUdp) {}
+  void Start();
+};
+
+}
 #endif // BACKEND_H_
