@@ -98,7 +98,7 @@ int main() {
         int balance = CalculateBalance(sender, transactions);
         if (balance < amount) {
           status = ResponseStatus::kInsufficientFunds;
-          client_stream.out << static_cast<int>(status) << std::endl;
+          client_stream.out << static_cast<int>(status) << '\n' << balance << std::endl;
           break;
         }
 
