@@ -18,7 +18,7 @@ class BackendClient {
   int next_serial_no = 1;
 
 public:
-  BackendClient(): sock_(SOCK_DGRAM), stream_(sock_.descriptor()) {
+  BackendClient(): sock_(Socket::Type::kUdp), stream_(sock_.descriptor()) {
     sock_.bind(24000 + kUscId3Digits);
     stream_.in.tie(&stream_.out);
 

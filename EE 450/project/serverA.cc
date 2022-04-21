@@ -5,7 +5,7 @@
 #include "backend.h"
 
 int main() {
-  alichain::Socket sock(SOCK_DGRAM);
+  alichain::Socket sock(alichain::Socket::Type::kUdp);
   sock.bind(21000 + kUscId3Digits);
   std::cout << "The Server A is up and running using UDP on port "
             << 21000 + kUscId3Digits << ".\n";

@@ -43,10 +43,15 @@ private:
   int descriptor_;
 
 public:
+  enum class Type : int {
+    kTcp = SOCK_STREAM,
+    kUdp = SOCK_DGRAM
+  };
+
   int descriptor() const noexcept { return descriptor_; }
 
-  explicit Socket(int type) {
-    descriptor_ = socket(AF_INET, type, 0);
+  explicit Socket(Type type) {
+    descriptor_ = socket(AF_INET, static_cast<int>(type), 0);
     if (descriptor_ == -1)
       throw std::system_error(errno, std::system_category());
   }

@@ -22,7 +22,7 @@ int main() {
   using std::cout;
   using std::getline;
 
-  alichain::Socket server(SOCK_STREAM);
+  alichain::Socket server(alichain::Socket::Type::kTcp);
   server.set_option(SO_REUSEADDR, 1);
   server.bind(25000 + kUscId3Digits);
   server.listen(1024);
