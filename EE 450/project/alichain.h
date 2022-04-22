@@ -14,6 +14,7 @@ constexpr std::array<uint16_t, 3> kBackendPorts{
   22000 + kUscId3Digits,
   23000 + kUscId3Digits
 };
+constexpr uint16_t kBackendClientPort = 24000 + kUscId3Digits;
 
 }
 

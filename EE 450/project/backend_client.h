@@ -19,7 +19,7 @@ class BackendClient {
 
 public:
   BackendClient(): sock_(Socket::Type::kUdp), stream_(sock_.descriptor()) {
-    sock_.bind(24000 + kUscId3Digits);
+    sock_.bind(kBackendClientPort);
     stream_.in.tie(&stream_.out);
 
     // Wait for backends to send their next available serial numbers.

@@ -7,7 +7,7 @@ void Backend::Start() {
   std::cout << "The Server" << name_
     << " is up and running using UDP on port " << port_ << ".\n";
 
-  sock_.connect(24000 + kUscId3Digits);
+  sock_.connect(kBackendClientPort);
   SocketStream server_stream(sock_.descriptor());
 
   int next_serial_no;
