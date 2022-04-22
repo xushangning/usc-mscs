@@ -2,6 +2,9 @@
 #include <string>
 #include <algorithm>
 #include <iomanip>
+#include <system_error>
+
+#include <sys/epoll.h>
 
 #include "alichain.h"
 #include "backend_client.h"
@@ -21,21 +24,43 @@ int CalculateBalance(const string &name, vector<Transaction> &transactions) {
 int main() {
   using std::cout;
   using std::getline;
+  using namespace alichain;
 
-  alichain::Socket server(alichain::Socket::Type::kTcp);
-  server.set_option(SO_REUSEADDR, 1);
-  server.bind(25000 + kUscId3Digits);
-  server.listen(1024);
+  auto epfd = epoll_create1(0);
+  if (epfd == -1)
+    throw std::system_error(errno, std::system_category());
+
+  Socket server_sockets[2]{
+    Socket(Socket::Type::kTcp),
+    Socket(Socket::Type::kTcp)
+  };
+  for (decltype(kServerPorts.size()) i = 0; i < kServerPorts.size(); ++i) {
+    server_sockets[i].set_option(SO_REUSEADDR, 1);
+    server_sockets[i].bind(kServerPorts[i]);
+    server_sockets[i].listen(1024);
+
+    struct epoll_event event{
+      .events = EPOLLIN,
+      .data = {.fd = static_cast<int>(i)}
+    };
+    if (epoll_ctl(epfd, EPOLL_CTL_ADD, server_sockets[i].descriptor(), &event) == -1)
+      throw std::system_error(errno, std::system_category());
+  }
   cout << "The main server is up and running.\n";
 
-  alichain::BackendClient backend_client;
+  BackendClient backend_client;
   while (true) {
+    struct epoll_event event;
+    if (epoll_wait(epfd, &event, 1, -1) == -1)
+      throw std::system_error(errno, std::system_category());
+
     uint16_t client_port;
-    int connfd = server.accept(&client_port);
+    auto &server_socket = server_sockets[event.data.fd];
+    auto connfd = server_socket.accept(&client_port);
     if (connfd == -1)
       continue;
 
-    alichain::SocketStream client_stream(connfd);
+    SocketStream client_stream(connfd);
     client_stream.in.tie(&client_stream.out);
 
     int operation;
@@ -63,7 +88,8 @@ int main() {
           balance += t.receiver == name ? t.amount : - t.amount;
         client_stream.out << static_cast<int>(ResponseStatus::kSuccess) << '\n'
           << balance << std::endl;
-        cout << "The main server sent the current balance to client A.\n";
+        cout << "The main server sent the current balance to client "
+          << static_cast<char>('A' + event.data.fd) << ".\n";
         break;
       }
 
@@ -105,7 +131,8 @@ int main() {
         backend_client.CreateTransaction(sender, receiver, amount);
         client_stream.out << static_cast<int>(status) << '\n'
           << balance - amount << std::endl;
-        cout << "The main server sent the result of the transaction to client A.\n";
+        cout << "The main server sent the result of the transaction to client "
+          << static_cast<char>('A' + event.data.fd) << ".\n";
         break;
       }
 
