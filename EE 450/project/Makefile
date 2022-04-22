@@ -2,8 +2,8 @@ CXXFLAGS := -Wall -std=gnu++17 -g
 
 all: clientA serverA serverB serverC serverM
 
-client%: client%.cc Socket.h
-	g++ $(CXXFLAGS) -o $@ $@.cc
+client%: client%.cc client.cc client.h
+	g++ $(CXXFLAGS) -o $@ $@.cc client.cc
 
 serverM: serverM.cc backend_client.h alichain.h
 	g++ $(CXXFLAGS) -o $@ $@.cc

@@ -16,6 +16,11 @@ constexpr std::array<uint16_t, 3> kBackendPorts{
 };
 constexpr uint16_t kBackendClientPort = 24000 + kUscId3Digits;
 
+constexpr std::array<uint16_t, 2> kServerPorts{
+  25000 + kUscId3Digits,
+  26000 + kUscId3Digits
+};
+
 }
 
 enum class BackendOperations {
