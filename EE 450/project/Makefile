@@ -1,6 +1,6 @@
 CXXFLAGS := -Wall -std=gnu++17 -g
 
-all: clientA serverA serverB serverC serverM
+all: clientA clientB serverA serverB serverC serverM
 
 client%: client%.cc client.cc client.h
 	g++ $(CXXFLAGS) -o $@ $@.cc client.cc
@@ -15,6 +15,6 @@ tests: tests.cc backend.h
 	g++ $(CXXFLAGS) -o $@ $@.cc
 
 clean:
-	rm -f clientA serverA serverB serverC serverM tests
+	rm -f clientA clientB serverA serverB serverC serverM tests
 
 .PHONY: clean
