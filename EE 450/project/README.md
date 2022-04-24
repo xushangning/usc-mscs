@@ -2,7 +2,7 @@
 
 Shangning Xu 3010562761
 
-1. Scope of the project: All operations other than the bonus stats operation have been completed.
+1. Scope of the project: All operations (including the bonus stats operation) have been completed.
 2. Source files (only files not explicitly required by the handout are described):
     1. alicahin.h: declarations that are useful for the entire project e.g., port numbers
     2. backend.h, backend.cc: the backend server

@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <iomanip>
 #include <system_error>
+#include <unordered_map>
 
 #include <sys/epoll.h>
 
@@ -173,6 +174,51 @@ int main() {
             << std::setw(widths[1]) << std::left << i->sender << ' '
             << std::setw(widths[2]) << i->receiver << ' '
             << std::setw(widths[3] + 1) << std::right << i->amount << '\n';
+        break;
+      }
+
+      case ServerOperations::kStats: {
+        string name;
+        getline(client_stream.in, name);
+
+        vector<Transaction> transactions;
+        backend_client.GetTransactions(name, transactions);
+        if (transactions.empty()) {
+          client_stream.out << static_cast<int>(ResponseStatus::kUserOrSenderNotFound) << std::endl;
+          break;
+        }
+
+        struct StatsEntry {
+          int n_transactions, amount;
+        };
+        using MapType = std::unordered_map<string, StatsEntry>;
+        MapType stats;
+        for (const auto &t : transactions) {
+          if (t.sender == name) {
+            ++stats[t.receiver].n_transactions;
+            stats[t.receiver].amount -= t.amount;
+          } else {
+            ++stats[t.sender].n_transactions;
+            stats[t.sender].amount += t.amount;
+          }
+        }
+
+        vector<MapType::const_iterator> sorted_stats(stats.size());
+        std::iota(sorted_stats.begin(), sorted_stats.end(), stats.cbegin());
+        std::sort(
+          sorted_stats.begin(), sorted_stats.end(),
+          [](const MapType::const_iterator &a, const MapType::const_iterator &b) {
+            return a->second.n_transactions > b->second.n_transactions;
+          }
+        );
+
+        client_stream.out << static_cast<int>(ResponseStatus::kSuccess) << '\n'
+          << sorted_stats.size() << '\n';
+        for (const auto &i : sorted_stats)
+          client_stream.out << i->first << '\n'
+            << i->second.n_transactions << '\n' << i->second.amount << '\n';
+        client_stream.out.flush();
+
         break;
       }
 
