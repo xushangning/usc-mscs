@@ -1,9 +1,6 @@
 #ifndef ALICHAIN_CLIENT_H_
 #define ALICHAIN_CLIENT_H_
 
-#include "alichain.h"
-#include "Socket.h"
-
 namespace alichain {
 
 class Client {

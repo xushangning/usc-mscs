@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include "alichain.h"
+#include "Socket.h"
 #include "client.h"
 
 namespace alichain {
