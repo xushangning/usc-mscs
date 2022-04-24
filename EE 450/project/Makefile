@@ -17,9 +17,12 @@ tests: tests.cc backend.h
 clean:
 	rm -f clientA clientB serverA serverB serverC serverM tests
 
+submission:
+	tar -caf ee450_shangnin_1.tar.gz *.cc *.h Makefile README.md
+
 client.cc: alichain.h Socket.h client.h;
 backend.h: Socket.h alichain.h;
 backend.cc: backend.h;
 backend_client.h: Socket.h backend.h alichain.h;
 
-.PHONY: clean
+.PHONY: clean submission
