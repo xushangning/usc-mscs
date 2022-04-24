@@ -58,7 +58,7 @@ public:
 
   ~Socket() { close(descriptor()); }
 
-  void bind(uint16_t port) const {
+  void Bind(uint16_t port) const {
     struct sockaddr_in addr{
       .sin_family = AF_INET,
       .sin_port = htons(port),
@@ -68,12 +68,12 @@ public:
       throw std::system_error(errno, std::system_category());
   }
 
-  void listen(int backlog) const {
+  void Listen(int backlog) const {
     if (::listen(descriptor(), backlog) == -1)
       throw std::system_error(errno, std::system_category());
   }
 
-  int accept(uint16_t *client_port = nullptr) const {
+  int Accept(uint16_t *client_port = nullptr) const {
     struct sockaddr_in addr;
     socklen_t addrlen = sizeof(addr);
     int connfd = ::accept(descriptor(), reinterpret_cast<struct sockaddr *>(&addr), &addrlen);
@@ -84,7 +84,7 @@ public:
     return connfd;
   }
 
-  void connect(uint16_t port) const {
+  void Connect(uint16_t port) const {
     struct sockaddr_in addr{
       .sin_family = AF_INET,
       .sin_port = htons(port),

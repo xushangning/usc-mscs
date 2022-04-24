@@ -3,11 +3,11 @@
 namespace alichain {
 
 void Backend::Start() {
-  sock_.bind(port_);
+  sock_.Bind(port_);
   std::cout << "The Server" << name_
     << " is up and running using UDP on port " << port_ << ".\n";
 
-  sock_.connect(kBackendClientPort);
+  sock_.Connect(kBackendClientPort);
   SocketStream server_stream(sock_.descriptor());
 
   int next_serial_no;

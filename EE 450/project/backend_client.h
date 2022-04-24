@@ -20,7 +20,7 @@ class BackendClient {
 
 public:
   BackendClient(): sock_(Socket::Type::kUdp), stream_(sock_.descriptor()) {
-    sock_.bind(kBackendClientPort);
+    sock_.Bind(kBackendClientPort);
     stream_.in.tie(&stream_.out);
 
     // Wait for backends to send their next available serial numbers.
@@ -42,7 +42,7 @@ public:
 
   void GetTransactions(const std::string &user_name_regex, std::vector<Transaction> &transactions) {
     for (decltype(kBackendPorts.size()) i = 0; i < kBackendPorts.size(); ++i) {
-      sock_.connect(kBackendPorts[i]);
+      sock_.Connect(kBackendPorts[i]);
 
       stream_.out << static_cast<int>(BackendOperations::kGetTransactions)
                   << '\n' << user_name_regex << '\n';
@@ -78,7 +78,7 @@ public:
     std::uniform_int_distribution<size_type> d(0, kBackendPorts.size() - 1);
     auto chosen_backend = d(e);
 
-    sock_.connect(kBackendPorts[chosen_backend]);
+    sock_.Connect(kBackendPorts[chosen_backend]);
     stream_.out << static_cast<int>(BackendOperations::kCreateTransaction)
                 << '\n' << next_serial_no_++ << '\n' << sender << '\n' << receiver << '\n'
       << amount << '\n';

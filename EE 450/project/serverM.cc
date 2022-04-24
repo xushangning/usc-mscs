@@ -11,6 +11,7 @@
 
 using std::string;
 using std::vector;
+using namespace alichain;
 
 using Transaction = TransactionLog::Transaction;
 
@@ -24,7 +25,6 @@ int CalculateBalance(const string &name, vector<Transaction> &transactions) {
 int main() {
   using std::cout;
   using std::getline;
-  using namespace alichain;
 
   auto epfd = epoll_create1(0);
   if (epfd == -1)
@@ -36,8 +36,8 @@ int main() {
   };
   for (decltype(kServerPorts.size()) i = 0; i < kServerPorts.size(); ++i) {
     server_sockets[i].set_option(SO_REUSEADDR, 1);
-    server_sockets[i].bind(kServerPorts[i]);
-    server_sockets[i].listen(1024);
+    server_sockets[i].Bind(kServerPorts[i]);
+    server_sockets[i].Listen(1024);
 
     struct epoll_event event{
       .events = EPOLLIN,
@@ -56,7 +56,7 @@ int main() {
 
     uint16_t client_port;
     auto &server_socket = server_sockets[event.data.fd];
-    auto connfd = server_socket.accept(&client_port);
+    auto connfd = server_socket.Accept(&client_port);
     if (connfd == -1)
       continue;
 

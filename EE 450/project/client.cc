@@ -27,7 +27,7 @@ int Client::Start(int argc, char *argv[]) {
   }
 
   Socket sock(Socket::Type::kTcp);
-  sock.connect(kServerPorts[name_ - 'A']);
+  sock.Connect(kServerPorts[name_ - 'A']);
   cout << "The client " << name_ << " is up and running.\n";
 
   SocketStream server_stream(sock.descriptor());

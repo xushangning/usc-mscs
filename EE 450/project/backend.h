@@ -9,6 +9,8 @@
 #include "Socket.h"
 #include "alichain.h"
 
+namespace alichain {
+
 class TransactionLog {
 public:
   struct Transaction {
@@ -55,8 +57,6 @@ public:
 
   void CreateTransaction(const Transaction &t) { log.push_back(t); }
 };
-
-namespace alichain {
 
 class Backend {
   char name_;
