@@ -117,21 +117,23 @@ int main() {
           status = status == ResponseStatus::kReceiverNotFound ?
             ResponseStatus::kSenderAndReceiverNotFound :
             ResponseStatus::kUserOrSenderNotFound;
-        if (status != ResponseStatus::kSuccess) {
-          client_stream.out << static_cast<int>(status) << std::endl;
-          break;
+
+        int balance;
+        if (status == ResponseStatus::kSuccess) {
+          balance = CalculateBalance(sender, transactions);
+          if (balance < amount)
+            status = ResponseStatus::kInsufficientFunds;
+          else
+            backend_client.CreateTransaction(sender, receiver, amount);
         }
 
-        int balance = CalculateBalance(sender, transactions);
-        if (balance < amount) {
-          status = ResponseStatus::kInsufficientFunds;
-          client_stream.out << static_cast<int>(status) << '\n' << balance << std::endl;
-          break;
-        }
+        client_stream.out << static_cast<int>(status) << '\n';
+        if (status == ResponseStatus::kSuccess)
+          client_stream.out << balance - amount << '\n';
+        else if (status == ResponseStatus::kInsufficientFunds)
+          client_stream.out << balance << '\n';
+        client_stream.out.flush();
 
-        backend_client.CreateTransaction(sender, receiver, amount);
-        client_stream.out << static_cast<int>(status) << '\n'
-          << balance - amount << std::endl;
         cout << "The main server sent the result of the transaction to client "
           << static_cast<char>('A' + event.data.fd) << ".\n";
         break;
