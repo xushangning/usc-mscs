@@ -73,17 +73,6 @@ public:
       throw std::system_error(errno, std::system_category());
   }
 
-  int Accept(uint16_t *client_port = nullptr) const {
-    struct sockaddr_in addr;
-    socklen_t addrlen = sizeof(addr);
-    int connfd = ::accept(descriptor(), reinterpret_cast<struct sockaddr *>(&addr), &addrlen);
-
-    if (client_port)
-      *client_port = ntohs(addr.sin_port);
-
-    return connfd;
-  }
-
   void Connect(uint16_t port) const {
     struct sockaddr_in addr{
       .sin_family = AF_INET,

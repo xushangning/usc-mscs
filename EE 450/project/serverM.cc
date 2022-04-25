@@ -55,9 +55,8 @@ int main() {
     if (epoll_wait(epfd, &event, 1, -1) == -1)
       throw std::system_error(errno, std::system_category());
 
-    uint16_t client_port;
     auto &server_socket = server_sockets[event.data.fd];
-    auto connfd = server_socket.Accept(&client_port);
+    auto connfd = accept(server_socket.descriptor(), nullptr, nullptr);
     if (connfd == -1)
       continue;
 
@@ -71,8 +70,9 @@ int main() {
       case ServerOperations::kCheckWallet: {
         string name;
         getline(client_stream.in, name);
+        // Port number to print: https://piazza.com/class/kyll7qbcetu155?cid=439
         cout << "The main server received input=\"" << name
-          << "\" from the client using TCP over port " << client_port << ".\n";
+          << "\" from the client using TCP over port " << kServerPorts[event.data.fd] << ".\n";
 
         vector<Transaction> transactions;
         backend_client.GetTransactions(name, transactions);
@@ -103,7 +103,7 @@ int main() {
         client_stream.in.get();
         cout << "The main server received from \"" << sender << "\" to transfer "
           << amount << " coins to \"" << receiver
-          << "\" using TCP over port " << client_port << ".\n";
+          << "\" using TCP over port " << kServerPorts[event.data.fd] << ".\n";
 
         ResponseStatus status = ResponseStatus::kSuccess;
         vector<Transaction> transactions;
