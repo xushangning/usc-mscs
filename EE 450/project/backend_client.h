@@ -67,7 +67,7 @@ public:
         transactions.push_back(t);
       }
       std::cout << "The main server received transactions from Server "
-                   "A using UDP over port "
+        << static_cast<char>('A' + i) << " using UDP over port "
         << kBackendPorts[i] << ".\n";
     }
   }
