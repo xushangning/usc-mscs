@@ -1,6 +1,9 @@
 /CSCI 570/project/output.txt
 /CSCI 570/project/output/
 
+*.doc
+/.vs/
+
 .DS_Store
 .ipynb_checkpoints/
 
