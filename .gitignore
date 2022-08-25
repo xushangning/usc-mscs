@@ -1,6 +1,8 @@
 /CSCI 570/project/output.txt
 /CSCI 570/project/output/
 
+*.ppm
+
 *.doc
 # Visual Studio
 .vs/
