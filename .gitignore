@@ -2,7 +2,10 @@
 /CSCI 570/project/output/
 
 *.doc
-/.vs/
+# Visual Studio
+.vs/
+Debug/
+*.vcxproj.user
 
 .DS_Store
 .ipynb_checkpoints/
