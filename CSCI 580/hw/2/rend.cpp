@@ -55,9 +55,9 @@ int GzRender::GzFlushDisplay2File(FILE* outfile)
 
 int GzRender::GzFlushDisplay2FrameBuffer()
 {
-/* HW1.7 write pixels to framebuffer: 
+/* HW1.7 write pixels to framebuffer:
 	- put the pixels into the frame buffer
-	- CAUTION: when storing the pixels into the frame buffer, the order is blue, green, and red 
+	- CAUTION: when storing the pixels into the frame buffer, the order is blue, green, and red
 	- NOT red, green, and blue !!!
 */
 
@@ -68,7 +68,7 @@ int GzRender::GzFlushDisplay2FrameBuffer()
 /***********************************************/
 /* HW2 methods: implement from here */
 
-int GzRender::GzPutAttribute(int numAttributes, GzToken	*nameList, GzPointer *valueList) 
+int GzRender::GzPutAttribute(int numAttributes, GzToken	*nameList, GzPointer *valueList)
 {
 /* HW 2.1
 -- Set renderer attribute states (e.g.: GZ_RGB_COLOR default color)
@@ -78,13 +78,13 @@ int GzRender::GzPutAttribute(int numAttributes, GzToken	*nameList, GzPointer *va
 	return GZ_SUCCESS;
 }
 
-int GzRender::GzPutTriangle(int	numParts, GzToken *nameList, GzPointer *valueList) 
+int GzRender::GzPutTriangle(int	numParts, GzToken *nameList, GzPointer *valueList)
 /* numParts - how many names and values */
 {
 /* HW 2.2
 -- Pass in a triangle description with tokens and values corresponding to
-      GZ_NULL_TOKEN:		do nothing - no values
-      GZ_POSITION:		3 vert positions in model space
+	GZ_NULL_TOKEN:		do nothing - no values
+	GZ_POSITION:		3 vert positions in model space
 -- Invoke the rastrizer/scanline framework
 -- Return error code
 */
