@@ -137,7 +137,9 @@
     <ClCompile Include="CS580HWDoc.cpp" />
     <ClCompile Include="CS580HWView.cpp" />
     <ClCompile Include="MainFrm.cpp" />
-    <ClCompile Include="rend.cpp" />
+    <ClCompile Include="rend.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="StdAfx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">stdafx.h</PrecompiledHeaderFile>
