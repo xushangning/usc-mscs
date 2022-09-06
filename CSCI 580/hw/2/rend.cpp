@@ -1,5 +1,6 @@
 #include	"stdio.h"
 #include	"math.h"
+#include	<numeric>
 #include	<algorithm>
 #include	"Gz.h"
 #include	"rend.h"
@@ -9,7 +10,7 @@
 
 constexpr int N_RGB = 3;
 
-constexpr GzPixel BACKGROUND{ 0, 0, 1000, 1, 0 };
+constexpr GzPixel BACKGROUND{ 0, 0, 1000, 1, std::numeric_limits<GzDepth>::max() };
 
 constexpr GzIntensity MAX_INTENSITY = 4095;
 
@@ -126,7 +127,12 @@ int GzRender::GzPutAttribute(int numAttributes, GzToken	*nameList, GzPointer *va
 -- Set renderer attribute states (e.g.: GZ_RGB_COLOR default color)
 -- In later homeworks set shaders, interpolaters, texture maps, and lights
 */
-
+	for (int i = 0; i < numAttributes; ++i)
+		switch (nameList[i]) {
+		case GZ_RGB_COLOR:
+			std::copy_n(*static_cast<GzColor*>(valueList[i]), N_RGB, flatcolor);
+			break;
+		}
 	return GZ_SUCCESS;
 }
 
