@@ -1,3 +1,5 @@
+#include <format>
+#include <array>
 #include <type_traits>
 
 #include "CppUnitTest.h"
@@ -5,6 +7,19 @@
 #include "../2/rend.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
+
+bool operator==(const GzPixel& x, const GzPixel& y) noexcept
+{
+    return x.red == y.red && x.green == y.green && x.blue == y.blue
+        && x.alpha == y.alpha && x.z == y.z;
+}
+
+namespace Microsoft { namespace VisualStudio { namespace CppUnitTestFramework {
+    template <>
+    std::wstring ToString(const GzPixel& p) {
+        return std::format(L"{{{}, {}, {}}}", p.red, p.green, p.blue);
+    }
+}}}
 
 namespace UnitTests
 {
@@ -50,6 +65,34 @@ namespace UnitTests
                     Assert::AreEqual(render_.ctoi(kColor[1]), pixel.green);
                     Assert::AreEqual(render_.ctoi(kColor[2]), pixel.blue);
                     Assert::AreEqual(C - x - y, pixel.z);
+                }
+        }
+        
+        TEST_METHOD(TestEmptyTriangles)
+        {
+            constexpr int TEST_REGION = 6;
+            GzPixel background[TEST_REGION][TEST_REGION];
+            for (int i = 0; i < TEST_REGION; ++i)
+                for (int j = 0; j < TEST_REGION; ++j) {
+                    auto& pixel = background[i][j];
+                    render_.GzGet(i, j, &pixel.red, &pixel.green, &pixel.blue, &pixel.alpha, &pixel.z);
+                }
+
+            std::array argument_types = { GZ_POSITION, GZ_POSITION };
+            Triangle triangles[]{
+                // a small triangle that doesn't touch any pixel
+                { {0.25, 0.25}, {5, 0.5}, {2.75, 1} },
+                // a triangle degenerated into a segment
+                { {0, 0, 0}, {3, 3, 3}, {5, 5, 5} },
+            };
+            GzPointer arguments[]{ triangles[0], triangles[1] };
+            render_.GzPutTriangle(static_cast<int>(argument_types.size()), argument_types.data(), arguments);
+
+            for (int i = 0; i < TEST_REGION; ++i)
+                for (int j = 0; j < TEST_REGION; ++j) {
+                    GzPixel pixel;
+                    render_.GzGet(i, j, &pixel.red, &pixel.green, &pixel.blue, &pixel.alpha, &pixel.z);
+                    Assert::AreEqual(background[i][j], pixel);
                 }
         }
     };
