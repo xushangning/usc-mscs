@@ -107,6 +107,7 @@
       <ProgramDataBaseFileName>.\Debug\</ProgramDataBaseFileName>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Midl>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -136,6 +137,9 @@
     <ClCompile Include="CS580HW.cpp" />
     <ClCompile Include="CS580HWDoc.cpp" />
     <ClCompile Include="CS580HWView.cpp" />
+    <ClCompile Include="dda.ixx">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="rend.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>

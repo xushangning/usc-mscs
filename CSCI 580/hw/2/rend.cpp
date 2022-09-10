@@ -2,8 +2,11 @@
 #include	"math.h"
 #include	<numeric>
 #include	<algorithm>
+#include	<array>
 #include	"Gz.h"
 #include	"rend.h"
+
+import dda;
 
 /***********************************************/
 /* HW1 methods: copy here the methods from HW1 */
@@ -58,12 +61,13 @@ int GzRender::GzPut(int i, int j, GzIntensity r, GzIntensity g, GzIntensity b, G
 	if (!(i >= 0 && j >= 0 && i < xres && j < yres))
 		return GZ_FAILURE;
 
-	pixelbuffer[ARRAY(i, j)] = {
-		min(r, MAX_INTENSITY),
-		min(g, MAX_INTENSITY),
-		min(b, MAX_INTENSITY),
-		a, z
-	};
+	if (z < pixelbuffer[ARRAY(i, j)].z)
+		pixelbuffer[ARRAY(i, j)] = {
+			min(r, MAX_INTENSITY),
+			min(g, MAX_INTENSITY),
+			min(b, MAX_INTENSITY),
+			a, z
+		};
 	return GZ_SUCCESS;
 }
 
@@ -136,6 +140,51 @@ int GzRender::GzPutAttribute(int numAttributes, GzToken	*nameList, GzPointer *va
 	return GZ_SUCCESS;
 }
 
+inline float crossProduct(const GzCoord& tail, const GzCoord& head_start, const GzCoord& head_end)
+{
+	return (head_start[0] - tail[0]) * (head_end[1] - tail[1]) - (head_end[0] - tail[0]) * (head_start[1] - tail[1]);
+}
+
+/// <summary>
+/// Rasterize a trapezoid parallel to the x-axis or its degenerated form, a
+/// triangle with one edge parallel to the x-axis.
+/// </summary>
+/// 
+/// <param name="leader">
+/// An iterator that provides coordinates along one side that is not parallel
+/// to the x-axis. It is the iterator used to determine the end of a loop.
+/// </param>
+/// <param name="follower">
+/// An iterator that provides coordinates along the other side that is not
+/// parallel to the x-axis
+/// </param>
+/// <param name="leader_on_x_begin">
+/// Whether the leader iterator corresponds to the side with smaller
+/// x-coordinates than the other.
+/// </param>
+void putTrapezoid(
+	GzRender& render, const GzIntensity(&color)[3],
+	DDA::iterator& leader, DDA::iterator& follower, const DDA::iterator& end,
+	bool leader_on_x_begin
+)
+{
+	auto& x_begin = leader_on_x_begin ? leader : follower,
+		& x_end = leader_on_x_begin ? follower : leader;
+	while (leader != end) {
+		DDA x(0, *x_begin, *x_end);		// DDA along the x axis.
+		for (auto& coord : x)
+			render.GzPut(
+				static_cast<int>(coord[0]), static_cast<int>(coord[1]),
+				color[0], color[1], color[2],
+				1, static_cast<GzDepth>(coord[2])
+			);
+
+		++leader;
+		++follower;
+	}
+
+}
+
 int GzRender::GzPutTriangle(int	numParts, GzToken *nameList, GzPointer *valueList)
 /* numParts - how many names and values */
 {
@@ -146,7 +195,55 @@ int GzRender::GzPutTriangle(int	numParts, GzToken *nameList, GzPointer *valueLis
 -- Invoke the rastrizer/scanline framework
 -- Return error code
 */
+	for (int i = 0; i < numParts; ++i)
+		switch (nameList[i]) {
+		case GZ_POSITION: {
+			auto first_vertex = static_cast<GzCoord*>(valueList[i]);
 
+			std::array vertices = { first_vertex, first_vertex + 1, first_vertex + 2 };
+			// Sort by y.
+			std::sort(vertices.begin(), vertices.end(), [](GzCoord* a, GzCoord* b) { return (*a)[1] < (*b)[1]; });
+			GzCoord& y_begin = *vertices[0],
+				/// <summary>
+				/// The vertex with the middling y-coordinate among the three.
+				/// The triangle is divided into two parts by the line that is
+				/// parallel to the x-ais and goes through this vertex.
+				/// </summary>
+				& y_mid = *vertices[1],
+				& y_end = *vertices[2];
+
+			auto cross_product = crossProduct(y_begin, y_end, y_mid);
+			if (cross_product == 0)
+				// degenerated triangle
+				break;
+			// Whether the edges (y_begin, y_mid, y_end) have smaller
+			// x-coordinates than the edge (y_begin, y_end) i.e., on the left
+			// of (y_begin, y_end).
+			bool y_mid_on_x_begin = cross_product > 0;
+			
+			GzIntensity color[]{ ctoi(flatcolor[0]), ctoi(flatcolor[1]), ctoi(flatcolor[2]) };
+
+			DDA begin_end(1, y_begin, y_end);
+			auto begin_end_iter = begin_end.begin();
+			if (y_begin[1] != y_mid[1]) {
+				// Rasterize the part of the triangle with smaller x-coordinates.
+				DDA begin_mid(1, y_begin, y_mid);
+				auto begin_mid_iter = begin_mid.begin();
+
+				putTrapezoid(*this, color, begin_mid_iter, begin_end_iter, begin_mid.end(), y_mid_on_x_begin);
+			}
+
+			if (y_mid[1] != y_end[1]) {
+				// Rasterize the other part of the triangle with larger x-coordinates.
+				DDA mid_end(1, y_mid, y_end);
+				auto mid_end_iter = mid_end.begin();
+
+				putTrapezoid(*this, color, mid_end_iter, begin_end_iter, mid_end.end(), y_mid_on_x_begin);
+			}
+
+			break;
+		}
+		}
 	return GZ_SUCCESS;
 }
 
