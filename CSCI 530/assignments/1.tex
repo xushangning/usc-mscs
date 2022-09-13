@@ -1,0 +1,62 @@
+\documentclass{article}
+
+\usepackage{mathtools}
+
+\title{CSCI 530 - Assignment \#1 - Fall 2022}
+\author{Shangning Xu}
+
+\begin{document}
+
+\maketitle
+
+\section{}
+
+We use encryption modes of operation to convert block ciphers into stream ciphers for the following reasons:
+\begin{enumerate}
+    \item Block ciphers are vulnerable to replay attacks, while stream ciphers that use a mode of operation with an IV are not. For example, if an adversary knows that the response to a user's question is only ``Yes'' or ``No'' encrypted by a block cipher, it can easily replay the encrypted message to provide a fake answer to the users. When a stream cipher with an IV is used, the adversary cannot replay the encrypted message because ciphertexts for ``Yes'' and ``No'' are different for each message due to different IVs.
+    \item A block cipher is unable to encrypt messages longer than its block size, while there is no message size limit for stream ciphers, making the latter more suitable for practical use.
+\end{enumerate}
+
+IVs defend against replay attacks like the one outlined in the previous paragraph. It's totally fine if the adversary knows the IV, as knowing the IV won't break the message's confidentiality: an attacker who wishes to break the encryption still needs to brute-force the whole key even when given the IV.
+
+Using the same IV for multiple messages allows replay attacks because with the same IV, the same ciphertext is generated for the same message.
+
+It's possible to design a protocol so it is just as safe to use the same IV to encrypt a message stream, as it is to use a different IV for the stream each time. For example, Kerberos always uses an IV of zero with random data as the first plaintext block. This is equivalent to using a random IV in a stream cipher because the first block of plaintext is combined with the second block to produce unique ciphertexts, just like how an IV is combined with the first block of plaintext.
+
+\section{}
+
+To find $d$, because $d$ satisfies
+\[
+    ed \equiv 1 \pmod{(p - 1)(q - 1)},
+\]
+where $(p - 1)(q - 1) = 220$, let $k$ be the quotient in the modulo operation, we have
+\[
+ed = k(p - 1)(q - 1) + 1 \implies ed - k(p - 1)(q - 1) = 1.
+\]
+Because the GCD of $e$ and $(p - 1)(q - 1)$ is exactly 1, we can use the extended Euclidean algorithm to solve for $d$, which gives $d = 147$.
+
+To encipher the plaintext, let $c = m^e \bmod pq = 5^3 = 125$.
+
+To decipher c, we need to calculate $c^d = 125^{147}$. Because $147 = 2^0 + 2^1 + 2^4 + 2^7$ and note that
+\begin{align*}
+    c^{2^0} \bmod pq &= 125,\\
+    c^{2^1} \bmod pq &= 192,\\
+    c^{2^4} \bmod pq &= 4,\\
+    c^{2^7} \bmod pq &= 9,
+\end{align*}
+we have
+\begin{align*}
+    c^{147} \bmod pq &= c^{2^0 + 2^1 + 2^4 + 2^7} \bmod pq\\
+        &= 125 \cdot 192 \cdot 4 \cdot 9 \bmod 253\\
+        &= 5 = m.
+\end{align*}
+
+\section{}
+
+The key must be used only once because otherwise the adversary can XOR two ciphertexts that are encrypted with the same key to get the XOR of the two plaintexts and with further analysis, to recover the messages themselves.
+
+This method of encryption is called a one-time pad. It is provably secure with respect to confidentiality, because when the adversary tries to brute-force the key, they may select a key that when XORed with the ciphertext, gives a plaintext that makes perfect sense but means the exact opposite.
+
+On the other hand, one-time pads provide weak integrity because flipping a bit in the ciphertext will flip the corresponding bit in the plaintext.
+
+\end{document}
