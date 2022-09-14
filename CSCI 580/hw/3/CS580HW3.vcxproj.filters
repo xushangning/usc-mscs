@@ -48,6 +48,7 @@
     <ClCompile Include="TranslateDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="dda.ixx" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="CS580HW.rc">
