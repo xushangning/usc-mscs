@@ -1,14 +1,16 @@
 /* CS580 Homework 3 */
 
-#include	"stdio.h"
-#include	"math.h"
 #include	<numeric>
+#include	<numbers>
+#include	"stdio.h"
+#include	<cmath>
 #include	<algorithm>
 #include	<array>
 #include	"Gz.h"
 #include	"rend.h"
 
 import dda;
+import geometry;
 
 #define PI (float) 3.14159265358979323846
 
@@ -16,7 +18,13 @@ constexpr int N_RGB = 3;
 
 constexpr GzPixel BACKGROUND{ 0, 0, 1000, 1, std::numeric_limits<GzDepth>::max() };
 
-constexpr GzIntensity MAX_INTENSITY = 4095;
+constexpr GzIntensity MIN_INTENSITY = 0, MAX_INTENSITY = 4095;
+
+inline constexpr float deg2rad(float d) noexcept { return d * std::numbers::pi_v<float> / 180; }
+
+using std::fill;
+using std::cos;
+using std::sin;
 
 int GzRender::GzRotXMat(float degree, GzMatrix mat)
 {
@@ -24,6 +32,12 @@ int GzRender::GzRotXMat(float degree, GzMatrix mat)
 // Create rotate matrix : rotate along x axis
 // Pass back the matrix using mat value
 */
+	fill(mat[0], mat[4], 0.0f);
+	mat[0][0] = mat[3][3] = 1;
+	auto rad = deg2rad(degree);
+	mat[1][1] = mat[2][2] = cos(rad);
+	mat[2][1] = sin(rad);
+	mat[1][2] = -mat[2][1];
 
 	return GZ_SUCCESS;
 }
@@ -34,6 +48,12 @@ int GzRender::GzRotYMat(float degree, GzMatrix mat)
 // Create rotate matrix : rotate along y axis
 // Pass back the matrix using mat value
 */
+	fill(mat[0], mat[4], 0.0f);
+	mat[1][1] = mat[3][3] = 1;
+	auto rad = deg2rad(degree);
+	mat[0][0] = mat[2][2] = cos(rad);
+	mat[0][2] = sin(rad);
+	mat[2][0] = -mat[0][2];
 
 	return GZ_SUCCESS;
 }
@@ -44,6 +64,12 @@ int GzRender::GzRotZMat(float degree, GzMatrix mat)
 // Create rotate matrix : rotate along z axis
 // Pass back the matrix using mat value
 */
+	fill(mat[0], mat[4], 0.0f);
+	mat[2][2] = mat[3][3] = 1;
+	auto rad = deg2rad(degree);
+	mat[0][0] = mat[1][1] = cos(rad);
+	mat[1][0] = sin(rad);
+	mat[0][1] = -mat[1][0];
 
 	return GZ_SUCCESS;
 }
@@ -54,6 +80,11 @@ int GzRender::GzTrxMat(GzCoord translate, GzMatrix mat)
 // Create translation matrix
 // Pass back the matrix using mat value
 */
+	fill(mat[0], mat[4], 0.0f);
+	mat[0][0] = mat[1][1] = mat[2][2] = mat[3][3] = 1;
+	mat[0][3] = translate[0];
+	mat[1][3] = translate[1];
+	mat[2][3] = translate[2];
 
 	return GZ_SUCCESS;
 }
@@ -65,6 +96,11 @@ int GzRender::GzScaleMat(GzCoord scale, GzMatrix mat)
 // Create scaling matrix
 // Pass back the matrix using mat value
 */
+	fill(mat[0], mat[4], 0.0f);
+	mat[0][0] = scale[0];
+	mat[1][1] = scale[1];
+	mat[2][2] = scale[2];
+	mat[3][3] = 1;
 
 	return GZ_SUCCESS;
 }
@@ -73,6 +109,12 @@ int GzRender::GzScaleMat(GzCoord scale, GzMatrix mat)
 using std::min;
 
 GzRender::GzRender(int xRes, int yRes)
+	: m_camera({
+		.position = {DEFAULT_IM_X, DEFAULT_IM_Y, DEFAULT_IM_Z},
+		.worldup = {0, 1, 0},
+		.FOV = DEFAULT_FOV
+	}),
+	matlevel(0), Xsp()
 {
 /* HW1.1 create a framebuffer for MS Windows display:
  -- set display resolution
@@ -89,7 +131,12 @@ GzRender::GzRender(int xRes, int yRes)
 /* HW 3.6
 - setup Xsp and anything only done once 
 - init default camera 
-*/ 
+*/
+	Xsp[0][0] = Xsp[0][3] = static_cast<float>(xres) / 2;
+	Xsp[1][3] = static_cast<float>(yres) / 2;
+	Xsp[1][1] = -Xsp[1][3];
+	Xsp[2][2] = static_cast<float>(std::numeric_limits<GzDepth>::max());
+	Xsp[3][3] = 1;
 }
 
 GzRender::~GzRender()
@@ -114,7 +161,48 @@ int GzRender::GzBeginRender()
 - compute Xiw and projection xform Xpi from camera definition 
 - init Ximage - put Xsp at base of stack, push on Xpi and Xiw 
 - now stack contains Xsw and app can push model Xforms when needed 
-*/ 
+*/
+	GzPushMatrix(Xsp);
+
+	// Xpi
+	auto& Xpi = m_camera.Xpi;
+	fill(Xpi[0], Xpi[4], 0.0f);
+	Xpi[0][0] = Xpi[1][1] = Xpi[3][3] = 1;
+	Xpi[2][2] = Xpi[3][2] = std::tan(deg2rad(m_camera.FOV / 2));
+	GzPushMatrix(Xpi);
+
+	// Xiw
+	Vector z(m_camera.lookat);
+	z -= m_camera.position;
+	z /= abs(z);
+
+	Vector y(m_camera.worldup);
+	y -= y.Dot(z) * z;
+	y /= abs(y);
+
+	Vector x = y.Cross(z);
+	
+	auto& Xiw = m_camera.Xiw;
+	fill(Xiw[0], Xiw[4], 0.0f);
+	Xiw[0][0] = x[0];
+	Xiw[0][1] = x[1];
+	Xiw[0][2] = x[2];
+
+	Xiw[1][0] = y[0];
+	Xiw[1][1] = y[1];
+	Xiw[1][2] = y[2];
+
+	Xiw[2][0] = z[0];
+	Xiw[2][1] = z[1];
+	Xiw[2][2] = z[2];
+
+	Xiw[0][3] = -x.Dot(m_camera.position);
+	Xiw[1][3] = -y.Dot(m_camera.position);
+	Xiw[2][3] = -z.Dot(m_camera.position);
+
+	Xiw[3][3] = 1.0f;
+
+	GzPushMatrix(Xiw);
 
 	return GZ_SUCCESS;
 }
@@ -124,7 +212,7 @@ int GzRender::GzPutCamera(GzCamera camera)
 /* HW 3.8 
 /*- overwrite renderer camera structure with new camera definition
 */
-
+	m_camera = camera;
 	return GZ_SUCCESS;	
 }
 
@@ -134,7 +222,15 @@ int GzRender::GzPushMatrix(GzMatrix	matrix)
 - push a matrix onto the Ximage stack
 - check for stack overflow
 */
-	
+	if (matlevel >= MATLEVELS)
+		return GZ_FAILURE;
+
+	if (matlevel)
+		MatMul(Ximage[matlevel], Ximage[matlevel - 1], matrix);
+	else
+		std::copy(matrix[0], matrix[4], Ximage[matlevel][0]);
+	++matlevel;
+
 	return GZ_SUCCESS;
 }
 
@@ -144,7 +240,9 @@ int GzRender::GzPopMatrix()
 - pop a matrix off the Ximage stack
 - check for stack underflow
 */
-
+	if (matlevel == 0)
+		return GZ_FAILURE;
+	--matlevel;
 	return GZ_SUCCESS;
 }
 
@@ -154,11 +252,12 @@ int GzRender::GzPut(int i, int j, GzIntensity r, GzIntensity g, GzIntensity b, G
 	if (!(i >= 0 && j >= 0 && i < xres && j < yres))
 		return GZ_FAILURE;
 
+	using std::clamp;
 	if (z < pixelbuffer[ARRAY(i, j)].z)
 		pixelbuffer[ARRAY(i, j)] = {
-			min(r, MAX_INTENSITY),
-			min(g, MAX_INTENSITY),
-			min(b, MAX_INTENSITY),
+			clamp(r, MIN_INTENSITY, MAX_INTENSITY),
+			clamp(g, MIN_INTENSITY, MAX_INTENSITY),
+			clamp(b, MIN_INTENSITY, MAX_INTENSITY),
 			a, z
 		};
 	return GZ_SUCCESS;
@@ -297,8 +396,18 @@ int GzRender::GzPutTriangle(int numParts, GzToken *nameList, GzPointer *valueLis
 		switch (nameList[i]) {
 		case GZ_POSITION: {
 			auto first_vertex = static_cast<GzCoord*>(valueList[i]);
-
 			std::array vertices = { first_vertex, first_vertex + 1, first_vertex + 2 };
+
+			bool should_exit = false;
+			for (auto v : vertices)
+				// Cull triangles with a negative-z vertex.
+				if (!(MatVecMul(Ximage[matlevel - 1], *v) && (*v)[2] >= 0)) {
+					should_exit = true;
+					break;
+				}
+			if (should_exit)
+				break;
+
 			// Sort by y.
 			std::sort(vertices.begin(), vertices.end(), [](GzCoord* a, GzCoord* b) { return (*a)[1] < (*b)[1]; });
 			GzCoord& y_begin = *vertices[0],

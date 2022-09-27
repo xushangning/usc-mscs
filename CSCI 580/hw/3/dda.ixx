@@ -74,7 +74,7 @@ DDA::DDA(size_t param_index, const value_type& begin, const value_type& end) noe
     : param_index_(param_index), value_end_(end)
 {
     auto initial_param = begin[param_index],
-        param_begin = std::ceilf(initial_param),
+        param_begin = std::ceil(initial_param),
         delta_param = param_begin - initial_param,
         param_diff = end[param_index] - initial_param;
 
@@ -90,5 +90,5 @@ DDA::DDA(size_t param_index, const value_type& begin, const value_type& end) noe
         }
 
     // Ensure that begin == end when iteration ends.
-    value_end_[param_index] = std::ceilf(value_end_[param_index]);
+    value_end_[param_index] = std::ceil(value_end_[param_index]);
 }

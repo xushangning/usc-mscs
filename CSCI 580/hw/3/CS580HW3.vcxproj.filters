@@ -49,6 +49,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="dda.ixx" />
+    <ClCompile Include="geometry.ixx" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="CS580HW.rc">
