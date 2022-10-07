@@ -43,3 +43,15 @@
     5. A criminal may be able to apply for credit cards through means that are still authenticated by personal information, like through mail or phone call, or even through social engineering trick customer support for credit card companies to issue a replacement card for an existing one.
     6. We can require people who want to authenticate with personal information to apply at a local branch with the credit card company.
 3. The company should establishes data access policies with Bell-Lapadula and Biba. Customer personal information and employee credentials should have the top security classification to limit the number of subjects that can access them. Internet-facing web servers should have the lowest integrity level, followed by company-issued devices at a higher integrity level. Subjects at different integrity levels should be compartmented in internal networks to limit the scope of security compromise (if any).
+
+## Fall 2021
+
+### 1
+
+Mechanism | Client Auth | Server Auth | Information Held Client | Information Held Server | Third Party | Keys held at end
+--- | --- | --- | --- | --- | --- | ---
+Kerberos | Yes | Yes | Kc | Ks | KDC, TGS | Session key
+Diffie-Hellman | No | No | NA | NA | None | $g^{xy}$
+SSL or TLS (server cert only) | No | Yes | NA | Server cert | None | 4 session keys for confidentiality and integrity
+SSH | Yes | Yes | Password or client public key | Server public key | None | None
+PGP or GPG | Yes | Yes | Client public key | Server public key | Directory service | None
