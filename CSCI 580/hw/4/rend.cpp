@@ -114,7 +114,7 @@ GzRender::GzRender(int xRes, int yRes)
 		.worldup = {0, 1, 0},
 		.FOV = DEFAULT_FOV
 	}),
-	matlevel(0), Xsp()
+	matlevel(0), Xsp(), numlights{}
 {
 /* HW1.1 create a framebuffer for MS Windows display:
  -- set display resolution
@@ -332,6 +332,30 @@ int GzRender::GzPutAttribute(int numAttributes, GzToken	*nameList, GzPointer *va
 		switch (nameList[i]) {
 		case GZ_RGB_COLOR:
 			std::copy_n(*static_cast<GzColor*>(valueList[i]), N_RGB, flatcolor);
+			break;
+		case GZ_INTERPOLATE:
+			interp_mode = *static_cast<int*>(valueList[i]);
+			break;
+		case GZ_DIRECTIONAL_LIGHT:
+			if (numlights < MAX_LIGHTS)
+				lights[numlights++] = *static_cast<GzLight*>(valueList[i]);
+			else
+				return GZ_FAILURE;
+			break;
+		case GZ_AMBIENT_LIGHT:
+			ambientlight = *static_cast<GzLight*>(valueList[i]);
+			break;
+		case GZ_AMBIENT_COEFFICIENT:
+			std::copy_n(*static_cast<GzColor*>(valueList[i]), N_RGB, Ka);
+			break;
+		case GZ_DIFFUSE_COEFFICIENT:
+			std::copy_n(*static_cast<GzColor*>(valueList[i]), N_RGB, Kd);
+			break;
+		case GZ_SPECULAR_COEFFICIENT:
+			std::copy_n(*static_cast<GzColor*>(valueList[i]), N_RGB, Ks);
+			break;
+		case GZ_DISTRIBUTION_COEFFICIENT:
+			spec = *static_cast<float*>(valueList[i]);
 			break;
 		}
 	return GZ_SUCCESS;
