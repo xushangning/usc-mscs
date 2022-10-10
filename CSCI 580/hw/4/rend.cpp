@@ -462,6 +462,8 @@ void putTrapezoid(
 
 }
 
+struct ModelPoint { valarray<float> coordinate, normal; };
+
 int GzRender::GzPutTriangle(int numParts, GzToken *nameList, GzPointer *valueList)
 /* numParts - how many names and values */
 {
@@ -472,35 +474,43 @@ int GzRender::GzPutTriangle(int numParts, GzToken *nameList, GzPointer *valueLis
 -- Invoke the rastrizer/scanline framework
 -- Return error code
 */
-	GzCoord* first_vertex{}, * first_normal{};
+	GzCoord* vertices{}, * normals{};
 	for (int i = 0; i < numParts; ++i)
 		switch (nameList[i]) {
 		case GZ_POSITION:
-			first_vertex = static_cast<GzCoord*>(valueList[i]);
+			vertices = static_cast<GzCoord*>(valueList[i]);
 			break;
 		case GZ_NORMAL:
-			first_normal = static_cast<GzCoord*>(valueList[i]);
+			normals = static_cast<GzCoord*>(valueList[i]);
+			break;
 		}
-	if (!(first_vertex && first_normal))
+	if (!(vertices && normals))
 		return GZ_FAILURE;
 
-	std::array vertices = { first_vertex, first_vertex + 1, first_vertex + 2 };
-
-	for (auto v : vertices)
+	typedef std::array<ModelPoint, 3> TriangleModel;
+	TriangleModel triangle;
+	for (TriangleModel::size_type i = 0; i < triangle.size(); ++i) {
+		auto& p = triangle[i];
+		p.coordinate = valarray<float>(vertices[i], 3);
 		// Cull triangles with a negative-z vertex.
-		if (!(MatVecMul(Ximage[matlevel - 1], *v) && (*v)[2] >= 0))
+		if (!(MatValarrayMul(Ximage[matlevel - 1], p.coordinate) && p.coordinate[2] >= 0))
 			return GZ_SUCCESS;
 
-	// Sort by y.
-	std::sort(vertices.begin(), vertices.end(), [](GzCoord* a, GzCoord* b) { return (*a)[1] < (*b)[1]; });
-	std::valarray<float> y_begin(*vertices[0], 3),
+		p.normal = valarray<float>(normals[i], 3);
+	}
+
+	std::array sorted_by_y = { triangle.cbegin(), triangle.cbegin() + 1, triangle.cbegin() + 2 };
+	typedef TriangleModel::const_iterator ModelIter;
+	std::ranges::sort(sorted_by_y, [](ModelIter i, ModelIter j) { return i->coordinate[1] < j->coordinate[1]; });
+
+	const valarray<float>& y_begin = sorted_by_y[0]->coordinate,
 		/// <summary>
 		/// The vertex with the middling y-coordinate among the three.
 		/// The triangle is divided into two parts by the line that is
 		/// parallel to the x-ais and goes through this vertex.
 		/// </summary>
-		y_mid(*vertices[1], 3),
-		y_end(*vertices[2], 3);
+		y_mid = sorted_by_y[1]->coordinate,
+		y_end = sorted_by_y[2]->coordinate;
 
 	auto cross_product = CrossProduct2D(y_begin, y_end, y_mid);
 	if (cross_product == 0)
@@ -511,7 +521,7 @@ int GzRender::GzPutTriangle(int numParts, GzToken *nameList, GzPointer *valueLis
 	// of (y_begin, y_end).
 	bool y_mid_on_x_begin = cross_product > 0;
 
-	auto flat_color = phongLighting(*this, { *first_normal, 3 });
+	auto flat_color = phongLighting(*this, triangle[0].normal);
 	GzIntensity color[]{ ctoi(flat_color[0]), ctoi(flat_color[1]), ctoi(flat_color[2]) };
 
 	DDA begin_end(1, y_begin, y_end);
