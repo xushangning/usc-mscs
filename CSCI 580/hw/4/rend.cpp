@@ -440,7 +440,7 @@ valarray<float> phongLighting(const GzRender& renderer, valarray<float> normal)
 /// x-coordinates than the other.
 /// </param>
 void putTrapezoid(
-	GzRender& render, const GzIntensity(&color)[3],
+	GzRender& renderer,
 	DDA::iterator& leader, DDA::iterator& follower, const DDA::iterator& end,
 	bool leader_on_x_begin
 )
@@ -449,12 +449,23 @@ void putTrapezoid(
 		& x_end = leader_on_x_begin ? follower : leader;
 	while (leader != end) {
 		DDA x(0, *x_begin, *x_end);		// DDA along the x axis.
-		for (auto& coord : x)
-			render.GzPut(
-				static_cast<int>(coord[0]), static_cast<int>(coord[1]),
-				color[0], color[1], color[2],
-				1, static_cast<GzDepth>(coord[2])
+		for (const auto& v : x) {
+			GzColor color;
+			switch (renderer.interp_mode) {
+			case GZ_FLAT:
+				std::ranges::copy(renderer.flatcolor, color);
+				break;
+			case GZ_COLOR:
+				std::ranges::copy(v[1], color);
+				break;
+			}
+
+			renderer.GzPut(
+				static_cast<int>(v[0][0]), static_cast<int>(v[0][1]),
+				renderer.ctoi(color[0]), renderer.ctoi(color[1]), renderer.ctoi(color[2]),
+				1, static_cast<GzDepth>(v[0][2])
 			);
+		}
 
 		++leader;
 		++follower;
@@ -463,6 +474,13 @@ void putTrapezoid(
 }
 
 struct ModelPoint { valarray<float> coordinate, normal; };
+
+DDA BuildDDA(const GzRender& renderer, std::size_t param_index, const ModelPoint& begin, const ModelPoint& end)
+{
+	return renderer.interp_mode == GZ_COLOR
+		? DDA(param_index, { begin.coordinate, phongLighting(renderer, begin.normal) }, { end.coordinate, phongLighting(renderer, end.normal) })
+		: DDA(param_index, { begin.coordinate }, { end.coordinate });
+}
 
 int GzRender::GzPutTriangle(int numParts, GzToken *nameList, GzPointer *valueList)
 /* numParts - how many names and values */
@@ -503,16 +521,16 @@ int GzRender::GzPutTriangle(int numParts, GzToken *nameList, GzPointer *valueLis
 	typedef TriangleModel::const_iterator ModelIter;
 	std::ranges::sort(sorted_by_y, [](ModelIter i, ModelIter j) { return i->coordinate[1] < j->coordinate[1]; });
 
-	const valarray<float>& y_begin = sorted_by_y[0]->coordinate,
+	const auto& y_begin = *sorted_by_y[0],
 		/// <summary>
 		/// The vertex with the middling y-coordinate among the three.
 		/// The triangle is divided into two parts by the line that is
 		/// parallel to the x-ais and goes through this vertex.
 		/// </summary>
-		y_mid = sorted_by_y[1]->coordinate,
-		y_end = sorted_by_y[2]->coordinate;
+		& y_mid = *sorted_by_y[1],
+		& y_end = *sorted_by_y[2];
 
-	auto cross_product = CrossProduct2D(y_begin, y_end, y_mid);
+	auto cross_product = CrossProduct2D(y_begin.coordinate, y_end.coordinate, y_mid.coordinate);
 	if (cross_product == 0)
 		// degenerated triangle
 		return GZ_SUCCESS;
@@ -521,25 +539,26 @@ int GzRender::GzPutTriangle(int numParts, GzToken *nameList, GzPointer *valueLis
 	// of (y_begin, y_end).
 	bool y_mid_on_x_begin = cross_product > 0;
 
-	auto flat_color = phongLighting(*this, triangle[0].normal);
-	GzIntensity color[]{ ctoi(flat_color[0]), ctoi(flat_color[1]), ctoi(flat_color[2]) };
+	// Compute color for flat shading.
+	if (interp_mode == GZ_FLAT)
+		std::ranges::copy(phongLighting(*this, triangle[0].normal), flatcolor);
 
-	DDA begin_end(1, y_begin, y_end);
+	DDA begin_end = BuildDDA(*this, 1, y_begin, y_end);
 	auto begin_end_iter = begin_end.begin();
-	if (y_begin[1] != y_mid[1]) {
+	if (y_begin.coordinate[1] != y_mid.coordinate[1]) {
 		// Rasterize the part of the triangle with smaller x-coordinates.
-		DDA begin_mid(1, y_begin, y_mid);
+		DDA begin_mid = BuildDDA(*this, 1, y_begin, y_mid);
 		auto begin_mid_iter = begin_mid.begin();
 
-		putTrapezoid(*this, color, begin_mid_iter, begin_end_iter, begin_mid.end(), y_mid_on_x_begin);
+		putTrapezoid(*this, begin_mid_iter, begin_end_iter, begin_mid.end(), y_mid_on_x_begin);
 	}
 
-	if (y_mid[1] != y_end[1]) {
+	if (y_mid.coordinate[1] != y_end.coordinate[1]) {
 		// Rasterize the other part of the triangle with larger x-coordinates.
-		DDA mid_end(1, y_mid, y_end);
+		DDA mid_end = BuildDDA(*this, 1, y_mid, y_end);
 		auto mid_end_iter = mid_end.begin();
 
-		putTrapezoid(*this, color, mid_end_iter, begin_end_iter, mid_end.end(), y_mid_on_x_begin);
+		putTrapezoid(*this, mid_end_iter, begin_end_iter, mid_end.end(), y_mid_on_x_begin);
 	}
 
 	return GZ_SUCCESS;

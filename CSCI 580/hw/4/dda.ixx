@@ -24,7 +24,7 @@ using std::valarray;
 /// </remarks>
 export class DDA {
 public:
-    typedef valarray<float> value_type;
+    typedef valarray<valarray<float>> value_type;
 
 private:
     /// <summary>
@@ -57,7 +57,7 @@ public:
 
         bool operator==(const iterator& other) const noexcept
         {
-            return value_[param_index_] == other.value_[other.param_index_];
+            return value_[0][param_index_] == other.value_[0][other.param_index_];
         }
 
         friend class DDA;
@@ -68,19 +68,20 @@ public:
 };
 
 DDA::DDA(size_t param_index, const value_type& begin, const value_type& end) noexcept
-    : param_index_(param_index), value_end_(end)
+    : param_index_(param_index), slope_(end - begin), value_begin_(begin), value_end_(end)
 {
-    auto initial_param = begin[param_index],
+    auto initial_param = begin[0][param_index],
         // ceil moves the starting parameter to its next integer.
         param_begin = std::ceil(initial_param),
         delta_param = param_begin - initial_param,
-        param_diff = end[param_index] - initial_param;
+        param_diff = end[0][param_index] - initial_param;
 
-    slope_ = (end - begin) / param_diff;
-    slope_[param_index] = 1;
-    value_begin_ = begin + slope_ * delta_param;
-    value_begin_[param_index] = param_begin;
+    for (auto& v : slope_)
+        v /= param_diff;
+    for (size_t i = 0; i < value_begin_.size(); ++i)
+        value_begin_[i] += slope_[i] * delta_param;
+    value_begin_[0][param_index] = param_begin;
 
     // Ensure that begin == end when iteration ends.
-    value_end_[param_index] = std::ceil(value_end_[param_index]);
+    value_end_[0][param_index] = std::ceil(value_end_[0][param_index]);
 }
