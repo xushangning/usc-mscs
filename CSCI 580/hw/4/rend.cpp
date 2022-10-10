@@ -11,6 +11,7 @@
 
 import dda;
 import geometry;
+import linalg;
 
 #define PI (float) 3.14159265358979323846
 
@@ -225,10 +226,27 @@ int GzRender::GzPushMatrix(GzMatrix	matrix)
 	if (matlevel >= MATLEVELS)
 		return GZ_FAILURE;
 
-	if (matlevel)
+	// The matrix after scaling and translation components are removed.
+	GzMatrix matrix_for_norm = {
+		{1.0f, 0.0f, 0.0f, 0.0f},
+		{0.0f, 1.0f, 0.0f, 0.0f},
+		{0.0f, 0.0f, 1.0f, 0.0f},
+		{0.0f, 0.0f, 0.0f, 1.0f}
+	};
+	if (!Is3x3Diagonal(matrix))
+		// If not diagnoal, the upper left 3 * 3 matrix must be a rotation
+		// matrix. Copy it over to matrix_for_norm.
+		for (int i = 0; i < 3; ++i)
+			std::copy_n(matrix[i], 3, matrix_for_norm[i]);
+
+	if (matlevel) {
 		MatMul(Ximage[matlevel], Ximage[matlevel - 1], matrix);
-	else
+		MatMul(Xnorm[matlevel], Xnorm[matlevel - 1], matrix_for_norm);
+	}
+	else {
 		std::copy(matrix[0], matrix[4], Ximage[matlevel][0]);
+		std::copy(matrix_for_norm[0], matrix_for_norm[4], Xnorm[matlevel][0]);
+	}
 	++matlevel;
 
 	return GZ_SUCCESS;

@@ -50,6 +50,7 @@
     </ClCompile>
     <ClCompile Include="dda.ixx" />
     <ClCompile Include="geometry.ixx" />
+    <ClCompile Include="linalg.ixx" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="CS580HW.rc">
