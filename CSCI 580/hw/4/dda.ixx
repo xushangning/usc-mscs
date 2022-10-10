@@ -28,9 +28,9 @@ public:
 
 private:
     /// <summary>
-    /// The index of dimension in a coordinate that is used as the
-    /// interpolation parameter e.g., param_index_ == 1 means the y-axis is the
-    /// interpolation parameter.
+    /// The index of the element in value_type[0] that is used as the
+    /// interpolation parameter e.g., param_index_ == 1 means value_type[0][1]
+    /// is the interpolation parameter.
     /// </summary>
     size_t param_index_;
 

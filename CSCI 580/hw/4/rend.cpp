@@ -476,6 +476,9 @@ void putTrapezoid(
 
 }
 
+/// <summary>
+/// Represent a sample point in a 3D model.
+/// </summary>
 struct ModelPoint { valarray<float> coordinate, normal; };
 
 DDA BuildDDA(const GzRender& renderer, std::size_t param_index, const ModelPoint& begin, const ModelPoint& end)
