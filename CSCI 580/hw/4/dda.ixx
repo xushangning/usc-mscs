@@ -1,12 +1,12 @@
 export module dda;
 
-import <array>;
+import <valarray>;
 import <cmath>;
 
 import "gz.h";
 
 using std::size_t;
-using std::array;
+using std::valarray;
 
 /// <summary>
 /// Digital Differential Analyzer for linear interpolation as a C++ container.
@@ -24,7 +24,7 @@ using std::array;
 /// </remarks>
 export class DDA {
 public:
-    typedef array<float, 3> value_type;
+    typedef valarray<float> value_type;
 
 private:
     /// <summary>
@@ -38,8 +38,6 @@ private:
 
 public:
     DDA(size_t param_index, const value_type& begin, const value_type& end) noexcept;
-    DDA(size_t param_index, const GzCoord& begin, const GzCoord& end) noexcept
-        : DDA(param_index, std::to_array(begin), std::to_array(end)) {}
 
     class iterator {
         size_t param_index_;
@@ -51,8 +49,7 @@ public:
     public:
         iterator& operator++() noexcept
         {
-            for (value_type::size_type i = 0; i < value_.size(); ++i)
-                value_[i] += slope_[i];
+            value_ += slope_;
             return *this;
         }
 
@@ -74,20 +71,15 @@ DDA::DDA(size_t param_index, const value_type& begin, const value_type& end) noe
     : param_index_(param_index), value_end_(end)
 {
     auto initial_param = begin[param_index],
+        // ceil moves the starting parameter to its next integer.
         param_begin = std::ceil(initial_param),
         delta_param = param_begin - initial_param,
         param_diff = end[param_index] - initial_param;
 
-    // Move the starting parameter to its next integer.
-    for (value_type::size_type i = 0; i < value_begin_.size(); ++i)
-        if (i == param_index) {
-            slope_[i] = 1;
-            value_begin_[i] = param_begin;
-        }
-        else {
-            slope_[i] = (end[i] - begin[i]) / param_diff;
-            value_begin_[i] = begin[i] + slope_[i] * delta_param;
-        }
+    slope_ = (end - begin) / param_diff;
+    slope_[param_index] = 1;
+    value_begin_ = begin + slope_ * delta_param;
+    value_begin_[param_index] = param_begin;
 
     // Ensure that begin == end when iteration ends.
     value_end_[param_index] = std::ceil(value_end_[param_index]);

@@ -1,9 +1,17 @@
 export module geometry;
 
+import <valarray>;
 import <array>;
 import <cmath>;
 
 import "gz.h";
+
+using std::valarray;
+
+export inline float CrossProduct2D(const valarray<float>& tail, const valarray<float>& head_start, const valarray<float>& head_end)
+{
+	return (head_start[0] - tail[0]) * (head_end[1] - tail[1]) - (head_end[0] - tail[0]) * (head_start[1] - tail[1]);
+}
 
 export class Vector
 {

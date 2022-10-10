@@ -6,6 +6,7 @@
 #include	<cmath>
 #include	<algorithm>
 #include	<array>
+#include	<valarray>
 #include	"Gz.h"
 #include	"rend.h"
 
@@ -26,6 +27,8 @@ inline constexpr float deg2rad(float d) noexcept { return d * std::numbers::pi_v
 using std::fill;
 using std::cos;
 using std::sin;
+
+using std::valarray;
 
 int GzRender::GzRotXMat(float degree, GzMatrix mat)
 {
@@ -379,11 +382,6 @@ int GzRender::GzPutAttribute(int numAttributes, GzToken	*nameList, GzPointer *va
 	return GZ_SUCCESS;
 }
 
-inline float crossProduct(const GzCoord& tail, const GzCoord& head_start, const GzCoord& head_end)
-{
-	return (head_start[0] - tail[0]) * (head_end[1] - tail[1]) - (head_end[0] - tail[0]) * (head_start[1] - tail[1]);
-}
-
 /// <summary>
 /// Rasterize a trapezoid parallel to the x-axis or its degenerated form, a
 /// triangle with one edge parallel to the x-axis.
@@ -452,16 +450,16 @@ int GzRender::GzPutTriangle(int numParts, GzToken *nameList, GzPointer *valueLis
 
 			// Sort by y.
 			std::sort(vertices.begin(), vertices.end(), [](GzCoord* a, GzCoord* b) { return (*a)[1] < (*b)[1]; });
-			GzCoord& y_begin = *vertices[0],
+			std::valarray<float> y_begin(*vertices[0], 3),
 				/// <summary>
 				/// The vertex with the middling y-coordinate among the three.
 				/// The triangle is divided into two parts by the line that is
 				/// parallel to the x-ais and goes through this vertex.
 				/// </summary>
-				& y_mid = *vertices[1],
-				& y_end = *vertices[2];
+				y_mid(*vertices[1], 3),
+				y_end(*vertices[2], 3);
 
-			auto cross_product = crossProduct(y_begin, y_end, y_mid);
+			auto cross_product = CrossProduct2D(y_begin, y_end, y_mid);
 			if (cross_product == 0)
 				// degenerated triangle
 				break;
