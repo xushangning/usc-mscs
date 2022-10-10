@@ -13,6 +13,8 @@ export inline float CrossProduct2D(const valarray<float>& tail, const valarray<f
 	return (head_start[0] - tail[0]) * (head_end[1] - tail[1]) - (head_end[0] - tail[0]) * (head_start[1] - tail[1]);
 }
 
+export inline float Norm(const valarray<float>& v) { return std::sqrt((v * v).sum()); }
+
 export class Vector
 {
 	std::array<float, 3> data_;

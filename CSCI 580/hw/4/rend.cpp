@@ -410,7 +410,7 @@ valarray<float> phongLighting(const GzRender& renderer, valarray<float> normal)
 
 		diffuse_term += light_color * n_dot_l;
 
-		valarray<float> reflection = normal * n_dot_l * 2 - light_direction;
+		const auto reflection = normal * n_dot_l * 2 - light_direction;
 		auto clamped_r_dot_e = std::max(Dot(reflection, eye), 0.0f);
 		specular_term += light_color * std::pow(clamped_r_dot_e, renderer.spec);
 	}
@@ -450,13 +450,16 @@ void putTrapezoid(
 	while (leader != end) {
 		DDA x(0, *x_begin, *x_end);		// DDA along the x axis.
 		for (const auto& v : x) {
-			GzColor color;
+			valarray<float> color;
 			switch (renderer.interp_mode) {
 			case GZ_FLAT:
-				std::ranges::copy(renderer.flatcolor, color);
+				color = { renderer.flatcolor, N_RGB };
 				break;
 			case GZ_COLOR:
-				std::ranges::copy(v[1], color);
+				color = v[1];
+				break;
+			case GZ_NORMALS:
+				color = phongLighting(renderer, v[1] / Norm(v[1]));
 				break;
 			}
 
@@ -478,7 +481,9 @@ struct ModelPoint { valarray<float> coordinate, normal; };
 DDA BuildDDA(const GzRender& renderer, std::size_t param_index, const ModelPoint& begin, const ModelPoint& end)
 {
 	return renderer.interp_mode == GZ_COLOR
-		? DDA(param_index, { begin.coordinate, phongLighting(renderer, begin.normal) }, { end.coordinate, phongLighting(renderer, end.normal) })
+			? DDA(param_index, { begin.coordinate, phongLighting(renderer, begin.normal) }, { end.coordinate, phongLighting(renderer, end.normal) })
+		: renderer.interp_mode == GZ_NORMALS
+			? DDA(param_index, { begin.coordinate, begin.normal }, { end.coordinate, end.normal })
 		: DDA(param_index, { begin.coordinate }, { end.coordinate });
 }
 
