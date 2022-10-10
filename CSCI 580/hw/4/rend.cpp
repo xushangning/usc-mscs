@@ -382,6 +382,46 @@ int GzRender::GzPutAttribute(int numAttributes, GzToken	*nameList, GzPointer *va
 	return GZ_SUCCESS;
 }
 
+valarray<float> phongLighting(const GzRender& renderer, valarray<float> normal)
+{
+	// Compute ambient color first.
+	valarray<float> result(renderer.Ka, N_RGB), specular_term(N_RGB), diffuse_term(N_RGB);
+	result *= valarray<float>(renderer.ambientlight.color, N_RGB);
+
+	// Bring the normal vector to image space.
+	MatValarrayMul(renderer.Xnorm[renderer.matlevel - 1], normal);
+
+	const valarray<float> eye = { 0.0f, 0.0f, -1.0f };
+	for (int i = 0; i < renderer.numlights; ++i) {
+		const auto& light = renderer.lights[i];
+		const valarray<float> light_direction(light.direction, 3), light_color(light.color, N_RGB);
+
+		auto n_dot_e = Dot(normal, eye), n_dot_l = Dot(normal, light_direction);
+		if (n_dot_e > 0 && n_dot_l < 0 || n_dot_e < 0 && n_dot_l > 0)
+			// The eye/camera and the light are on opposite sides of the triangle.
+			continue;
+
+		if (n_dot_e <= 0 && n_dot_l <= 0) {
+			// The normal's direction is opposite to both the light and
+			// eye/camera's directions. Flip the normal's direction.
+			normal = -normal;
+			n_dot_l = -n_dot_l;
+		}
+
+		diffuse_term += light_color * n_dot_l;
+
+		valarray<float> reflection = normal * n_dot_l * 2 - light_direction;
+		auto clamped_r_dot_e = std::max(Dot(reflection, eye), 0.0f);
+		specular_term += light_color * std::pow(clamped_r_dot_e, renderer.spec);
+	}
+
+	result += valarray<float>(renderer.Ks, N_RGB) * specular_term
+		+ valarray<float>(renderer.Kd, N_RGB) * diffuse_term;
+	for (auto& v : result)
+		v = std::min(v, 1.0f);
+	return result;
+}
+
 /// <summary>
 /// Rasterize a trapezoid parallel to the x-axis or its degenerated form, a
 /// triangle with one edge parallel to the x-axis.
@@ -432,65 +472,66 @@ int GzRender::GzPutTriangle(int numParts, GzToken *nameList, GzPointer *valueLis
 -- Invoke the rastrizer/scanline framework
 -- Return error code
 */
+	GzCoord* first_vertex{}, * first_normal{};
 	for (int i = 0; i < numParts; ++i)
 		switch (nameList[i]) {
-		case GZ_POSITION: {
-			auto first_vertex = static_cast<GzCoord*>(valueList[i]);
-			std::array vertices = { first_vertex, first_vertex + 1, first_vertex + 2 };
-
-			bool should_exit = false;
-			for (auto v : vertices)
-				// Cull triangles with a negative-z vertex.
-				if (!(MatVecMul(Ximage[matlevel - 1], *v) && (*v)[2] >= 0)) {
-					should_exit = true;
-					break;
-				}
-			if (should_exit)
-				break;
-
-			// Sort by y.
-			std::sort(vertices.begin(), vertices.end(), [](GzCoord* a, GzCoord* b) { return (*a)[1] < (*b)[1]; });
-			std::valarray<float> y_begin(*vertices[0], 3),
-				/// <summary>
-				/// The vertex with the middling y-coordinate among the three.
-				/// The triangle is divided into two parts by the line that is
-				/// parallel to the x-ais and goes through this vertex.
-				/// </summary>
-				y_mid(*vertices[1], 3),
-				y_end(*vertices[2], 3);
-
-			auto cross_product = CrossProduct2D(y_begin, y_end, y_mid);
-			if (cross_product == 0)
-				// degenerated triangle
-				break;
-			// Whether the edges (y_begin, y_mid, y_end) have smaller
-			// x-coordinates than the edge (y_begin, y_end) i.e., on the left
-			// of (y_begin, y_end).
-			bool y_mid_on_x_begin = cross_product > 0;
-
-			GzIntensity color[]{ ctoi(flatcolor[0]), ctoi(flatcolor[1]), ctoi(flatcolor[2]) };
-
-			DDA begin_end(1, y_begin, y_end);
-			auto begin_end_iter = begin_end.begin();
-			if (y_begin[1] != y_mid[1]) {
-				// Rasterize the part of the triangle with smaller x-coordinates.
-				DDA begin_mid(1, y_begin, y_mid);
-				auto begin_mid_iter = begin_mid.begin();
-
-				putTrapezoid(*this, color, begin_mid_iter, begin_end_iter, begin_mid.end(), y_mid_on_x_begin);
-			}
-
-			if (y_mid[1] != y_end[1]) {
-				// Rasterize the other part of the triangle with larger x-coordinates.
-				DDA mid_end(1, y_mid, y_end);
-				auto mid_end_iter = mid_end.begin();
-
-				putTrapezoid(*this, color, mid_end_iter, begin_end_iter, mid_end.end(), y_mid_on_x_begin);
-			}
-
+		case GZ_POSITION:
+			first_vertex = static_cast<GzCoord*>(valueList[i]);
 			break;
+		case GZ_NORMAL:
+			first_normal = static_cast<GzCoord*>(valueList[i]);
 		}
-		}
+	if (!(first_vertex && first_normal))
+		return GZ_FAILURE;
+
+	std::array vertices = { first_vertex, first_vertex + 1, first_vertex + 2 };
+
+	for (auto v : vertices)
+		// Cull triangles with a negative-z vertex.
+		if (!(MatVecMul(Ximage[matlevel - 1], *v) && (*v)[2] >= 0))
+			return GZ_SUCCESS;
+
+	// Sort by y.
+	std::sort(vertices.begin(), vertices.end(), [](GzCoord* a, GzCoord* b) { return (*a)[1] < (*b)[1]; });
+	std::valarray<float> y_begin(*vertices[0], 3),
+		/// <summary>
+		/// The vertex with the middling y-coordinate among the three.
+		/// The triangle is divided into two parts by the line that is
+		/// parallel to the x-ais and goes through this vertex.
+		/// </summary>
+		y_mid(*vertices[1], 3),
+		y_end(*vertices[2], 3);
+
+	auto cross_product = CrossProduct2D(y_begin, y_end, y_mid);
+	if (cross_product == 0)
+		// degenerated triangle
+		return GZ_SUCCESS;
+	// Whether the edges (y_begin, y_mid, y_end) have smaller
+	// x-coordinates than the edge (y_begin, y_end) i.e., on the left
+	// of (y_begin, y_end).
+	bool y_mid_on_x_begin = cross_product > 0;
+
+	auto flat_color = phongLighting(*this, { *first_normal, 3 });
+	GzIntensity color[]{ ctoi(flat_color[0]), ctoi(flat_color[1]), ctoi(flat_color[2]) };
+
+	DDA begin_end(1, y_begin, y_end);
+	auto begin_end_iter = begin_end.begin();
+	if (y_begin[1] != y_mid[1]) {
+		// Rasterize the part of the triangle with smaller x-coordinates.
+		DDA begin_mid(1, y_begin, y_mid);
+		auto begin_mid_iter = begin_mid.begin();
+
+		putTrapezoid(*this, color, begin_mid_iter, begin_end_iter, begin_mid.end(), y_mid_on_x_begin);
+	}
+
+	if (y_mid[1] != y_end[1]) {
+		// Rasterize the other part of the triangle with larger x-coordinates.
+		DDA mid_end(1, y_mid, y_end);
+		auto mid_end_iter = mid_end.begin();
+
+		putTrapezoid(*this, color, mid_end_iter, begin_end_iter, mid_end.end(), y_mid_on_x_begin);
+	}
+
 	return GZ_SUCCESS;
 }
 
