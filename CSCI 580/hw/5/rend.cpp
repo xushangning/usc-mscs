@@ -395,6 +395,8 @@ int GzRender::GzPutAttribute(int numAttributes, GzToken	*nameList, GzPointer *va
 	return GZ_SUCCESS;
 }
 
+int tex_fun(float u, float v, GzColor color);
+
 valarray<float> phongLighting(const GzRender& renderer, valarray<float> normal)
 {
 	// Compute ambient color first.
@@ -469,11 +471,16 @@ void putTrapezoid(
 				color = { renderer.flatcolor, N_RGB };
 				break;
 			case GZ_COLOR:
-				color = v[1];
+				color = v[2];
 				break;
-			case GZ_NORMALS:
-				color = phongLighting(renderer, v[1] / Norm(v[1]));
+			case GZ_NORMALS: {
+				GzColor texture;
+				tex_fun(v[1][0], v[1][1], texture);
+				std::ranges::copy(texture, renderer.Ka);
+				std::ranges::copy(texture, renderer.Kd);
+				color = phongLighting(renderer, v[2] / Norm(v[2]));
 				break;
+			}
 			}
 
 			renderer.GzPut(
@@ -492,14 +499,34 @@ void putTrapezoid(
 /// <summary>
 /// Represent a sample point in a 3D model.
 /// </summary>
-struct ModelPoint { valarray<float> coordinate, normal; };
+struct ModelPoint { valarray<float> coordinate, normal, texture; };
 
+/// <summary>
+/// Construct different DDAs in different interpolation modes. The current
+/// structure of DDA's interpolated value is [coordinate, texture, normal].
+/// </summary>
 DDA BuildDDA(const GzRender& renderer, std::size_t param_index, const ModelPoint& begin, const ModelPoint& end)
 {
 	return renderer.interp_mode == GZ_COLOR
-			? DDA(param_index, { begin.coordinate, phongLighting(renderer, begin.normal) }, { end.coordinate, phongLighting(renderer, end.normal) })
+			? DDA(
+				param_index,
+				{
+					begin.coordinate,
+					begin.texture,
+					phongLighting(renderer, begin.normal)
+				},
+				{
+					end.coordinate,
+					end.texture,
+					phongLighting(renderer, end.normal)
+				}
+			)
 		: renderer.interp_mode == GZ_NORMALS
-			? DDA(param_index, { begin.coordinate, begin.normal }, { end.coordinate, end.normal })
+			? DDA(
+				param_index,
+				{ begin.coordinate, begin.texture, begin.normal },
+				{ end.coordinate, end.texture, end.normal }
+			)
 		: DDA(param_index, { begin.coordinate }, { end.coordinate });
 }
 
@@ -519,6 +546,7 @@ int GzRender::GzPutTriangle(int numParts, GzToken *nameList, GzPointer *valueLis
 -- invoke triangle rasterizer
 */
 	GzCoord* vertices{}, * normals{};
+	GzTextureIndex* textures{};
 	for (int i = 0; i < numParts; ++i)
 		switch (nameList[i]) {
 		case GZ_POSITION:
@@ -527,8 +555,11 @@ int GzRender::GzPutTriangle(int numParts, GzToken *nameList, GzPointer *valueLis
 		case GZ_NORMAL:
 			normals = static_cast<GzCoord*>(valueList[i]);
 			break;
+		case GZ_TEXTURE_INDEX:
+			textures = static_cast<GzTextureIndex*>(valueList[i]);
+			break;
 		}
-	if (!(vertices && normals))
+	if (!(vertices && normals && textures))
 		return GZ_FAILURE;
 
 	typedef std::array<ModelPoint, 3> TriangleModel;
@@ -541,10 +572,11 @@ int GzRender::GzPutTriangle(int numParts, GzToken *nameList, GzPointer *valueLis
 			return GZ_SUCCESS;
 
 		p.normal = valarray<float>(normals[i], 3);
+		p.texture = valarray<float>(textures[i], 2);
 	}
 
 	std::array sorted_by_y = { triangle.cbegin(), triangle.cbegin() + 1, triangle.cbegin() + 2 };
-	typedef TriangleModel::const_iterator ModelIter;
+	typedef TriangleModel::const_iterator ModelIter; 
 	std::ranges::sort(sorted_by_y, [](ModelIter i, ModelIter j) { return i->coordinate[1] < j->coordinate[1]; });
 
 	const auto& y_begin = *sorted_by_y[0],

@@ -1,6 +1,7 @@
 /* Texture functions for cs580 GzLib	*/
 #include    "stdafx.h" 
 #include	"stdio.h"
+#include    <cmath>
 #include	"Gz.h"
 
 GzColor	*image=NULL;
@@ -43,8 +44,27 @@ int tex_fun(float u, float v, GzColor color)
 /* bounds-test u,v to make sure nothing will overflow image array bounds */
 /* determine texture cell corner values and perform bilinear interpolation */
 /* set color to interpolated GzColor value and return */
+    if (!(u >= 0.0f && u <= 1.0f && v >= 0.0f && v <= 1.0f))
+        return GZ_FAILURE;
 
-  
+    using std::ceil;
+    using std::floor;
+    auto scaled_u = u * (xs - 1), scaled_v = v * (ys - 1),
+        floored_float_u = floor(scaled_u), floored_float_v = floor(scaled_v),
+        delta_u = scaled_u - floored_float_u, delta_v = scaled_v - floored_float_v;
+    auto floored_u = static_cast<int>(floored_float_u),
+        floored_v = static_cast<int>(floored_float_v),
+        ceiled_u = static_cast<int>(ceil(scaled_u)),
+        ceiled_v = static_cast<int>(ceil(scaled_v));
+    // Bilinear Coefficients: fc == coefficient for floored v, ceiled u
+    auto cc = delta_u * delta_v, fc = delta_u * (1.0f - delta_v),
+        cf = (1.0f - delta_u) * delta_v, ff = (1.0f - delta_u) * (1.0f - delta_v);
+
+    for (int i = 0; i < 3; ++i)
+        color[i] = image[ceiled_v * xs + ceiled_u][i] * cc
+            + image[ceiled_v * xs + floored_u][i] * cf
+            + image[floored_v * xs + ceiled_u][i] * fc
+            + image[floored_v * xs + floored_u][i] * ff;
 	return GZ_SUCCESS;
 }
 
