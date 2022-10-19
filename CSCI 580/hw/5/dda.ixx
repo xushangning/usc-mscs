@@ -2,6 +2,8 @@ export module dda;
 
 import <valarray>;
 import <cmath>;
+import <numeric>;
+import <ranges>;
 
 import "gz.h";
 
@@ -22,7 +24,7 @@ using std::valarray;
 /// That is, the begin coordinate is included in the container if its parameter
 /// is integral, while the end coordinate is never included.
 /// </remarks>
-export class DDA {
+class DDA {
 public:
     typedef valarray<valarray<float>> value_type;
 
@@ -85,3 +87,61 @@ DDA::DDA(size_t param_index, const value_type& begin, const value_type& end) noe
     // Ensure that begin == end when iteration ends.
     value_end_[0][param_index] = std::ceil(value_end_[0][param_index]);
 }
+
+constexpr float perspectiveCorrectionCoefficient(float z) noexcept
+{
+    return z / (static_cast<float>(std::numeric_limits<GzDepth>::max()) - z);
+}
+
+DDA::value_type toInterpolationSpace(const DDA::value_type& v) noexcept
+{
+    auto result = v;
+    auto c = perspectiveCorrectionCoefficient(v[0][2]);
+    for (auto& x : result | std::views::drop(1))
+        x /= c + 1.0f;
+    return result;
+}
+
+DDA::value_type fromInterpolationSpace(const DDA::value_type& v) noexcept
+{
+    auto result = v;
+    auto c = perspectiveCorrectionCoefficient(v[0][2]);
+    for (auto& x : result | std::views::drop(1))
+        x *= c + 1.0f;
+    return result;
+}
+
+/// <summary>
+/// DDA with perspective correction. It assumes that the first element of the
+/// nested valarray is a 3D coordinate and its z-coordinate is used for
+/// perspective correction.
+/// </summary>
+export class PerspectiveCorrectDDA : public DDA
+{
+public:
+    PerspectiveCorrectDDA(size_t param_index, const value_type& begin, const value_type& end) noexcept
+        : DDA(param_index, toInterpolationSpace(begin), toInterpolationSpace(end)) {}
+
+    class iterator : public DDA::iterator
+    {
+        value_type value_;
+
+        iterator(DDA::iterator&& i) noexcept
+            : DDA::iterator(std::move(i)), value_(fromInterpolationSpace(DDA::iterator::operator*())) {}
+
+    public:
+        iterator& operator++() noexcept
+        {
+            DDA::iterator::operator++();
+            value_ = fromInterpolationSpace(DDA::iterator::operator*());
+            return *this;
+        }
+
+        const value_type& operator*() const noexcept { return value_; }
+
+        friend class PerspectiveCorrectDDA;
+    };
+
+    iterator begin() const noexcept { return iterator(DDA::begin()); }
+    iterator end() const noexcept { return iterator(DDA::end()); }
+};

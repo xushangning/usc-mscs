@@ -455,15 +455,15 @@ valarray<float> phongLighting(const GzRender& renderer, valarray<float> normal)
 /// x-coordinates than the other.
 /// </param>
 void putTrapezoid(
-	GzRender& renderer,
-	DDA::iterator& leader, DDA::iterator& follower, const DDA::iterator& end,
-	bool leader_on_x_begin
+	GzRender& renderer,	PerspectiveCorrectDDA::iterator& leader,
+	PerspectiveCorrectDDA::iterator& follower,
+	const PerspectiveCorrectDDA::iterator& end, bool leader_on_x_begin
 )
 {
 	auto& x_begin = leader_on_x_begin ? leader : follower,
 		& x_end = leader_on_x_begin ? follower : leader;
 	while (leader != end) {
-		DDA x(0, *x_begin, *x_end);		// DDA along the x axis.
+		PerspectiveCorrectDDA x(0, *x_begin, *x_end);		// DDA along the x axis.
 		for (const auto& v : x) {
 			valarray<float> color;
 			switch (renderer.interp_mode) {
@@ -505,10 +505,13 @@ struct ModelPoint { valarray<float> coordinate, normal, texture; };
 /// Construct different DDAs in different interpolation modes. The current
 /// structure of DDA's interpolated value is [coordinate, texture, normal].
 /// </summary>
-DDA BuildDDA(const GzRender& renderer, std::size_t param_index, const ModelPoint& begin, const ModelPoint& end)
+PerspectiveCorrectDDA BuildPerspectiveCorrectDDA(
+	const GzRender& renderer, std::size_t param_index,
+	const ModelPoint& begin, const ModelPoint& end
+)
 {
 	return renderer.interp_mode == GZ_COLOR
-			? DDA(
+			? PerspectiveCorrectDDA(
 				param_index,
 				{
 					begin.coordinate,
@@ -522,12 +525,12 @@ DDA BuildDDA(const GzRender& renderer, std::size_t param_index, const ModelPoint
 				}
 			)
 		: renderer.interp_mode == GZ_NORMALS
-			? DDA(
+			? PerspectiveCorrectDDA(
 				param_index,
 				{ begin.coordinate, begin.texture, begin.normal },
 				{ end.coordinate, end.texture, end.normal }
 			)
-		: DDA(param_index, { begin.coordinate }, { end.coordinate });
+		: PerspectiveCorrectDDA(param_index, { begin.coordinate }, { end.coordinate });
 }
 
 int GzRender::GzPutTriangle(int numParts, GzToken *nameList, GzPointer *valueList)
@@ -601,11 +604,11 @@ int GzRender::GzPutTriangle(int numParts, GzToken *nameList, GzPointer *valueLis
 	if (interp_mode == GZ_FLAT)
 		std::ranges::copy(phongLighting(*this, triangle[0].normal), flatcolor);
 
-	DDA begin_end = BuildDDA(*this, 1, y_begin, y_end);
+	PerspectiveCorrectDDA begin_end = BuildPerspectiveCorrectDDA(*this, 1, y_begin, y_end);
 	auto begin_end_iter = begin_end.begin();
 	if (y_begin.coordinate[1] != y_mid.coordinate[1]) {
 		// Rasterize the part of the triangle with smaller x-coordinates.
-		DDA begin_mid = BuildDDA(*this, 1, y_begin, y_mid);
+		PerspectiveCorrectDDA begin_mid = BuildPerspectiveCorrectDDA(*this, 1, y_begin, y_mid);
 		auto begin_mid_iter = begin_mid.begin();
 
 		putTrapezoid(*this, begin_mid_iter, begin_end_iter, begin_mid.end(), y_mid_on_x_begin);
@@ -613,7 +616,7 @@ int GzRender::GzPutTriangle(int numParts, GzToken *nameList, GzPointer *valueLis
 
 	if (y_mid.coordinate[1] != y_end.coordinate[1]) {
 		// Rasterize the other part of the triangle with larger x-coordinates.
-		DDA mid_end = BuildDDA(*this, 1, y_mid, y_end);
+		PerspectiveCorrectDDA mid_end = BuildPerspectiveCorrectDDA(*this, 1, y_mid, y_end);
 		auto mid_end_iter = mid_end.begin();
 
 		putTrapezoid(*this, mid_end_iter, begin_end_iter, mid_end.end(), y_mid_on_x_begin);
