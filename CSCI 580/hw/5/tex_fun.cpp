@@ -2,6 +2,7 @@
 #include    "stdafx.h" 
 #include	"stdio.h"
 #include    <cmath>
+#include    <algorithm>
 #include	"Gz.h"
 
 GzColor	*image=NULL;
@@ -71,7 +72,11 @@ int tex_fun(float u, float v, GzColor color)
 /* Procedural texture function */
 int ptex_fun(float u, float v, GzColor color)
 {
-
+    constexpr auto N_CHECKERS = 6;
+    auto intensity = static_cast<float>(
+        (static_cast<int>(u * N_CHECKERS) + static_cast<int>(v * N_CHECKERS)) % 2
+    );
+    std::ranges::fill_n(color, 3, intensity);
 	return GZ_SUCCESS;
 }
 
