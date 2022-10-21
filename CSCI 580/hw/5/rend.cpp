@@ -391,11 +391,12 @@ int GzRender::GzPutAttribute(int numAttributes, GzToken	*nameList, GzPointer *va
 		case GZ_DISTRIBUTION_COEFFICIENT:
 			spec = *static_cast<float*>(valueList[i]);
 			break;
+		case GZ_TEXTURE_MAP:
+			tex_fun = static_cast<GzTexture>(valueList[i]);
+			break;
 		}
 	return GZ_SUCCESS;
 }
-
-int tex_fun(float u, float v, GzColor color);
 
 valarray<float> phongLighting(const GzRender& renderer, valarray<float> normal)
 {
@@ -475,7 +476,7 @@ void putTrapezoid(
 				break;
 			case GZ_NORMALS: {
 				GzColor texture;
-				tex_fun(v[1][0], v[1][1], texture);
+				renderer.tex_fun(v[1][0], v[1][1], texture);
 				std::ranges::copy(texture, renderer.Ka);
 				std::ranges::copy(texture, renderer.Kd);
 				color = phongLighting(renderer, v[2] / Norm(v[2]));
