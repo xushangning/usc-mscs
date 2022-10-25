@@ -467,21 +467,23 @@ void putTrapezoid(
 		PerspectiveCorrectDDA x(0, *x_begin, *x_end);		// DDA along the x axis.
 		for (const auto& v : x) {
 			valarray<float> color;
+			GzColor texture;
 			switch (renderer.interp_mode) {
 			case GZ_FLAT:
 				color = { renderer.flatcolor, N_RGB };
 				break;
 			case GZ_COLOR:
-				color = v[2];
+				renderer.tex_fun(v[1][0], v[1][1], texture);
+				color = v[2] * valarray<float>(texture, N_RGB);
+				for (auto& c : color)
+					c = std::min(c, 1.0f);
 				break;
-			case GZ_NORMALS: {
-				GzColor texture;
+			case GZ_NORMALS:
 				renderer.tex_fun(v[1][0], v[1][1], texture);
 				std::ranges::copy(texture, renderer.Ka);
 				std::ranges::copy(texture, renderer.Kd);
 				color = phongLighting(renderer, v[2] / Norm(v[2]));
 				break;
-			}
 			}
 
 			renderer.GzPut(
@@ -601,9 +603,15 @@ int GzRender::GzPutTriangle(int numParts, GzToken *nameList, GzPointer *valueLis
 	// of (y_begin, y_end).
 	bool y_mid_on_x_begin = cross_product > 0;
 
-	// Compute color for flat shading.
 	if (interp_mode == GZ_FLAT)
+		// Compute color for flat shading.
 		std::ranges::copy(phongLighting(*this, triangle[0].normal), flatcolor);
+	else if (interp_mode == GZ_COLOR) {
+		// Set all Phong lighting coefficients to 1 for Gouraud shading.
+		std::ranges::fill(Ka, 1.0f);
+		std::ranges::fill(Kd, 1.0f);
+		std::ranges::fill(Ks, 1.0f);
+	}
 
 	PerspectiveCorrectDDA begin_end = BuildPerspectiveCorrectDDA(*this, 1, y_begin, y_end);
 	auto begin_end_iter = begin_end.begin();
