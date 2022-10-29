@@ -288,6 +288,26 @@ int Application5::Render()
 		return GZ_FAILURE;
 	}
 
+	for (int i = 0; i < m_nWidth; ++i)
+		for (int j = 0; j < m_nHeight; ++j) {
+			float rgb[3]{};
+			for (int k = 0; k < AAKERNEL_SIZE; ++k) {
+				GzIntensity r, g, b;
+				m_pRender[k].GzGet(i, j, &r, &g, &b, nullptr, nullptr);
+				rgb[0] += r * AAFilter[k][2];
+				rgb[1] += g * AAFilter[k][2];
+				rgb[2] += b * AAFilter[k][2];
+			}
+
+			// Can't use GzPut here because z-value is unchanged so we can't
+			// pass the z-buffer test in GzPut, resulting in no value written
+			// if we use GzPut.
+			auto& p = m_pRender[0].pixelbuffer[m_pRender[0].ARRAY(i, j)];
+			p.red = static_cast<GzIntensity>(rgb[0]);
+			p.green = static_cast<GzIntensity>(rgb[1]);
+			p.blue = static_cast<GzIntensity>(rgb[2]);
+		}
+
 	m_pRender->GzFlushDisplay2File(outfile); 	/* write out or update display to file*/
 	m_pRender->GzFlushDisplay2FrameBuffer();	// write out or update display to frame buffer
 
