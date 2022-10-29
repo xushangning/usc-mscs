@@ -394,6 +394,12 @@ int GzRender::GzPutAttribute(int numAttributes, GzToken	*nameList, GzPointer *va
 		case GZ_TEXTURE_MAP:
 			tex_fun = static_cast<GzTexture>(valueList[i]);
 			break;
+		case GZ_AASHIFTX:
+			Xoffset = *static_cast<float*>(valueList[i]);
+			break;
+		case GZ_AASHIFTY:
+			Yoffset = *static_cast<float*>(valueList[i]);
+			break;
 		}
 	return GZ_SUCCESS;
 }
@@ -576,6 +582,9 @@ int GzRender::GzPutTriangle(int numParts, GzToken *nameList, GzPointer *valueLis
 		// Cull triangles with a negative-z vertex.
 		if (!(MatValarrayMul(Ximage[matlevel - 1], p.coordinate) && p.coordinate[2] >= 0))
 			return GZ_SUCCESS;
+
+		p.coordinate[0] += Xoffset;
+		p.coordinate[1] += Yoffset;
 
 		p.normal = valarray<float>(normals[i], 3);
 		p.texture = valarray<float>(textures[i], 2);
