@@ -485,9 +485,11 @@ void putTrapezoid(
 					c = std::min(c, 1.0f);
 				break;
 			case GZ_NORMALS:
-				renderer.tex_fun(v[1][0], v[1][1], texture);
-				std::ranges::copy(texture, renderer.Ka);
-				std::ranges::copy(texture, renderer.Kd);
+				if (renderer.tex_fun) {
+					renderer.tex_fun(v[1][0], v[1][1], texture);
+					std::ranges::copy(texture, renderer.Ka);
+					std::ranges::copy(texture, renderer.Kd);
+				}
 				color = phongLighting(renderer, v[2] / Norm(v[2]));
 				break;
 			}
