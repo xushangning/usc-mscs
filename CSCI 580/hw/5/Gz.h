@@ -31,6 +31,9 @@
 
 #define	GZ_TEXTURE_MAP	1010		/* texture function ptr */
 
+#define GZ_AASHIFTX 1020
+#define GZ_AASHIFTY 1021
+
 /*
  * value-list attributes
  */

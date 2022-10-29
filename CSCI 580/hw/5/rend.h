@@ -40,7 +40,10 @@ public:
 	float		    spec;		/* specular power */
 	GzTexture		tex_fun;    /* tex_fun(float u, float v, GzColor color) */
 
-  	// Constructors
+	// HW6
+	float		Xoffset = 0.0f, Yoffset = 0.0f;
+
+	// Constructors
 	GzRender(int xRes, int yRes);
 	~GzRender();
 
