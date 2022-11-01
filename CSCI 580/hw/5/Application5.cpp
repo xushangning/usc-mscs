@@ -7,6 +7,12 @@
 */
 
 #include "stdafx.h"
+#include <algorithm>
+#include <fstream>
+#include <string>
+#include <iterator>
+#include <execution>
+#include <sstream>
 #include "CS580HW.h"
 #include "Application5.h"
 #include "Gz.h"
@@ -211,7 +217,25 @@ int Application5::Initialize()
 
 int Application5::Render() 
 {
-	for (int i = 0; i < AAKERNEL_SIZE; ++i) {
+	// I/O File open
+	std::ifstream infile(INFILE);
+	if (!infile)
+	{
+		AfxMessageBox("The input file was not opened\n");
+		return GZ_FAILURE;
+	}
+
+	
+	std::string input(std::istreambuf_iterator{ infile }, std::istreambuf_iterator<char>());
+
+	infile.close();
+	if (!infile)
+		AfxMessageBox(_T("The input file was not closed\n"));
+
+	// Per our testing, the sequenctial execution policy is faster than parallel
+	// because multiple threads are contending for the free store in the
+	// parallel case due to our extensive use of valarray.
+	std::for_each_n(std::execution::seq, m_pRender, AAKERNEL_SIZE, [&input](GzRender& renderer) {
 		GzToken		nameListTriangle[3]; 	/* vertex attribute names */
 		GzPointer	valueListTriangle[3]; 	/* vertex attribute pointers */
 		GzCoord		vertexList[3];	/* vertex position coordinates */
@@ -222,7 +246,7 @@ int Application5::Render()
 
 
 		/* Initialize Display */
-		status |= m_pRender[i].GzDefault();  /* init for new frame */
+		status |= renderer.GzDefault();  /* init for new frame */
 
 		/*
 		* Tokens associated with triangle vertex values
@@ -231,37 +255,22 @@ int Application5::Render()
 		nameListTriangle[1] = GZ_NORMAL;
 		nameListTriangle[2] = GZ_TEXTURE_INDEX;
 
-		// I/O File open
-		FILE* infile;
-		if ((infile = fopen(INFILE, "r")) == NULL)
-		{
-			AfxMessageBox("The input file was not opened\n");
-			return GZ_FAILURE;
-		}
+		std::istringstream in(input);
 
 		/*
 		* Walk through the list of triangles, set color
 		* and render each triangle
 		*/
-		while (fscanf(infile, "%s", dummy) == 1) { 	/* read in tri word */
-			fscanf(infile, "%f %f %f %f %f %f %f %f",
-				&(vertexList[0][0]), &(vertexList[0][1]),
-				&(vertexList[0][2]),
-				&(normalList[0][0]), &(normalList[0][1]),
-				&(normalList[0][2]),
-				&(uvList[0][0]), &(uvList[0][1]));
-			fscanf(infile, "%f %f %f %f %f %f %f %f",
-				&(vertexList[1][0]), &(vertexList[1][1]),
-				&(vertexList[1][2]),
-				&(normalList[1][0]), &(normalList[1][1]),
-				&(normalList[1][2]),
-				&(uvList[1][0]), &(uvList[1][1]));
-			fscanf(infile, "%f %f %f %f %f %f %f %f",
-				&(vertexList[2][0]), &(vertexList[2][1]),
-				&(vertexList[2][2]),
-				&(normalList[2][0]), &(normalList[2][1]),
-				&(normalList[2][2]),
-				&(uvList[2][0]), &(uvList[2][1]));
+		while (in >> dummy) { 	/* read in tri word */
+			in >> vertexList[0][0] >> vertexList[0][1] >> vertexList[0][2]
+				>> normalList[0][0] >> normalList[0][1] >> normalList[0][2]
+				>> uvList[0][0] >> uvList[0][1];
+			in >> vertexList[1][0] >> vertexList[1][1] >> vertexList[1][2]
+				>> normalList[1][0] >> normalList[1][1] >> normalList[1][2]
+				>> uvList[1][0] >> uvList[1][1];
+			in >> vertexList[2][0] >> vertexList[2][1] >> vertexList[2][2]
+				>> normalList[2][0] >> normalList[2][1] >> normalList[2][2]
+				>> uvList[2][0] >> uvList[2][1];
 
 			/*
 			 * Set the value pointers to the first vertex of the
@@ -271,15 +280,12 @@ int Application5::Render()
 			valueListTriangle[0] = (GzPointer)vertexList;
 			valueListTriangle[1] = (GzPointer)normalList;
 			valueListTriangle[2] = (GzPointer)uvList;
-			m_pRender[i].GzPutTriangle(3, nameListTriangle, valueListTriangle);
+			renderer.GzPutTriangle(3, nameListTriangle, valueListTriangle);
 		}
-
-		if (fclose(infile))
-			AfxMessageBox(_T("The input file was not closed\n"));
 
 		if (status)
 			return(GZ_FAILURE);
-	}
+	});
 
 	FILE* outfile;
 	if ((outfile = fopen(OUTFILE, "wb")) == NULL)
