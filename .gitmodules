@@ -1,0 +1,3 @@
+[submodule "CSCI 580/project/raytracing-mlt"]
+	path = CSCI 580/project/raytracing-mlt
+	url = ../raytracing-mlt.git
