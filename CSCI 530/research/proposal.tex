@@ -1,0 +1,32 @@
+\documentclass{article}
+
+\usepackage{biblatex}
+\addbibresource{ref.bib}
+
+\usepackage{hyperref}
+
+\title{CSCI 530 Research Proposal}
+\author{Shangning Xu}
+
+\begin{document}
+
+\maketitle
+
+We propose to conduct a literature review on the Great Firewall of China (GFW), a networking system deployed at nation scale to block access to websites from within China, including popular ones such as Facebook, Google, Twitter, and Instagram. Through a survey of existing research on GFW, we hope to present a more complete technical picture of GFW based on understanding of GFW in the current literature. The technical picture should at least includes the following aspects:
+
+\begin{description}
+    \item[Technical capability] GFW is most infamous for the wide range of websites it blocks. What techniques are employed by GFW in website blocking and how do its techniques like DNS poisoning \cite{farnan2016poisoning,anonymous2014towards,nguyen2021how,anonymous2020triplet,lowe2007a} evolve? How do GFW handle network protocols like Tor \cite{winter2012how,dunna2018analyzing}, TLS \cite{frolov2019use}, HTTPS \cite{bock2021even}, and HTML \cite{park2010empirical}? Keyword filtering \cite{weinberg2021chinese}
+    \item[Architecture] What do we understand about the architecture of GFW? What is the physical location of hardware that forms the firewall? How are these devices distributed across China? Researchers have tried to locate where content filtering happens \cite{xu2011internet} and investigated regional variation in filtering \cite{wright2014regional}.
+\end{description}
+
+As an application of our accumulated understanding of GFW through the literature review, we will analyze past and current popular tools used to circumvent GFW e.g., \cite{clayton2006ignoring} to understand their evasion mechanism. Finally, in addition to technical details about GFW, we also hope to cover common methodologies in GFW research \cite{scheitle2018long}.
+
+This research is conducted to paint a more complete technical picture of GFW to identify gaps in existing research and spurn new research ideas. A literature review is all the more necessary for GFW because GFW acts as a black box to all researchers, just like natural science where the nature is the black box. Researchers may propose different theories for different natural phenomena when there is truly one unifying theory that explains all of them. A literature review is a great opportunity to take a 1,000-foot view and piece together all observations on GFW.
+
+A completed literature review is also a valuable resource for attracting and ``on-boarding'' new researchers, who may only have undergraduate-level of computer networking knowledge but are interested in GFW research. It saves their time by organizing exiting research and providing a list of reliable references to get them up to speed with the current research frontier. This advantage of a literature review applies to any literature review on any subject.
+
+Our proposed research is relevant to computer network security, a topic discussed in the course, and more specifically relevant to firewalls and intrusion detection systems (IDS). It provides a real-world example of the deployment of a nation-scale system that incorporate techniques from both firewalls and IDS. It also raises the question of privacy, another topic in the course, and serves as a warning for cautious use of technology.
+
+\printbibliography
+
+\end{document}

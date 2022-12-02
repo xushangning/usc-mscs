@@ -1,0 +1,203 @@
+@inproceedings{clayton2006ignoring,
+  author    = {Clayton, Richard
+               and Murdoch, Steven J.
+               and Watson, Robert N. M.},
+  editor    = {Danezis, George
+               and Golle, Philippe},
+  title     = {Ignoring the Great Firewall of China},
+  booktitle = {Privacy Enhancing Technologies},
+  year      = {2006},
+  publisher = {Springer Berlin Heidelberg},
+  address   = {Berlin, Heidelberg},
+  pages     = {20--35},
+  abstract  = {The so-called ``Great Firewall of China'' operates, in part, by inspecting TCP packets for keywords that are to be blocked. If the keyword is present, TCP reset packets (viz: with the RST flag set) are sent to both endpoints of the connection, which then close. However, because the original packets are passed through the firewall unscathed, if the endpoints completely ignore the firewall's resets, then the connection will proceed unhindered. Once one connection has been blocked, the firewall makes further easy-to-evade attempts to block further connections from the same machine. This latter behaviour can be leveraged into a denial-of-service attack on third-party machines.},
+  isbn      = {978-3-540-68793-1}
+}
+
+@inproceedings{farnan2016poisoning,
+  author    = {Farnan, Oliver and Darer, Alexander and Wright, Joss},
+  title     = {Poisoning the Well: Exploring the Great Firewall's Poisoned DNS Responses},
+  year      = {2016},
+  isbn      = {9781450345699},
+  publisher = {Association for Computing Machinery},
+  address   = {New York, NY, USA},
+  url       = {https://doi.org/10.1145/2994620.2994636},
+  doi       = {10.1145/2994620.2994636},
+  abstract  = {One of the primary filtering methods that the Great Firewall of China (GFW) relies on is poisoning DNS responses for certain domains. When a DNS request is poisoned by the GFW, multiple DNS responses are received - both legitimate and poisoned responses. While most prior research into the GFW focuses on the poisoned responses, ours also considers the legitimate responses from the DNS servers themselves. We find that even when we ignored the immediate poisoned responses, the cache from the DNS servers themselves are also poisoned. We also find and discuss the IP addresses within the DNS responses we get; in particular 9 IP addresses that are returned as a result for many different poisoned domains. We present the argument that this type of attack may not be primarily targeted directly at users, but at the underlying DNS infrastructure within China.},
+  booktitle = {Proceedings of the 2016 ACM on Workshop on Privacy in the Electronic Society},
+  pages     = {95–98},
+  numpages  = {4},
+  keywords  = {internet security, censorship, DNS poisoning, great firewall, china},
+  location  = {Vienna, Austria},
+  series    = {WPES '16}
+}
+
+@article{chengacer,
+  title     = {ACER: detecting Shadowsocks server based on active probe technology},
+  author    = {Cheng, Jiaxing and Li, Ying and Huang, Cheng and Yu, Ailing and Zhang, Tao},
+  journal   = {Journal of Computer Virology and Hacking Techniques},
+  pages     = {1--11},
+  publisher = {Springer}
+}
+
+@inproceedings{anonymous2014towards,
+  title     = {{ Towards} a Comprehensive Picture of the Great {Firewall{\textquoteright}s} {DNS} Censorship},
+  booktitle = {4th USENIX Workshop on Free and Open Communications on the Internet (FOCI 14)},
+  year      = {2014},
+  address   = {San Diego, CA},
+  url       = {https://www.usenix.org/conference/foci14/workshop-program/presentation/anonymous},
+  publisher = {USENIX Association},
+  month     = aug
+}
+
+@inproceedings{dunna2018analyzing,
+  author    = {Arun Dunna and Ciar{\'a}n O{\textquoteright}Brien and Phillipa Gill},
+  title     = {Analyzing China{\textquoteright}s Blocking of Unpublished Tor Bridges},
+  booktitle = {8th USENIX Workshop on Free and Open Communications on the Internet (FOCI 18)},
+  year      = {2018},
+  address   = {Baltimore, MD},
+  url       = {https://www.usenix.org/conference/foci18/presentation/dunna},
+  publisher = {USENIX Association},
+  month     = aug
+}
+
+@inproceedings{frolov2019use,
+  title     = {The use of TLS in Censorship Circumvention.},
+  author    = {Frolov, Sergey and Wustrow, Eric},
+  booktitle = {NDSS},
+  year      = {2019},
+  url       = {https://www.ndss-symposium.org/ndss-paper/the-use-of-tls-in-censorship-circumvention/}
+}
+
+@inproceedings{nguyen2021how,
+  author    = {Nguyen Phong Hoang and Arian Akhavan Niaki and Jakub Dalek and Jeffrey Knockel and Pellaeon Lin and Bill Marczak and Masashi Crete-Nishihata and Phillipa Gill and Michalis Polychronakis},
+  title     = {How Great is the Great Firewall? Measuring China{\textquoteright}s {DNS} Censorship},
+  booktitle = {30th USENIX Security Symposium (USENIX Security 21)},
+  year      = {2021},
+  isbn      = {978-1-939133-24-3},
+  pages     = {3381--3398},
+  url       = {https://www.usenix.org/conference/usenixsecurity21/presentation/hoang},
+  publisher = {USENIX Association},
+  month     = aug
+}
+
+@inproceedings{anonymous2020triplet,
+  author    = {Anonymous and Arian Akhavan Niaki and Nguyen Phong Hoang and Phillipa Gill and Amir Houmansadr},
+  title     = {Triplet Censors: Demystifying Great {Firewall{\textquoteright}s} {DNS} Censorship Behavior},
+  booktitle = {10th USENIX Workshop on Free and Open Communications on the Internet (FOCI 20)},
+  year      = {2020},
+  url       = {https://www.usenix.org/conference/foci20/presentation/anonymous},
+  publisher = {USENIX Association},
+  month     = aug
+}
+
+@inproceedings{bock2021even,
+  author    = {Bock, Kevin and Naval, Gabriel and Reese, Kyle and Levin, Dave},
+  title     = {Even Censors Have a Backup: Examining China's Double HTTPS Censorship Middleboxes},
+  year      = {2021},
+  isbn      = {9781450386401},
+  publisher = {Association for Computing Machinery},
+  address   = {New York, NY, USA},
+  url       = {https://doi.org/10.1145/3473604.3474559},
+  doi       = {10.1145/3473604.3474559},
+  abstract  = {The Great Firewall of China (GFW) has long censored HTTPS (via the Server Name Indication field, or SNI). Its mechanism for doing so has been studied, with various evasion strategies discovered in recent years. In this paper, we have evidence that suggests the GFW has deployed a second HTTPS censorship middlebox that runs in parallel to the first. We present a detailed analysis of this secondary censorship middlebox---how it operates, the content it blocks, and how it interacts with the primary middlebox---and present evidence that this has been in operation since at least September 2019. We also present several packet-based evasion strategies for the secondary middlebox and demonstrate that the primary censorship middlebox can be defeated independently from the secondary. Our code is publicly available.},
+  booktitle = {Proceedings of the ACM SIGCOMM 2021 Workshop on Free and Open Communications on the Internet},
+  pages     = {1–7},
+  numpages  = {7},
+  keywords  = {Geneva, Censorship-in-Depth, Censorship},
+  location  = {Virtual Event, USA},
+  series    = {FOCI '21}
+}
+
+@techreport{lowe2007a,
+  author      = {Graham Lowe and Patrick Winters and Michael L. Marcus},
+  title       = {The Great {DNS} Wall of {China}},
+  institution = {New York University},
+  year        = {2007},
+  url         = {https://censorbib.nymity.ch/pdf/Lowe2007a.pdf}
+}
+
+@inproceedings{xu2011internet,
+  author    = {Xu, Xueyang
+               and Mao, Z. Morley
+               and Halderman, J. Alex},
+  editor    = {Spring, Neil
+               and Riley, George F.},
+  title     = {Internet Censorship in China: Where Does the Filtering Occur?},
+  booktitle = {Passive and Active Measurement},
+  year      = {2011},
+  publisher = {Springer Berlin Heidelberg},
+  address   = {Berlin, Heidelberg},
+  pages     = {133--142},
+  abstract  = {China filters Internet traffic in and out of the country. In order to circumvent the firewall, it is helpful to know where the filtering occurs. In this work, we explore the AS-level topology of China's network, and probe the firewall to find the locations of filtering devices. We find that even though most filtering occurs in border ASes, choke points also exist in many provincial networks. The result suggests that two major ISPs in China have different approaches placing filtering devices.},
+  isbn      = {978-3-642-19260-9}
+}
+
+@inproceedings{park2010empirical,
+  author    = {Park, Jong Chun and Crandall, Jedidiah R.},
+  booktitle = {2010 IEEE 30th International Conference on Distributed Computing Systems},
+  title     = {Empirical Study of a National-Scale Distributed Intrusion Detection System: Backbone-Level Filtering of HTML Responses in China},
+  year      = {2010},
+  volume    = {},
+  number    = {},
+  pages     = {315-326},
+  doi       = {10.1109/ICDCS.2010.46}
+}
+
+@article{wright2014regional,
+  author    = {Joss Wright},
+  title     = {Regional variation in Chinese internet filtering},
+  journal   = {Information, Communication \& Society},
+  volume    = {17},
+  number    = {1},
+  pages     = {121-141},
+  year      = {2014},
+  publisher = {Routledge},
+  doi       = {10.1080/1369118X.2013.853818},
+  url       = {https://doi.org/10.1080/1369118X.2013.853818},
+  eprint    = {https://doi.org/10.1080/1369118X.2013.853818}
+}
+
+@inproceedings{weinberg2021chinese,
+  author    = {Weinberg, Zachary and Barradas, Diogo and Christin, Nicolas},
+  title     = {Chinese Wall or Swiss Cheese? Keyword Filtering in the Great Firewall of China},
+  year      = {2021},
+  isbn      = {9781450383127},
+  publisher = {Association for Computing Machinery},
+  address   = {New York, NY, USA},
+  url       = {https://doi.org/10.1145/3442381.3450076},
+  doi       = {10.1145/3442381.3450076},
+  booktitle = {Proceedings of the Web Conference 2021},
+  pages     = {472–483},
+  numpages  = {12},
+  keywords  = {Measurement, Keyword filtering, Censorship},
+  location  = {Ljubljana, Slovenia},
+  series    = {WWW '21}
+}
+
+@inproceedings{winter2012how,
+  title     = {How the Great Firewall of China is Blocking Tor},
+  booktitle = {2nd USENIX Workshop on Free and Open Communications on the Internet (FOCI 12)},
+  year      = {2012},
+  address   = {Bellevue, WA},
+  url       = {https://www.usenix.org/conference/foci12/workshop-program/presentation/Winter},
+  publisher = {USENIX Association},
+  month     = aug
+}
+
+@inproceedings{scheitle2018long,
+  author    = {Scheitle, Quirin and Hohlfeld, Oliver and Gamba, Julien and Jelten, Jonas and Zimmermann, Torsten and Strowes, Stephen D. and Vallina-Rodriguez, Narseo},
+  title     = {A Long Way to the Top: Significance, Structure, and Stability of Internet Top Lists},
+  year      = {2018},
+  isbn      = {9781450356190},
+  publisher = {Association for Computing Machinery},
+  address   = {New York, NY, USA},
+  url       = {https://doi.org/10.1145/3278532.3278574},
+  doi       = {10.1145/3278532.3278574},
+  abstract  = {A broad range of research areas including Internet measurement, privacy, and network security rely on lists of target domains to be analysed; researchers make use of target lists for reasons of necessity or efficiency. The popular Alexa list of one million domains is a widely used example. Despite their prevalence in research papers, the soundness of top lists has seldom been questioned by the community: little is known about the lists' creation, representativity, potential biases, stability, or overlap between lists.In this study we survey the extent, nature, and evolution of top lists used by research communities. We assess the structure and stability of these lists, and show that rank manipulation is possible for some lists. We also reproduce the results of several scientific studies to assess the impact of using a top list at all, which list specifically, and the date of list creation. We find that (i) top lists generally overestimate results compared to the general population by a significant margin, often even an order of magnitude, and (ii) some top lists have surprising change characteristics, causing high day-to-day fluctuation and leading to result instability. We conclude our paper with specific recommendations on the use of top lists, and how to interpret results based on top lists with caution.},
+  booktitle = {Proceedings of the Internet Measurement Conference 2018},
+  pages     = {478–493},
+  numpages  = {16},
+  location  = {Boston, MA, USA},
+  series    = {IMC '18}
+}
