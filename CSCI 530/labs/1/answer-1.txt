@@ -1,0 +1,5 @@
+pub   rsa3072 2022-08-26 [SC] [expires: 2024-08-25]
+      5623248A54E609878581F496ED3F657D6592C2D9
+uid           [ultimate] Shining Xu <shangnin@usc.edu>
+sub   rsa3072 2022-08-26 [E] [expires: 2024-08-25]
+

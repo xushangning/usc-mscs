@@ -1,0 +1,17 @@
+-- BEGIN RESPONSE TEXT --
+This response includes the token "sn@u" which you should include in your
+lab solution.
+
+On 8/26/2022 12:51 PM, Shining Xu wrote:
+> My email address is shangnin@usc.edu and my key fingerprint is
+> 5623248A54E609878581F496ED3F657D6592C2D9. I am sending this message to
+> csci530@usc.edu
+-- END RESPONSE TEXT --
+
+> gpg --verify OpenPGP_signature.asc email-body.txt
+gpg: Signature made 三  9/ 7 11:23:02 2022 PDT
+gpg:                using RSA key ACF88618FA29DA6C4A9AC92EA76D0D67A74EAE19
+gpg: Good signature from "Aziza Saulebay <saulebay@usc.edu>" [unknown]
+gpg: WARNING: This key is not certified with a trusted signature!
+gpg:          There is no indication that the signature belongs to the owner.
+Primary key fingerprint: ACF8 8618 FA29 DA6C 4A9A  C92E A76D 0D67 A74E AE19

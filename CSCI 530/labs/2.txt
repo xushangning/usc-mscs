@@ -1,0 +1,9 @@
+1. a) 1
+    b) 100 000
+    c) 4096
+    d) 409 600 000
+    e) 38.5024
+2. a) There are 50 * 365 = 18250 days or 18250 * 24 = 438 000 hours in 50 years. According to the spreadsheet, the length of numbers-only passwords that require at least 50 years to crack is 17.
+    b) 18
+    c) 25
+    d) 13, if we take the upcoming computing power into account.
