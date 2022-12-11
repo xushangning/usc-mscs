@@ -41,13 +41,19 @@
 }
 
 @inproceedings{anonymous2014towards,
-  title     = {{ Towards} a Comprehensive Picture of the Great {Firewall{\textquoteright}s} {DNS} Censorship},
-  booktitle = {4th USENIX Workshop on Free and Open Communications on the Internet (FOCI 14)},
-  year      = {2014},
+  author    = {Anonymous},
+  editor    = {Jedidiah R. Crandall and
+               Vern Paxson},
+  title     = {Towards a Comprehensive Picture of the Great Firewall's {DNS} Censorship},
+  booktitle = {4th {USENIX} Workshop on Free and Open Communications on the Internet,
+               {FOCI} '14, San Diego, CA, USA, August 18, 2014},
+  publisher = {{USENIX} Association},
   address   = {San Diego, CA},
+  year      = {2014},
   url       = {https://www.usenix.org/conference/foci14/workshop-program/presentation/anonymous},
-  publisher = {USENIX Association},
-  month     = aug
+  timestamp = {Mon, 01 Feb 2021 08:42:59 +0100},
+  biburl    = {https://dblp.org/rec/conf/uss/X14.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
 }
 
 @inproceedings{dunna2018analyzing,
@@ -176,13 +182,19 @@
 }
 
 @inproceedings{winter2012how,
+  author    = {Philipp Winter and
+               Stefan Lindskog},
+  editor    = {Roger Dingledine and
+               Joss Wright},
   title     = {How the Great Firewall of China is Blocking Tor},
-  booktitle = {2nd USENIX Workshop on Free and Open Communications on the Internet (FOCI 12)},
+  booktitle = {2nd {USENIX} Workshop on Free and Open Communications on the Internet,
+               {FOCI} '12, Bellevue, WA, USA, August 6, 2012},
+  publisher = {{USENIX} Association},
   year      = {2012},
-  address   = {Bellevue, WA},
-  url       = {https://www.usenix.org/conference/foci12/workshop-program/presentation/Winter},
-  publisher = {USENIX Association},
-  month     = aug
+  url       = {https://www.usenix.org/conference/foci12/workshop-program/presentation/winter},
+  timestamp = {Mon, 01 Feb 2021 08:43:10 +0100},
+  biburl    = {https://dblp.org/rec/conf/uss/WinterL12.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
 }
 
 @inproceedings{scheitle2018long,
@@ -200,4 +212,104 @@
   numpages  = {16},
   location  = {Boston, MA, USA},
   series    = {IMC '18}
+}
+
+@inproceedings{detecting-forged-tcp-reset,
+  author    = {Nicholas Weaver and
+               Robin Sommer and
+               Vern Paxson},
+  title     = {Detecting Forged {TCP} Reset Packets},
+  booktitle = {Proceedings of the Network and Distributed System Security Symposium,
+               {NDSS} 2009, San Diego, California, USA, 8th February - 11th February
+               2009},
+  publisher = {The Internet Society},
+  year      = {2009},
+  url       = {https://www.ndss-symposium.org/ndss2009/detecting-forged-tcp-reset-packets/},
+  address   = {San Diego, CA, USA},
+  timestamp = {Mon, 01 Feb 2021 08:42:17 +0100},
+  biburl    = {https://dblp.org/rec/conf/ndss/WeaverSP09.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@inproceedings{geneva,
+  author    = {Bock, Kevin and Hughey, George and Qiang, Xiao and Levin, Dave},
+  title     = {Geneva: Evolving Censorship Evasion Strategies},
+  year      = {2019},
+  isbn      = {9781450367479},
+  publisher = {Association for Computing Machinery},
+  address   = {New York, NY, USA},
+  url       = {https://doi.org/10.1145/3319535.3363189},
+  doi       = {10.1145/3319535.3363189},
+  abstract  = {Researchers and censoring regimes have long engaged in a cat-and-mouse game, leading to increasingly sophisticated Internet-scale censorship techniques and methods to evade them. In this paper, we take a drastic departure from the previously manual evade-detect cycle by developing techniques to automate the discovery of censorship evasion strategies. We present Geneva, a novel genetic algorithm that evolves packet-manipulation-based censorship evasion strategies against nation-state level censors. Geneva composes, mutates, and evolves sophisticated strategies out of four basic packet manipulation primitives (drop, tamper headers, duplicate, and fragment). With experiments performed both in-lab and against several real censors (in China, India, and Kazakhstan), we demonstrate that Geneva is able to quickly and independently re-derive most strategies from prior work, and derive novel subspecies and altogether new species of packet manipulation strategies. Moreover, Geneva discovers successful strategies that prior work posited were not effective, and evolves extinct strategies into newly working variants. We analyze the novel strategies Geneva creates to infer previously unknown behavior in censors. Geneva is a first step towards automating censorship evasion; to this end, we have made our code and data publicly available.},
+  booktitle = {Proceedings of the 2019 ACM SIGSAC Conference on Computer and Communications Security},
+  pages     = {2199–2214},
+  numpages  = {16},
+  keywords  = {genetic algorithms, Geneva, censorship},
+  location  = {London, United Kingdom},
+  series    = {CCS '19}
+}
+
+@inproceedings{ChaiGH19,
+  author    = {Zimo Chai and
+               Amirhossein Ghafari and
+               Amir Houmansadr},
+  editor    = {Susan E. McGregor and
+               Michael Carl Tschantz},
+  title     = {On the Importance of Encrypted-SNI {(ESNI)} to Censorship Circumvention},
+  booktitle = {9th {USENIX} Workshop on Free and Open Communications on the Internet,
+               {FOCI} 2019, Santa Clara, CA, USA, August 13, 2019},
+  publisher = {{USENIX} Association},
+  year      = {2019},
+  url       = {https://www.usenix.org/conference/foci19/presentation/chai},
+  address   = {Santa Clara, CA, USA},
+  timestamp = {Mon, 01 Feb 2021 08:43:06 +0100},
+  biburl    = {https://dblp.org/rec/conf/uss/ChaiGH19.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@inproceedings{wang2017your,
+  author    = {Wang, Zhongjie and Cao, Yue and Qian, Zhiyun and Song, Chengyu and Krishnamurthy, Srikanth V.},
+  title     = {Your State is Not Mine: A Closer Look at Evading Stateful Internet Censorship},
+  year      = {2017},
+  isbn      = {9781450351188},
+  publisher = {Association for Computing Machinery},
+  address   = {New York, NY, USA},
+  url       = {https://doi.org/10.1145/3131365.3131374},
+  doi       = {10.1145/3131365.3131374},
+  abstract  = {Understanding the behaviors of, and evading state-level Internet-scale censorship systems such as the Great Firewall (GFW) of China, has emerged as a research problem of great interest. One line of evasion is the development of techniques that leverage the possibility that the TCP state maintained on the GFW may not represent the state at end-hosts. In this paper we undertake, arguably, the most extensive measurement study on TCP-level GFW evasion techniques, with several vantage points within and outside China, and with clients subscribed to multiple ISPs. We find that the state-of-the art evasion techniques are no longer very effective on the GFW. Our study further reveals that the primary reason that causes these failures is the evolution of GFW over time. In addition, other factors such as the presence of middleboxes on the route from the client to the server also contribute to previously unexpected behaviors.Our measurement study leads us to new understandings of the GFW and new evasion techniques. Evaluations of our new evasion strategies show that our new techniques provide much higher success rates of (compared to prior schemes) ≈ 90\% or higher. Our results further validate our new understandings of the GFW's evolved behaviors. We also develop a measurement-driven tool INTANG, that systematically looks for and finds the best strategy that works with a server and network path. Our measurements show that INTANG can yield near perfect evasion rates and is extremely effective in aiding various protocols such as HTTP, DNS over TCP, and Tor in evading the GFW.},
+  booktitle = {Proceedings of the 2017 Internet Measurement Conference},
+  pages     = {114–127},
+  numpages  = {14},
+  keywords  = {INTANG, TCP, the great firewall of china, censorship circumvention, traffic manipulation},
+  location  = {London, United Kingdom},
+  series    = {IMC '17}
+}
+
+@online{wilde2012great,
+  author  = {Tim Wilde},
+  title   = {Great Firewall Tor Probing Circa 09 DEC 2011},
+  organization = {Team Cymru, Inc.},
+  year    = {2012},
+  month   = {jan},
+  day     = {6},
+  url     = {https://gist.github.com/twilde/da3c7a9af01d74cd7de7},
+  lastaccessed = {December 9th, 2022}
+}
+
+@inproceedings{ensafi2015examining,
+  author    = {Ensafi, Roya and Fifield, David and Winter, Philipp and Feamster, Nick and Weaver, Nicholas and Paxson, Vern},
+  title     = {Examining How the Great Firewall Discovers Hidden Circumvention Servers},
+  year      = {2015},
+  isbn      = {9781450338486},
+  publisher = {Association for Computing Machinery},
+  address   = {New York, NY, USA},
+  url       = {https://doi.org/10.1145/2815675.2815690},
+  doi       = {10.1145/2815675.2815690},
+  abstract  = {Recently, the operators of the national censorship infrastructure of China began to employ "active probing" to detect and block the use of privacy tools. This probing works by passively monitoring the network for suspicious traffic, then actively probing the corresponding servers, and blocking any that are determined to run circumvention servers such as Tor.We draw upon multiple forms of measurements, some spanning years, to illuminate the nature of this probing. We identify the different types of probing, develop fingerprinting techniques to infer the physical structure of the system, localize the sensors that trigger probing---showing that they differ from the "Great Firewall" infrastructure---and assess probing's efficacy in blocking different versions of Tor. We conclude with a discussion of the implications for designing circumvention servers that resist such probing mechanisms.},
+  booktitle = {Proceedings of the 2015 Internet Measurement Conference},
+  pages     = {445–458},
+  numpages  = {14},
+  keywords  = {deep packet inspection, censorship circumvention, tor, active probing, great firewall of China},
+  location  = {Tokyo, Japan},
+  series    = {IMC '15}
 }
