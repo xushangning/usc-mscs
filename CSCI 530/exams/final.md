@@ -4,32 +4,32 @@
 
 ### 1
 
-a) No data authentication
+a) No data integrity
 
-3, 4
+- 3: Irrelevant
+- 4
+- 7: (Irrelevant) Modified HTTP content served by an ARP-spoofing attacker wont't be detected by the firewall.
 
-- 7: Modified HTTP content served by an ARP-spoofing attacker wont't be detected by the firewall.
+b) No authentication
 
-b) No key authentication
-
-3, 4, 7
+- 3
+- 4, 7: Irrelevant or wrong
 
 c)
 
-- 6: Compromise of the KDC allows the attacker to steal credentials.
-- 8: You can definitely do untrusted computation on trusted hardware.
-- ~~5~~: An IDS can detect privilege escalation of programs that normally shouldn't have privilege.
-- ~~7~~: The firewall can inspect a packet's payload and match it against existing rules to ensure that services running on the computer won't be exploited.
+- 6: Compromise of the KDC allows the attacker to steal credentials, but the prof said it was irrelevant.
+- ~~8~~: You can definitely do untrusted computation on trusted hardware. However, the problem here is that subversion means another backdoor program is installed, rather than an existing (trusted) program is compromised. When a new backdoor program is installed, maybe it doesn't even have access to files due to the fine-grained access control to persistent resources.
+- 5, 7: The question is that if the subversion has happened, are these mechanisms vulnerable? Also, unlike encryption, firewalls and IDS can't prevent 100% of subversion.
 
 d)
 
 - 6: The software that implements Kerberos is definitely exploitable by worms.
-- 8: Computing hardware is trusted but the computation itself shouldn't be trusted.
+- 8: Computing hardware is trusted but the computation itself shouldn't be trusted. This is the only answer prof chose.
 - ~~5~~: IDS can detect a worm's anomalous behaviors.
 
-e) 1, 2, 3, 5, 6, 7, 8
+e) 1, 2, 6
 
-f) 1, 6, 7
+f) 6
 
 - ~~5~~: An IDS can flag phishing emails and notify users of failed login attempts.
 
@@ -38,7 +38,7 @@ f) 1, 6, 7
 1. Attestation is the authentication of computer systems and is implemented by TPM in the following steps:
     1. When each piece of hardware or software is loaded, it will call TPM's extend operation to first, check the current value of PCR to ensure that underlying hardware is not tampered and second, set PCR to the hash value of a combination of the previous PCR and the hardware's own hash.
     2. A computer system will regularly report its attestation status with TPM's quote operation, which signs the current value of PCR with its private endorsement key and reports the signature over network to ensure the integrity of computation.
-2. In IPSec, both the client and the server are authenticated, while in HTTPS only the server is authenticated. Finally, in authentication performed by an application, only the client is authenticated.
+2. In IPSec, the subject in authentication is the computer, while in HTTPS the subject in authentication is the running web server process. Finally, in authentication performed by an application, only the subject in authentication is the user. (Of course, these differences are fundamentally due to the layers they are operating.)
 3. The zones in DNSSEC corresponds to CAs in TLS and the combination of zone signing keys and key signing keys correspond to certificates in TLS. Like the PKI of TLS, DNSSEC also establishes a hierarchy of zones where the parent zone signs the child zone's ZSK with its own ZSK, while resource records in a zone are signed by KSK, which are in turn signed by ZSK of that zone.
 4. Here are the advantages of a network-based IDS:
     - Network-based intrusion detection systems provide higher availability and are more resilient because failure in one IDS doesn't affect the operation of others, while a monolithic IDS is a single point of failure in the entire system.
