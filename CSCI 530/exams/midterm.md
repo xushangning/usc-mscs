@@ -60,26 +60,34 @@ PGP or GPG | Yes | Yes | Client public key | Server public key | Directory servi
 
 ### 1
 
-1. 1, 4
-2. 4, 5, 6
-3. 1
-4. 2
-5. 1, 2
-6. 1, 3, 6
-7. 5, 6
+a) 4, 6
+
+- ~~1~~: Considered a minor characteristic because although the security classification assigned to each object is associated with objects, the policy itself is not associated with objects.
+
+b) 5
+
+c) 1
+
+d) 2
+
+e) 1, 2
+
+f) 1 (minor), 3, 6
+
+g) 5
 
 ### 2
 
 1. Expiration date
-    1. Because as time passes, there is growing probability that the issued certificate or ticket is compromised and no longer valid.
+    1. Because as time passes, there is growing probability that the issued certificate or ticket is compromised e.g., brute-forced and no longer valid. The expiration date also ensures that if the key is stolen or guessed or brute-forced, the adversary won't be able to impersonate you using the compromised key indefinitely.
     2. A longer lifetime adds to the ease of use for users and reduces burden on the revocation mechanism, when there are fewer certificates that need to be revoked. A shorter lifetime gives high assurance on the validity of credentials.
     3. Because in Kerberos there is a trusted third-party KDC that handles the revocation.
 2. Nonce and timestamp
     1. They defend against replay attacks and ace used in authentication in public key cryptography.
-    2. Timestamps are easier to generate than nonces but require a synchronized clock. Nonces don’t require a synchronized clock but need to keep the seed confidential for pseudo-random number generator or have a good source of randomness.
+    2. Timestamps are easier to generate than nonces but require a synchronized clock. Nonces simplify the protocol because when timestamps are used, the validator must accept a range of timestamps, instead of a single value like nonce due to impreciseness of clocks. The range of acceptable timestamps is the time window in which messages can be replayed, so additional mechanism must be designed to defend against replay attacks.
 3. Because during authentication with mag stripe cards, the card reader can read the complete key from the card, unlike other physical devices like Yubikeys, making the stripe cards easy to be replicated. Just like attacks on passwords, once an adversary gets a copy of your stripe card key, they don’t need the original physical card anymore and can “replay” just the key.
 4. The public key is obtained from the list of trusted CA stored in the browser. If we had an incorrect public key for the CA, the connection would fail because the browser couldn’t validate the certificate provided by the server. If we accepted the public key of CA not worthy of our trust, when combined with a man-in-the middle attack, the CA issuer might be able to decrypt the connection and read the communication.
-5. Intermediate transmission infrastructure may enable man-in-the-middle attacks, where the infrastructure participates in key exchange and offer its own key to the communication parties. The implication is that the infrastructure will be able to read all the communication in between.
+5. Intermediate transmission infrastructure may enable man-in-the-middle attacks, where the infrastructure participates in key exchange and offer its own key to the communication parties. The implication is that the infrastructure will be able to read all the communication in between or to impersonate people in Whatsapp and ask for your credentials or requset money transfer.
 
 ### 3
 
@@ -88,8 +96,9 @@ PGP or GPG | Yes | Yes | Client public key | Server public key | Directory servi
     2. A public facing LAUSD website that is just set up may lack TLS. When a teacher or an administrator logs into the website on public Wi-Fi network and is observed by the adversary, they may be able eavesdrop on the connection and steal the credentials. With credentials, they can scout for information on the website used for phishing attacks.
     3. Due to misconfiguration on the firewall, an unguarded internal computer is exposed to the internet that should have been limited to internal network. The adversary found the computer by scanning the LAUSD’s IP rang, use the computer to hop into the internal network and install the ransomware on the computer.
 2. Policy and access control
-    1. The Bell-Lapadula model should be applied, and data should have different security classification. For example, credentials and policy enforcement mechanisms like firewalls should be kept top secret. Few people will have the ability to read or write these data. Other data like internal meetings should have the second-highest security classification. Finally, data like PR releases and promotional brochures should be kept unclassified. Data with different classification should be compartmented to prevent complete compromise and ransom attempt.
-    2. The Biba model should also be implemented here to safeguard the integrity of computer systems. Data produced by different computer systems should have different integrity levels. For example, data stored and produced by public-facing servers and LAUSD-issued laptops should have the lowest integrity level. Systems with higher integrity levels should only be able to write to, but not read from public-facing servers. Systems in the internal network should have a higher integrity level and systems directly managed by the incident response team should have the highest integrity level. In this way, if only the
+    1. Least privilege
+    2. Role-based access models
+    3. The Biba model should also be implemented here to safeguard the integrity of computer systems. Data produced by different computer systems should have different integrity levels. For example, data stored and produced by public-facing servers and LAUSD-issued laptops should have the lowest integrity level. Systems with higher integrity levels should only be able to write to, but not read from public-facing servers. Systems in the internal network should have a higher integrity level and systems directly managed by the incident response team should have the highest integrity level. In this way, if only the
 3. Authentication
     1. A federated identity solution like Shibboleth should be deployed across LAUSD to enable single sign-on for computer systems to reduce the possibility of a breach in a weak credential management system.
     2. Multi-factor authentication should be enabled across all users. Students, parents and even teachers may only need SMS-based or Duo-based authentication on their phone. District and school administrators should carry physical devices like Yubikeys for enhanced security.
