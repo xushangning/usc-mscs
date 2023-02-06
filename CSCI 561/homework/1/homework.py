@@ -1,6 +1,6 @@
 from enum import IntEnum
 from collections import deque
-from typing import Optional, Dict, Tuple, Iterable
+from typing import Optional, Dict, Tuple, Iterator
 import typing
 from heapq import heappop, heappush
 from argparse import ArgumentParser
@@ -41,12 +41,12 @@ def can_ski(current: int, successor: int, stamina: int, momentum: int) -> bool:
     return current >= abs(successor) or (0 <= successor <= current + stamina + momentum)
 
 
-Path = Iterable[Tuple[int, int]]
+Path = Iterator[Tuple[int, int]]
 
 
 def reconstruct_path(
     start: Tuple[int, int], lodge2cost: Dict[Tuple[int, int], Optional[int]], predecessor: np.ndarray
-) -> Iterable[Optional[Tuple[int, Path]]]:
+) -> Iterator[Optional[Tuple[int, Path]]]:
     for v_tuple, cost in lodge2cost.items():
         if cost is None:
             yield None
@@ -65,7 +65,7 @@ def reconstruct_path(
 
 def bfs(
     terrain: np.ndarray, start: np.ndarray, lodges: np.ndarray, stamina: int
-) -> Iterable[Optional[Tuple[int, Path]]]:
+) -> Iterator[Optional[Tuple[int, Path]]]:
     lodge2cost = dict.fromkeys(map(tuple, lodges))
     n_lodges_done = 0
 
@@ -100,7 +100,7 @@ def bfs(
 
 def ucs(
     terrain: np.ndarray, start: np.ndarray, lodges: np.ndarray, stamina: int
-) -> Iterable[Optional[Tuple[int, Path]]]:
+) -> Iterator[Optional[Tuple[int, Path]]]:
     lodge2cost = dict.fromkeys(map(tuple, lodges))
     n_lodges_done = 0
 
@@ -151,7 +151,7 @@ def heuristic(n: np.ndarray, n_elevation: int, momentum: int, goal: np.ndarray, 
 
 def a_star(
     terrain: np.ndarray, start: np.ndarray, lodges: np.ndarray, stamina: int
-) -> Iterable[Optional[Tuple[int, Path]]]:
+) -> Iterator[Optional[Tuple[int, Path]]]:
     # A state's predecessor in A* is now represented by its previous action and
     # the predecessor's momentum.
     Predecessor = Tuple[Action, int]
