@@ -3,6 +3,7 @@ from collections import deque
 from typing import Optional, Dict, Tuple, Iterable
 import typing
 from heapq import heappop, heappush
+from argparse import ArgumentParser
 
 import numpy as np
 
@@ -43,61 +44,64 @@ def can_ski(current: int, successor: int, stamina: int, momentum: int) -> bool:
 Path = Iterable[Tuple[int, int]]
 
 
-def reconstruct_paths(
-    start: Tuple[int, int], lodges: np.ndarray, predecessor: np.ndarray
-) -> Iterable[Optional[Path]]:
-    for v in lodges:
-        action_path = None
-        v_tuple = tuple(v)
-        if predecessor[v_tuple] != Action.NONE:
-            reversed_action_path = []
-            while True:
-                reversed_action_path.append(v_tuple)
-                if v_tuple == start:
-                    break
-                v -= ACTIONS[predecessor[v_tuple] - 1]
-                v_tuple = tuple(v)
-            action_path = reversed(reversed_action_path)
+def reconstruct_path(
+    start: Tuple[int, int], lodge2cost: Dict[Tuple[int, int], Optional[int]], predecessor: np.ndarray
+) -> Iterable[Optional[Tuple[int, Path]]]:
+    for v_tuple, cost in lodge2cost.items():
+        if cost is None:
+            yield None
+            continue
 
-        yield action_path
+        v = np.array(v_tuple, dtype='int32')
+        reversed_action_path = []
+        while True:
+            reversed_action_path.append(v_tuple)
+            if v_tuple == start:
+                break
+            v -= ACTIONS[predecessor[v_tuple] - 1]
+            v_tuple = tuple(v)
+        yield cost, reversed(reversed_action_path)
 
 
 def bfs(
     terrain: np.ndarray, start: np.ndarray, lodges: np.ndarray, stamina: int
-) -> Iterable[Optional[Path]]:
-    lodge_set = frozenset(map(tuple, lodges))
+) -> Iterable[Optional[Tuple[int, Path]]]:
+    lodge2cost = dict.fromkeys(map(tuple, lodges))
     n_lodges_done = 0
 
     predecessor = np.zeros_like(terrain, dtype='int8')
     start_tuple = tuple(start)
     predecessor[start_tuple] = Action.START
     frontier = deque((start,))
+    level = 1
     while frontier:
-        current = frontier.popleft()
-        current_tuple = tuple(current)
+        for _ in range(len(frontier)):
+            current = frontier.popleft()
+            current_tuple = tuple(current)
 
-        for direction, action in enumerate(ACTIONS, 1):
-            successor = current + action
-            if 0 <= successor[0] < terrain.shape[0] and 0 <= successor[1] < terrain.shape[1]:
-                successor_tuple = tuple(successor)
-                if (predecessor[successor_tuple] == Action.NONE
-                        and can_ski(terrain[current_tuple], terrain[successor_tuple], stamina, 0)):
-                    frontier.append(successor)
-                    predecessor[successor_tuple] = direction
+            for direction, action in enumerate(ACTIONS, 1):
+                successor = current + action
+                if 0 <= successor[0] < terrain.shape[0] and 0 <= successor[1] < terrain.shape[1]:
+                    successor_tuple = tuple(successor)
+                    if (predecessor[successor_tuple] == Action.NONE
+                            and can_ski(terrain[current_tuple], terrain[successor_tuple], stamina, 0)):
+                        frontier.append(successor)
+                        predecessor[successor_tuple] = direction
 
-                    if successor_tuple in lodge_set:
-                        n_lodges_done += 1
+                        if successor_tuple in lodge2cost:
+                            lodge2cost[successor_tuple] = level
+                            n_lodges_done += 1
+            if n_lodges_done == lodges.shape[0]:
+                break
+        level += 1
 
-        if n_lodges_done == lodges.shape[0]:
-            break
-
-    return reconstruct_paths(start_tuple, lodges, predecessor)
+    return reconstruct_path(start_tuple, lodge2cost, predecessor)
 
 
 def ucs(
     terrain: np.ndarray, start: np.ndarray, lodges: np.ndarray, stamina: int
-) -> Iterable[Optional[Path]]:
-    lodge_set = frozenset(map(tuple, lodges))
+) -> Iterable[Optional[Tuple[int, Path]]]:
+    lodge2cost = dict.fromkeys(map(tuple, lodges))
     n_lodges_done = 0
 
     predecessor = np.zeros_like(terrain, dtype='int8')
@@ -111,7 +115,8 @@ def ucs(
         else:
             continue
 
-        if current_tuple in lodge_set:
+        if current_tuple in lodge2cost:
+            lodge2cost[current_tuple] = cost
             n_lodges_done += 1
             if n_lodges_done == lodges.shape[0]:
                 break
@@ -126,7 +131,7 @@ def ucs(
                     successor_cost = cost + (14 if action[0] and action[1] else 10)
                     heappush(frontier, (successor_cost, successor_tuple, typing.cast(Action, direction)))
 
-    return reconstruct_paths(start_tuple, lodges, predecessor)
+    return reconstruct_path(start_tuple, lodge2cost, predecessor)
 
 
 def heuristic(n: np.ndarray, n_elevation: int, goal: np.ndarray, goal_elevation: int) -> int:
@@ -141,7 +146,7 @@ def heuristic(n: np.ndarray, n_elevation: int, goal: np.ndarray, goal_elevation:
 
 def a_star(
     terrain: np.ndarray, start: np.ndarray, lodges: np.ndarray, stamina: int
-) -> Iterable[Optional[Path]]:
+) -> Iterable[Optional[Tuple[int, Path]]]:
     # A state's predecessor in A* is now represented by its previous action and
     # the predecessor's momentum.
     Predecessor = Tuple[Action, int]
@@ -158,7 +163,7 @@ def a_star(
         predecessor: Dict[Tuple[Tuple[int, int], int], Predecessor] = {}
         start_state: Tuple[Tuple[int, int], int] = (tuple(start), 0)
         frontier = [(0, start_state, (Action.START, 0))]
-        action_path: Optional[Path] = None
+        cost_action_path: Optional[Tuple[int, Path]] = None
         while frontier:
             cost, current_state, pred = heappop(frontier)
 
@@ -179,7 +184,7 @@ def a_star(
                     action, momentum = predecessor[current_state]
                     current -= ACTIONS[action - 1]
                     current_state = (tuple(current), momentum)
-                action_path = reversed(reversed_action_path)
+                cost_action_path = cost, reversed(reversed_action_path)
                 break
 
             current_elevation = abs(terrain[current_tuple])
@@ -205,12 +210,16 @@ def a_star(
                                 (typing.cast(Action, direction), momentum)
                             )
                         )
-        yield action_path
+        yield cost_action_path
 
 
 ALGORITHMS = {'BFS': bfs, 'UCS': ucs, 'A*': a_star}
 
 if __name__ == '__main__':
+    parser = ArgumentParser()
+    parser.add_argument('--print-cost', action='store_true')
+    args = parser.parse_args()
+
     with open('input.txt', 'r') as f_in:
         f_iter = iter(f_in)
         algorithm = next(f_iter).rstrip('\n')
@@ -228,5 +237,12 @@ if __name__ == '__main__':
         coordinate[0], coordinate[1] = coordinate[1], coordinate[0]
 
     with open('output.txt', 'w') as f_out:
-        for path in ALGORITHMS[algorithm](terrain, start, lodges, stamina):
-            print('FAIL' if path is None else ' '.join(f'{x},{y}' for y, x in path), file=f_out)
+        for cost_path in ALGORITHMS[algorithm](terrain, start, lodges, stamina):
+            s = 'FAIL'
+            if cost_path is not None:
+                cost, path = cost_path
+                s = ''
+                if args.print_cost:
+                    s += str(cost) + ' '
+                s += ' '.join(f'{x},{y}' for y, x in path)
+            print(s, file=f_out)
