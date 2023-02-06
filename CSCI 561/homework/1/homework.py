@@ -152,9 +152,7 @@ def a_star(
     Predecessor = Tuple[Action, int]
 
     # Lodge -> Predecessor
-    lodge_predecessor: Dict[Tuple[int, int], Optional[Predecessor]] = dict(
-        (tuple(lodge), None) for lodge in lodges
-    )
+    lodge_predecessor: Dict[Tuple[int, int], Optional[Predecessor]] = dict.fromkeys(map(tuple, lodges))
 
     for lodge_tuple in lodge_predecessor:
         lodge = np.array(lodge_tuple, dtype='int32')
@@ -162,7 +160,10 @@ def a_star(
 
         predecessor: Dict[Tuple[Tuple[int, int], int], Predecessor] = {}
         start_state: Tuple[Tuple[int, int], int] = (tuple(start), 0)
-        frontier = [(0, start_state, (Action.START, 0))]
+        frontier = [(
+            heuristic(start, terrain[start_state[0]], lodge, lodge_elevation),
+            start_state, (Action.START, 0)
+        )]
         cost_action_path: Optional[Tuple[int, Path]] = None
         while frontier:
             cost, current_state, pred = heappop(frontier)
