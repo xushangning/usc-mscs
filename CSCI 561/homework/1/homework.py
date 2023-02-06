@@ -134,14 +134,19 @@ def ucs(
     return reconstruct_path(start_tuple, lodge2cost, predecessor)
 
 
-def heuristic(n: np.ndarray, n_elevation: int, goal: np.ndarray, goal_elevation: int) -> int:
-    """The heuristic is the sum of a diagonal distance and elevation difference
-    between n and the goal state. The distance is the minimum cost of a path
-    that can extend horizontally, vertically or 45-degree diagonally.
+def elevation_change_cost(current: int, successor: int, momentum: int) -> int:
+    """The cost of changing elevation from current to successor with momentum."""
+    return max(0, successor - current - momentum)
+
+
+def heuristic(n: np.ndarray, n_elevation: int, momentum: int, goal: np.ndarray, goal_elevation: int) -> int:
+    """The heuristic gives the minimum cost to reach the goal from n if rules
+    about elevation are ignored.
 
     n_elevation and goal_elevation can't be negative."""
     sides = abs(n - goal)
-    return max(sides) * 14 + abs(sides[0] - sides[1]) * 10 + max(0, goal_elevation - abs(n_elevation))
+    return min(sides) * 14 + abs(sides[0] - sides[1]) * 10\
+        + elevation_change_cost(n_elevation, goal_elevation, momentum)
 
 
 def a_star(
@@ -161,7 +166,7 @@ def a_star(
         predecessor: Dict[Tuple[Tuple[int, int], int], Predecessor] = {}
         start_state: Tuple[Tuple[int, int], int] = (tuple(start), 0)
         frontier = [(
-            heuristic(start, terrain[start_state[0]], lodge, lodge_elevation),
+            heuristic(start, terrain[start_state[0]], 0, lodge, lodge_elevation),
             start_state, (Action.START, 0)
         )]
         cost_action_path: Optional[Tuple[int, Path]] = None
@@ -189,7 +194,7 @@ def a_star(
                 break
 
             current_elevation = abs(terrain[current_tuple])
-            current_path_cost = cost - heuristic(current, current_elevation, lodge, lodge_elevation)
+            current_path_cost = cost - heuristic(current, current_elevation, momentum, lodge, lodge_elevation)
             for direction, action in enumerate(ACTIONS, 1):
                 successor = current + typing.cast(np.ndarray, action)
                 if 0 <= successor[0] < terrain.shape[0] and 0 <= successor[1] < terrain.shape[1]:
@@ -199,10 +204,11 @@ def a_star(
                     successor_momentum = max(0, current_elevation - successor_elevation_abs)
                     successor_state = (successor_tuple, successor_momentum)
                     if (successor_state not in predecessor
-                            and can_ski(current_elevation, successor_elevation, stamina, successor_momentum)):
+                            and can_ski(current_elevation, successor_elevation, stamina, momentum)):
                         successor_cost = current_path_cost\
                             + (14 if action[0] and action[1] else 10)\
-                            + heuristic(successor, successor_elevation_abs, lodge, lodge_elevation)
+                            + elevation_change_cost(current_elevation, successor_elevation_abs, momentum)\
+                            + heuristic(successor, successor_elevation_abs, successor_momentum, lodge, lodge_elevation)
                         heappush(
                             frontier,
                             (
