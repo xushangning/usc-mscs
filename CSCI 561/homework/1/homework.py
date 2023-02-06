@@ -156,11 +156,8 @@ def a_star(
     # the predecessor's momentum.
     Predecessor = Tuple[Action, int]
 
-    # Lodge -> Predecessor
-    lodge_predecessor: Dict[Tuple[int, int], Optional[Predecessor]] = dict.fromkeys(map(tuple, lodges))
-
-    for lodge_tuple in lodge_predecessor:
-        lodge = np.array(lodge_tuple, dtype='int32')
+    for lodge in lodges:
+        lodge_tuple = tuple(lodge)
         lodge_elevation = terrain[lodge_tuple]
 
         predecessor: Dict[Tuple[Tuple[int, int], int], Predecessor] = {}
