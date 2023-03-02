@@ -1,3 +1,5 @@
+from argparse import ArgumentParser
+
 from numpy.typing import NDArray
 import numpy as np
 
@@ -99,3 +101,32 @@ def encrypt(padded_message: bytes, key: bytes) -> bytes:
     state = shift_rows(state)
     state ^= schedule[Nr * Nb:(Nr + 1) * Nb]
     return state.tobytes()
+
+
+KEY_SIZE = Nk * BYTES_PER_WORD
+
+
+def parse_key(s: str) -> bytes:
+    key = bytes.fromhex(s)
+    if len(key) != KEY_SIZE:
+        raise ValueError(f'Key must be {KEY_SIZE} bytes long.')
+    return key
+
+
+def pad_iso_iec_7816_4(message: bytes, block_size: int) -> bytes:
+    return message + b'\x80' + b'\x00' * (block_size - (len(message) + 1) % block_size)
+
+
+if __name__ == '__main__':
+    parser = ArgumentParser()
+    parser.add_argument('key', type=parse_key)
+    parser.add_argument('message')
+    args = parser.parse_args()
+
+    BLOCK_SIZE = Nb * BYTES_PER_WORD
+    padded_message = pad_iso_iec_7816_4(args.message.encode('utf-8'), BLOCK_SIZE)
+    ciphertext = b''
+    # ECB mode
+    for i in range(0, len(padded_message), BLOCK_SIZE):
+        ciphertext += encrypt(padded_message[i: i + BLOCK_SIZE], args.key)
+    print(ciphertext.hex())
