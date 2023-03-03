@@ -6,6 +6,7 @@ from aesencrypt import (
     expand, galois_field_2_to_8th_mul, galois_field_2_to_8th_mat_mul,
     MIX_COLUMNS_COEFFICIENTS, encrypt
 )
+from aesdecrypt import decrypt
 
 
 class TestAES(TestCase):
@@ -57,11 +58,10 @@ class TestAES(TestCase):
             for j in range(expected.shape[1]):
                 self.assertEqual(expected[i, j], result[i, j])
 
-    def test_encrypt(self):
+    def test_encrypt_decrypt(self):
         # Example from Appendix B of the AES Standard
         plaintext = b'\x32\x43\xf6\xa8\x88\x5a\x30\x8d\x31\x31\x98\xa2\xe0\x37\x07\x34'
+        ciphertext = b'\x39\x25\x84\x1d\x02\xdc\x09\xfb\xdc\x11\x85\x97\x19\x6a\x0b\x32'
         key = self.KEY.tobytes()
-        self.assertEqual(
-            b'\x39\x25\x84\x1d\x02\xdc\x09\xfb\xdc\x11\x85\x97\x19\x6a\x0b\x32',
-            encrypt(plaintext, key)
-        )
+        self.assertEqual(ciphertext, encrypt(plaintext, key))
+        self.assertEqual(plaintext, decrypt(ciphertext, key))

@@ -117,13 +117,14 @@ def pad_iso_iec_7816_4(message: bytes, block_size: int) -> bytes:
     return message + b'\x80' + b'\x00' * (block_size - (len(message) + 1) % block_size)
 
 
+BLOCK_SIZE = Nb * BYTES_PER_WORD
+
 if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument('key', type=parse_key)
     parser.add_argument('message')
     args = parser.parse_args()
 
-    BLOCK_SIZE = Nb * BYTES_PER_WORD
     padded_message = pad_iso_iec_7816_4(args.message.encode('utf-8'), BLOCK_SIZE)
     ciphertext = b''
     # ECB mode
