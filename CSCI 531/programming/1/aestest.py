@@ -1,10 +1,12 @@
 from unittest import TestCase
+from secrets import token_hex
+import subprocess
 
 import numpy as np
 
 from aesencrypt import (
     expand, galois_field_2_to_8th_mul, galois_field_2_to_8th_mat_mul,
-    MIX_COLUMNS_COEFFICIENTS, encrypt
+    MIX_COLUMNS_COEFFICIENTS, encrypt, KEY_SIZE
 )
 from aesdecrypt import decrypt
 
@@ -65,3 +67,20 @@ class TestAES(TestCase):
         key = self.KEY.tobytes()
         self.assertEqual(ciphertext, encrypt(plaintext, key))
         self.assertEqual(plaintext, decrypt(ciphertext, key))
+
+
+if __name__ == '__main__':
+    message = input('Please enter a one-line message to encrypt: ')
+
+    key = token_hex(KEY_SIZE)
+    print(f'The randomly generated key is {key}.')
+
+    ciphertext = subprocess.run(
+        ('python3', 'aesencrypt.py', key, message), capture_output=True
+    ).stdout.decode('ascii').rstrip('\n')
+    print(f'The ciphertext:', ciphertext)
+
+    plaintext = subprocess.run(
+        ('python3', 'aesdecrypt.py', key, ciphertext), capture_output=True
+    ).stdout.decode('ascii').rstrip('\n')
+    print(f'The decrypted plaintext:', plaintext)
