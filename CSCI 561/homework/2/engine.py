@@ -103,6 +103,24 @@ class Pente:
     def to_algebraic_notation(cls, i, j):
         return str(i + 1) + cls.COLUMN_HEADERS[j]
 
+    @classmethod
+    def load_homework_input(cls, file_path):
+        board = cls()
+        with open(file_path) as f:
+            f_iter = iter(f)
+            board.is_white_s_turn = next(f_iter).rstrip('\n') == 'WHITE'
+            remaining_time = float(next(f_iter).rstrip('\n'))
+
+            captures = tuple(map(int, next(f_iter).rstrip('\n').split(' ')))
+            board.pairs_captured[0] = captures[1]
+            board.pairs_captured[1] = captures[0]
+
+            for i, line in enumerate(f):
+                for j, piece in enumerate(line.rstrip('\n')):
+                    if piece != '.':
+                        board._state[cls.BOARD_LENGTH - i - 1][j] = piece == 'w'
+        return board, remaining_time
+
 
 PLAYER_STATE_FILE_NAME = 'playdata.txt'
 BACKED_UP_PLAYER_STATE_FILE_NAME = '{}_' + PLAYER_STATE_FILE_NAME
