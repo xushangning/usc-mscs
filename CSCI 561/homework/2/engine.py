@@ -99,6 +99,68 @@ class Pente:
                 '.' if piece is None else 'w' if piece else 'b' for piece in row
             ))
 
+    def evaluate(self):
+        shape_score = 0
+        for i, row in enumerate(self._state):
+            for j, piece in enumerate(row):
+                if piece is None:
+                    continue
+
+                for di, dj in self.DIRECTIONS:
+                    streak_length = 1
+                    surrounding_positions = 0
+                    ti = i
+                    tj = j
+                    for _ in range(self.N_PIECES_WIN - 1):
+                        ti += di
+                        tj += dj
+                        if self.on_board(ti, tj) and self._state[ti][tj] is piece:
+                            streak_length += 1
+                        else:
+                            break
+                    if self.on_board(ti, tj) and self._state[ti][tj] is None:
+                        surrounding_positions += 1
+
+                    ti = i
+                    tj = j
+                    for _ in range(self.N_PIECES_WIN - 1):
+                        ti -= di
+                        tj -= dj
+                        if self.on_board(ti, tj) and self._state[ti][tj] is piece:
+                            streak_length += 1
+                        else:
+                            break
+                    if self.on_board(ti, tj) and self._state[ti][tj] is None:
+                        surrounding_positions += 1
+
+                    if piece is self.is_white_s_turn:
+                        if streak_length == 2:
+                            shape_score += 5 * surrounding_positions
+                        elif streak_length == 3:
+                            shape_score += 100 * surrounding_positions
+                        elif streak_length == 4:
+                            shape_score += 250 * surrounding_positions
+                    else:
+                        if streak_length == 2:
+                            if surrounding_positions == 1:
+                                shape_score += 50
+                            elif surrounding_positions == 2:
+                                shape_score -= 10
+                        elif streak_length == 3:
+                            shape_score -= 80 * surrounding_positions
+                        elif streak_length == 4:
+                            shape_score -= 125 * surrounding_positions
+
+        player_index = int(self.is_white_s_turn)
+        capture_score = self.pairs_captured[player_index] - self.pairs_captured[1 - player_index]
+        retval = shape_score + (1000 - shape_score) * capture_score // self.N_CAPTURES_WIN
+
+        if retval > 1000:
+            retval = 1000
+        if not self.is_white_s_turn:
+            retval = -retval
+        return retval
+
     @classmethod
     def to_algebraic_notation(cls, i, j):
         return str(i + 1) + cls.COLUMN_HEADERS[j]
