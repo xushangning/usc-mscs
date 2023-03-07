@@ -8,10 +8,9 @@ from engine import Pente, PLAYER_STATE_FILE_NAME
 DEFAULT_MAX_DEPTH = 3
 
 
-def minimax(
-    game: Pente, alpha: int = - Pente.MAX_UTILITY, beta: int = Pente.MAX_UTILITY,
-    max_depth=DEFAULT_MAX_DEPTH
-) -> Tuple[int, Tuple[int, int]]:
+def minimax(game: Pente, max_depth=DEFAULT_MAX_DEPTH) -> Tuple[int, Tuple[int, int]]:
+    alpha = -Pente.MAX_UTILITY
+    beta = Pente.MAX_UTILITY
     best_move = (0, 0)
     if game.is_white_s_turn:
         best_utility = - Pente.MAX_UTILITY
@@ -117,7 +116,16 @@ if __name__ == '__main__':
             else:
                 move = Pente.to_algebraic_notation(Pente.CENTER_POS, 6 if dj < 0 else 12)
     else:
-        move = Pente.to_algebraic_notation(*minimax(game)[1])
+        with open('calibrate.txt', 'rb') as f:
+            depth_to_run_time = pickle.load(f)
+        estimated_remaining_turns = 13 - game.turn
+        remaining_time_ms = int(remaining_time * 1000)
+        max_depth = 1
+        for max_depth, run_time in reversed(depth_to_run_time.items()):
+            if run_time * estimated_remaining_turns < remaining_time_ms:
+                break
+
+        move = Pente.to_algebraic_notation(*minimax(game, max_depth)[1])
 
     state['turn'] += 1
     with open(state_file_path, 'wb') as f:
