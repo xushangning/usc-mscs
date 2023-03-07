@@ -1,3 +1,4 @@
+from typing import Tuple
 from pathlib import Path
 import pickle
 from copy import deepcopy
@@ -10,7 +11,7 @@ DEFAULT_MAX_DEPTH = 3
 def minimax(
     game: Pente, alpha: int = - Pente.MAX_UTILITY, beta: int = Pente.MAX_UTILITY,
     max_depth=DEFAULT_MAX_DEPTH
-) -> tuple[int, tuple[int, int]]:
+) -> Tuple[int, Tuple[int, int]]:
     best_move = (0, 0)
     if game.is_white_s_turn:
         best_utility = - Pente.MAX_UTILITY

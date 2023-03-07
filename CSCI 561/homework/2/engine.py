@@ -1,11 +1,11 @@
-from typing import Optional
+from typing import Tuple, List, Optional, Union
 from argparse import ArgumentParser
 from pathlib import Path
 import subprocess
 
 
 class Pente:
-    State = tuple[list[Optional[bool]], ...]
+    State = Tuple[List[Optional[bool]], ...]
 
     BOARD_LENGTH = 19
     CENTER_POS = 9
@@ -58,7 +58,7 @@ class Pente:
                 return True
         return False
 
-    def move(self, pos: str | tuple[int, int]):
+    def move(self, pos: Union[str, Tuple[int, int]]):
         if isinstance(pos, str):
             i = int(pos[:-1]) - 1
             j = self.COLUMN_HEADERS.index(pos[-1])
