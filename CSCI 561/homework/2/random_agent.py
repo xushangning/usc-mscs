@@ -5,9 +5,7 @@ import random
 
 from engine import Pente, PLAYER_STATE_FILE_NAME
 
-DIRECTIONS = (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1)
 NEXT_MOVE_RADIUS = 2
-CENTER_POS = 9
 
 
 def play(state) -> str:
@@ -28,7 +26,7 @@ def play(state) -> str:
     next_positions = set()
     if is_white_s_turn and state['turn'] == 1:
         # Follow the rule that alleviate the first-player advantage.
-        pieces.remove((CENTER_POS, CENTER_POS))
+        pieces.remove((Pente.CENTER_POS, Pente.CENTER_POS))
         black_piece = next(iter(pieces))
         # The second white piece must be at least three intersections away from the first.
         next_positions.update((
@@ -37,17 +35,17 @@ def play(state) -> str:
         ))
 
         bi, bj = black_piece
-        for di, dj in DIRECTIONS:
+        for di, dj in Pente.DIRECTIONS:
             i = bi
             j = bj
             for _ in range(NEXT_MOVE_RADIUS):
                 i += di
                 j += dj
-                if Pente.on_board(i, j) and abs(i - CENTER_POS) >= 3 and abs(j - CENTER_POS) >= 3:
+                if Pente.on_board(i, j) and abs(i - Pente.CENTER_POS) >= 3 and abs(j - Pente.CENTER_POS) >= 3:
                     next_positions.add((i, j))
     else:
         for i, j in pieces:
-            for di, dj in DIRECTIONS:
+            for di, dj in Pente.DIRECTIONS:
                 ti = i
                 tj = j
                 for _ in range(NEXT_MOVE_RADIUS):

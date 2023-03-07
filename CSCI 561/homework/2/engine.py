@@ -8,9 +8,13 @@ class Pente:
     State = tuple[list[Optional[bool]], ...]
 
     BOARD_LENGTH = 19
+    CENTER_POS = 9
     COLUMN_HEADERS = 'ABCDEFGHJKLMNOPQRST'
-    DIRECTIONS = (1, 0), (0, 1), (1, 1), (-1, 1)
+    AXES = (1, 0), (0, 1), (1, 1), (-1, 1)
+    DIRECTIONS = (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1)
     N_PIECES_WIN = N_CAPTURES_WIN = 5
+    MAX_UTILITY = 1000
+    NEXT_MOVE_RADIUS = 2
 
     def __init__(self):
         self.result: Optional[bool] = None
@@ -46,20 +50,24 @@ class Pente:
             first_j = j + dj
             second_i = i + 2 * di
             second_j = j + 2 * dj
-            if (self._state[first_i][first_j] is not self._state[i][j]
-                    and self._state[second_i][second_j] is not self._state[i][j]):
+            opponent = not self._state[i][j]
+            if (self._state[first_i][first_j] is opponent
+                    and self._state[second_i][second_j] is opponent):
                 self._state[first_i][first_j] = None
                 self._state[second_i][second_j] = None
                 return True
         return False
 
-    def move(self, pos: str):
-        i = int(pos[:-1]) - 1
-        j = self.COLUMN_HEADERS.index(pos[-1])
+    def move(self, pos: str | tuple[int, int]):
+        if isinstance(pos, str):
+            i = int(pos[:-1]) - 1
+            j = self.COLUMN_HEADERS.index(pos[-1])
+        else:
+            i, j = pos
         self._state[i][j] = self.is_white_s_turn
 
         player_index = int(self.is_white_s_turn)
-        for di, dj in self.DIRECTIONS:
+        for di, dj in self.AXES:
             # Check five in a sequence.
             n_same_color = (1 + self._count_same_color_pieces(i, j, di, dj)
                             + self._count_same_color_pieces(i, j, -di, -dj))
@@ -92,12 +100,16 @@ class Pente:
 
     def print(self):
         """Pretty print for readability."""
+        print('Captures: W', self.pairs_captured[1], self.pairs_captured[0], 'B')
+
         print('  ', ' '.join(self.COLUMN_HEADERS))
         for i, row in enumerate(reversed(self._state)):
             print(format(self.BOARD_LENGTH - i, '2d'), end=' ')
             print(' '.join(
                 '.' if piece is None else 'w' if piece else 'b' for piece in row
             ))
+        # Numeric column headers for debugging with numeric coordinates.
+        print(' ', ''.join(format(i, '2d') for i in range(self.BOARD_LENGTH)))
 
     def evaluate(self):
         shape_score = 0
@@ -106,7 +118,7 @@ class Pente:
                 if piece is None:
                     continue
 
-                for di, dj in self.DIRECTIONS:
+                for di, dj in self.AXES:
                     streak_length = 1
                     surrounding_positions = 0
                     ti = i
@@ -153,13 +165,32 @@ class Pente:
 
         player_index = int(self.is_white_s_turn)
         capture_score = self.pairs_captured[player_index] - self.pairs_captured[1 - player_index]
-        retval = shape_score + (1000 - shape_score) * capture_score // self.N_CAPTURES_WIN
+        retval = shape_score + (self.MAX_UTILITY - shape_score) * capture_score // self.N_CAPTURES_WIN
 
-        if retval > 1000:
-            retval = 1000
+        if retval > self.MAX_UTILITY:
+            retval = self.MAX_UTILITY
         if not self.is_white_s_turn:
             retval = -retval
         return retval
+
+    def next_moves(self):
+        generated_moves = set()
+        for i, row in enumerate(self._state):
+            for j, piece in enumerate(row):
+                if piece is None:
+                    continue
+
+                for di, dj in self.DIRECTIONS:
+                    ti = i
+                    tj = j
+                    for _ in range(self.NEXT_MOVE_RADIUS):
+                        ti += di
+                        tj += dj
+                        if self.on_board(ti, tj) and self._state[ti][tj] is None:
+                            the_move = ti, tj
+                            if the_move not in generated_moves:
+                                generated_moves.add(the_move)
+                                yield the_move
 
     @classmethod
     def to_algebraic_notation(cls, i, j):
@@ -173,7 +204,7 @@ class Pente:
             board.is_white_s_turn = next(f_iter).rstrip('\n') == 'WHITE'
             remaining_time = float(next(f_iter).rstrip('\n'))
 
-            captures = tuple(map(int, next(f_iter).rstrip('\n').split(' ')))
+            captures = tuple(map(int, next(f_iter).rstrip('\n').split(',')))
             board.pairs_captured[0] = captures[1]
             board.pairs_captured[1] = captures[0]
 
@@ -210,7 +241,6 @@ if __name__ == '__main__':
         if backed_up_state_file_path.exists():
             backed_up_state_file_path.rename(state_file_path)
 
-        print(f'Turn {game.turn},', color.capitalize())
         with open('input.txt', 'w') as f:
             print(color.upper(), file=f)
             print(remaining_time[player_index], file=f)
@@ -222,6 +252,7 @@ if __name__ == '__main__':
         if state_file_path.exists():
             state_file_path.rename(backed_up_state_file_path)
         move = open('output.txt').read().rstrip('\n')
+        print(f'Turn {game.turn}, {color.capitalize()}:', move)
         game.move(move)
         game.print()
         print()
