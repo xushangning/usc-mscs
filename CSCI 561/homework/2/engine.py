@@ -175,22 +175,82 @@ class Pente:
 
     def next_moves(self):
         generated_moves = set()
+        ordered_moves: list[list[tuple[int, int]]] = [
+            [],     # killer moves that secures the win e.g., unbounded 3 to 4
+            [],     # defence moves if not taken resulting in a loss
+            [],     # captures
+            [],     # extend a streak of two to three
+            [],     # the rest
+        ]
+        pieces = []
         for i, row in enumerate(self._state):
             for j, piece in enumerate(row):
                 if piece is None:
                     continue
+                pieces.append((i, j))
 
                 for di, dj in self.DIRECTIONS:
-                    ti = i
-                    tj = j
-                    for _ in range(self.NEXT_MOVE_RADIUS):
-                        ti += di
-                        tj += dj
-                        if self.on_board(ti, tj) and self._state[ti][tj] is None:
-                            the_move = ti, tj
-                            if the_move not in generated_moves:
-                                generated_moves.add(the_move)
-                                yield the_move
+                    ti = i + di
+                    tj = j + dj
+                    if self.on_board(ti, tj) and self._state[ti][tj] is None:
+                        move = ti, tj
+                        if move not in generated_moves:
+                            player_index = int(self.is_white_s_turn)
+                            priority = len(ordered_moves) - 1
+                            for ei, ej in self.DIRECTIONS:
+                                streak_lengths = [0, 0]
+                                # True if the surrounding position is occupied
+                                # by the opponent's piece or out of the board.
+                                no_bounds = [False] * 2
+                                for k in range(len(streak_lengths)):
+                                    k_is_white = bool(k)
+                                    ui = ti
+                                    uj = tj
+                                    for _ in range(self.N_PIECES_WIN - 1):
+                                        ui += ei
+                                        uj += ej
+                                        if self.on_board(ui, uj) and self._state[ui][uj] is k_is_white:
+                                            streak_lengths[k] += 1
+                                        else:
+                                            break
+                                    if self.on_board(ui, uj) and self._state[ui][uj] is None:
+                                        no_bounds[k] = True
+
+                                our_streak_length = streak_lengths[player_index]
+                                opponent_streak_length = streak_lengths[1 - player_index]
+                                opponent_no_bound = no_bounds[1 - player_index]
+                                if our_streak_length == 4:
+                                    # an outright win
+                                    yield move
+                                elif our_streak_length == 3 and no_bounds[player_index]:
+                                    priority = 0
+                                    break
+                                if (opponent_streak_length == 4 and not opponent_no_bound
+                                        or opponent_streak_length == 3 and opponent_no_bound):
+                                    priority = min(priority, 1)
+                                elif opponent_streak_length == 2 and not opponent_no_bound:
+                                    priority = min(priority, 2)
+                                elif our_streak_length == 2:
+                                    priority = min(priority, 3)
+
+                            ordered_moves[priority].append(move)
+                            generated_moves.add(move)
+        for l in ordered_moves:
+            for move in l:
+                yield move
+
+        for i, j in pieces:
+            for di, dj in self.DIRECTIONS:
+                ti = i + di
+                tj = j + dj
+                for _ in range(1, self.NEXT_MOVE_RADIUS):
+                    ti += di
+                    tj += dj
+                    if self.on_board(ti, tj) and self._state[ti][tj] is None:
+                        move = ti, tj
+                        if move not in generated_moves:
+                            generated_moves.add(move)
+                            yield move
 
     @classmethod
     def to_algebraic_notation(cls, i, j):

@@ -45,10 +45,10 @@ def minimax(game: Pente, max_depth=DEFAULT_MAX_DEPTH) -> Tuple[int, Tuple[int, i
 
 
 def minimax_recursive(game: Pente, depth: int, max_depth: int, alpha: int, beta: int) -> int:
-    if depth > max_depth:
-        return game.evaluate()
     if game.result is not None:
         return game.MAX_UTILITY if game.result else - game.MAX_UTILITY
+    if depth > max_depth:
+        return game.evaluate()
 
     depth += 1
     if game.is_white_s_turn:
