@@ -280,10 +280,19 @@ BACKED_UP_PLAYER_STATE_FILE_NAME = '{}_' + PLAYER_STATE_FILE_NAME
 
 if __name__ == '__main__':
     parser = ArgumentParser()
-    parser.add_argument('white', help='command line for the white player')
-    parser.add_argument('black', help='command line for the black player')
+    parser.add_argument(
+        'white',
+        help='Command line for the white player. Use dash ("-") to read the move from stdin.'
+    )
+    parser.add_argument(
+        'black',
+        help='Command line for the black player. Use dash ("-") to read the move from stdin.'
+    )
     args = parser.parse_args()
-    commands = args.black.split(' '), args.white.split(' ')
+    commands = (
+        None if args.black == '-' else args.black.split(' '),
+        None if args.white == '-' else args.white.split(' ')
+    )
 
     # Remove state files from previous games.
     state_file_path = Path(PLAYER_STATE_FILE_NAME)
@@ -296,23 +305,28 @@ if __name__ == '__main__':
     while game.result is None:
         player_index = int(game.is_white_s_turn)
         color = 'white' if game.is_white_s_turn else 'black'
+        prompt = f'Turn {game.turn}, {color.capitalize()}:'
 
-        backed_up_state_file_path = Path(BACKED_UP_PLAYER_STATE_FILE_NAME.format(color))
-        if backed_up_state_file_path.exists():
-            backed_up_state_file_path.rename(state_file_path)
+        if (command := commands[player_index]) is None:
+            move = input(prompt + ' ')
+        else:
+            backed_up_state_file_path = Path(BACKED_UP_PLAYER_STATE_FILE_NAME.format(color))
+            if backed_up_state_file_path.exists():
+                backed_up_state_file_path.rename(state_file_path)
 
-        with open('input.txt', 'w') as f:
-            print(color.upper(), file=f)
-            print(remaining_time[player_index], file=f)
-            print(f'{game.pairs_captured[1]},{game.pairs_captured[0]}', file=f)
-            f.write(str(game))
+            with open('input.txt', 'w') as f:
+                print(color.upper(), file=f)
+                print(remaining_time[player_index], file=f)
+                print(f'{game.pairs_captured[1]},{game.pairs_captured[0]}', file=f)
+                f.write(str(game))
 
-        subprocess.run(commands[player_index])
+            subprocess.run(command)
 
-        if state_file_path.exists():
-            state_file_path.rename(backed_up_state_file_path)
-        move = open('output.txt').read().rstrip('\n')
-        print(f'Turn {game.turn}, {color.capitalize()}:', move)
+            if state_file_path.exists():
+                state_file_path.rename(backed_up_state_file_path)
+            move = open('output.txt').read().rstrip('\n')
+            print(prompt, move)
+
         game.move(move)
         game.print()
         print()
