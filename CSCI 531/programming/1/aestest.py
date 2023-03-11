@@ -1,5 +1,6 @@
 from unittest import TestCase
 from secrets import token_hex
+import sys
 import subprocess
 
 import numpy as np
@@ -76,11 +77,11 @@ if __name__ == '__main__':
     print(f'The randomly generated key is {key}.')
 
     ciphertext = subprocess.run(
-        ('python3', 'aesencrypt.py', key, message), capture_output=True
+        (sys.executable, 'aesencrypt.py', key, message), capture_output=True
     ).stdout.decode('ascii').rstrip('\n')
     print(f'The ciphertext:', ciphertext)
 
     plaintext = subprocess.run(
-        ('python3', 'aesdecrypt.py', key, ciphertext), capture_output=True
+        (sys.executable, 'aesdecrypt.py', key, ciphertext), capture_output=True
     ).stdout.decode('ascii').rstrip('\n')
     print(f'The decrypted plaintext:', plaintext)
