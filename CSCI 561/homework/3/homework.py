@@ -9,18 +9,59 @@ class KnowledgeBase:
         '&': 2,
         '~': 3,
     }
+    LOGICAL_OPERATORS = {'|', '&', '~'}
 
     @staticmethod
     def _is_name(s: str):
         return s[0] in ascii_letters
 
-    def __init__(self):
-        self._next_var_id = 0
+    @classmethod
+    def _is_complex_sentence(cls, node):
+        return isinstance(node, list) and node[0] in cls.LOGICAL_OPERATORS
 
-    def _parse(self, sentence: str):
+    @classmethod
+    def _is_atomic_sentence(cls, node):
+        return not cls._is_complex_sentence(node)
+
+    @classmethod
+    def _negate(cls, node, to_negate: bool):
+        """Push down negation in a pre-order traversal."""
+        if cls._is_atomic_sentence(node):
+            return ['~', node] if to_negate else node
+
+        if node[0] == '~':
+            to_negate = not to_negate
+            node = cls._negate(node[1], to_negate)
+        else:
+            # node must be a conjunction or disjunction.
+            if to_negate:
+                node[0] = '&' if node[0] == '|' else '|'
+            node[1] = cls._negate(node[1], to_negate)
+            node[2] = cls._negate(node[2], to_negate)
+
+        return node
+
+    @classmethod
+    def _distribute(cls, node):
+        """Distribute | over & in a post-order traversal."""
+        if not (isinstance(node, list) and node[0] in '|&'):
+            # node is a literal.
+            return (node,),
+
+        left_conjunction = cls._distribute(node[1])
+        right_conjunction = cls._distribute(node[2])
+        return left_conjunction + right_conjunction if node[0] == '&' \
+            else tuple(l + r for l in left_conjunction for r in right_conjunction)
+
+    def __init__(self):
+        self._clauses = []
+
+    @classmethod
+    def _parse(cls, sentence: str):
         """Parse a sentence into an AST using the shunting-yard algorithm.
         Implications are replaced with disjunctions."""
         partial_name = ''
+        next_var_id = 0
         var2id: Dict[str, int] = {}
         operand_stack = []
         function_stack: List[Union[str, List[str, int]]] = []
@@ -55,9 +96,9 @@ class KnowledgeBase:
             if partial_name:
                 if partial_name[0].islower():
                     # a variable name
-                    var_id = var2id.setdefault(partial_name, self._next_var_id)
-                    if var_id == self._next_var_id:
-                        self._next_var_id += 1
+                    var_id = var2id.setdefault(partial_name, next_var_id)
+                    if var_id == next_var_id:
+                        next_var_id += 1
                     operand_stack.append(var_id)
                 elif c == '(':
                     # a function name
@@ -77,9 +118,9 @@ class KnowledgeBase:
                     c = '=>'
                     i += 1
 
-                order = self.ORDER_OF_PRECEDENCE[c]
+                order = cls.ORDER_OF_PRECEDENCE[c]
                 while function_stack and function_stack[-1] != '('\
-                        and self.ORDER_OF_PRECEDENCE[function_stack[-1]] >= order:
+                        and cls.ORDER_OF_PRECEDENCE[function_stack[-1]] >= order:
                     eval_stack_top()
 
                 function_stack.append(c)
@@ -91,7 +132,7 @@ class KnowledgeBase:
 
                 function_stack.pop()
                 if function_stack and isinstance(function_stack[-1], list)\
-                        and self._is_name(function_stack[-1][0]):
+                        and cls._is_name(function_stack[-1][0]):
                     name, arity = function_stack.pop()
                     operand = [name]
                     operand.extend(operand_stack[-arity:])
@@ -104,3 +145,20 @@ class KnowledgeBase:
             eval_stack_top()
 
         return operand_stack[0]
+
+    def tell(self, sentence: str):
+        ast = self._parse(sentence)
+
+        # Convert the AST into a CNF.
+        ast = self._negate(ast, False)
+        cnf = self._distribute(ast)
+
+        for conjunct in cnf:
+            positive_literals = []
+            negative_literals = []
+            for literal in conjunct:
+                if isinstance(literal, list) and literal[0] == '~':
+                    negative_literals.append(literal[1])
+                else:
+                    positive_literals.append(literal)
+            self._clauses.append((negative_literals, positive_literals))
