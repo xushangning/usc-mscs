@@ -1,6 +1,5 @@
-from typing import Dict, Any, List, Union, Iterable
+from typing import Dict, Any, List, Union
 from string import ascii_letters
-from copy import deepcopy
 
 
 class KnowledgeBase:
@@ -13,7 +12,7 @@ class KnowledgeBase:
     LOGICAL_OPERATORS = {'|', '&', '~'}
     Substitution = Dict[int, Any]
     Variable = int
-    FunctionApplication = list
+    FunctionApplication = tuple
     ASTNode = Union[Variable, str, FunctionApplication]
 
     @staticmethod
@@ -21,13 +20,13 @@ class KnowledgeBase:
         return s[0] in ascii_letters
 
     @staticmethod
-    def _is_function(node: ASTNode):
-        """Check whether an AST node is a logical operator or a function application."""
-        return isinstance(node, list)
-
-    @staticmethod
     def _is_variable_name(node: ASTNode):
         return isinstance(node, str) and node[0].islower()
+
+    @classmethod
+    def _is_function(cls, node: ASTNode):
+        """Check whether an AST node is a logical operator or a function application."""
+        return isinstance(node, cls.FunctionApplication)
 
     @classmethod
     def _is_variable(cls, node: ASTNode):
@@ -45,24 +44,24 @@ class KnowledgeBase:
     def _negate(cls, node, to_negate: bool):
         """Push down negation in a pre-order traversal."""
         if cls._is_atomic_sentence(node):
-            return ['~', node] if to_negate else node
+            return ('~', node) if to_negate else node
 
         if node[0] == '~':
             to_negate = not to_negate
             node = cls._negate(node[1], to_negate)
         else:
             # node must be a conjunction or disjunction.
+            op = node[0]
             if to_negate:
-                node[0] = '&' if node[0] == '|' else '|'
-            node[1] = cls._negate(node[1], to_negate)
-            node[2] = cls._negate(node[2], to_negate)
+                op = '&' if op == '|' else '|'
+            node = (op, cls._negate(node[1], to_negate), cls._negate(node[2], to_negate))
 
         return node
 
     @classmethod
     def _distribute(cls, node):
         """Distribute | over & in a post-order traversal."""
-        if not (isinstance(node, list) and node[0] in '|&'):
+        if not (cls._is_function(node) and node[0] in '|&'):
             # node is a literal.
             return (node,),
 
@@ -89,14 +88,14 @@ class KnowledgeBase:
             """
             op = function_stack.pop()
             if op == '~':
-                operand_stack.append([op, operand_stack.pop()])
+                operand_stack.append((op, operand_stack.pop()))
             else:
                 op_2 = operand_stack.pop()
                 op_1 = operand_stack.pop()
                 if op == '=>':
                     op = '|'
-                    op_1 = ['~', op_1]
-                operand_stack.append([op, op_1, op_2])
+                    op_1 = ('~', op_1)
+                operand_stack.append((op, op_1, op_2))
 
         i = 0
         while i < len(sentence):
@@ -143,10 +142,9 @@ class KnowledgeBase:
                 if function_stack and isinstance(function_stack[-1], list)\
                         and cls._is_name(function_stack[-1][0]):
                     name, arity = function_stack.pop()
-                    operand = [name]
-                    operand.extend(operand_stack[-arity:])
+                    arguments = tuple(operand_stack[-arity:])
                     del operand_stack[-arity:]
-                    operand_stack.append(operand)
+                    operand_stack.append((name,) + arguments)
 
             i += 1
 
@@ -157,19 +155,17 @@ class KnowledgeBase:
 
     @classmethod
     def _substitute(cls, node: ASTNode, sub: Substitution):
-        """In-place substitution"""
         if cls._is_variable(node):
             return sub.get(node, node)
         if cls._is_function(node):
-            for i in range(1, len(node)):
-                node[i] = cls._substitute(node[i], sub)
+            return (node[0],) + tuple(cls._substitute(arg, sub) for arg in node[1:])
         return node
 
     @classmethod
     def _occur_check_and_substitute(cls, var: int, node: ASTNode, sub: Substitution):
         """Apply substitution to node and check whether var occurs in the
         substituted node. If not, return the substituted node."""
-        subbed_node = cls._substitute(deepcopy(node), sub)
+        subbed_node = cls._substitute(node, sub)
         stack = [subbed_node]
         while stack:
             node = stack.pop()
@@ -180,7 +176,7 @@ class KnowledgeBase:
         return subbed_node
 
     @classmethod
-    def _unify_var(cls, var: int, node, sub: Substitution) -> bool:
+    def _unify_var(cls, var: int, node: ASTNode, sub: Substitution) -> bool:
         if var in sub:
             return cls._unify(sub[var], node, sub)
         if cls._is_variable_name(node) and node in sub:
@@ -201,7 +197,7 @@ class KnowledgeBase:
         return True
 
     @classmethod
-    def _unify(cls, node1, node2, sub: Substitution) -> bool:
+    def _unify(cls, node1: ASTNode, node2: ASTNode, sub: Substitution) -> bool:
         """
         :param node1:
         :param node2:
@@ -231,25 +227,21 @@ class KnowledgeBase:
 
     def __init__(self):
         self._next_var_id = 0
-        self._clauses = []
+        self._clauses = set()
 
-    def _standardize_vars_apart(self, nodes: Iterable):
-        """This method assumes that variables are always contained in some function."""
-        var2id: Dict[str, int] = {}
-        for node in nodes:
-            stack = [node]
-            while stack:
-                node = stack.pop()
-                if self._is_function(node):
-                    for i in range(1, len(node)):
-                        if isinstance(node[i], str):
-                            if node[i][0].islower():
-                                # node[i] is a variable.
-                                node[i] = var2id.setdefault(node[i], self._next_var_id)
-                                if node[i] == self._next_var_id:
-                                    self._next_var_id += 1
-                        else:
-                            stack.append(node[i])
+    def _standardize_vars_apart_recursive(self, node, var2id: Dict[str, int]):
+        if isinstance(node, str):
+            if node[0].islower():
+                # node is a variable.
+                node = var2id.setdefault(node, self._next_var_id)
+                if node == self._next_var_id:
+                    self._next_var_id += 1
+        else:
+            node = (node[0],) + tuple(self._standardize_vars_apart_recursive(n, var2id) for n in node[1:])
+        return node
+
+    def _standardize_vars_apart(self, nodes: tuple):
+        return self._standardize_vars_apart_recursive(('PlaceholderFunction',) + nodes, {})[1:]
 
     def tell(self, sentence: str):
         ast = self._parse(sentence)
@@ -259,13 +251,28 @@ class KnowledgeBase:
         cnf = self._distribute(ast)
 
         for conjunct in cnf:
-            self._standardize_vars_apart(conjunct)
+            conjunct = self._standardize_vars_apart(conjunct)
 
             positive_literals = []
             negative_literals = []
             for literal in conjunct:
-                if isinstance(literal, list) and literal[0] == '~':
+                if self._is_function(literal) and literal[0] == '~':
                     negative_literals.append(literal[1])
                 else:
                     positive_literals.append(literal)
-            self._clauses.append((negative_literals, positive_literals))
+            self._clauses.add((frozenset(negative_literals), frozenset(positive_literals)))
+
+    def ask(self, query: str):
+        return False
+
+
+if __name__ == '__main__':
+    kb = KnowledgeBase()
+    with open('input.txt', 'r') as f:
+        f_iter = iter(f)
+        question = next(f_iter).rstrip('\n')
+        n_sentences = int(next(f_iter).rstrip('\n'))
+        for _ in range(n_sentences):
+            kb.tell(next(f_iter).rstrip('\n'))
+
+    print(kb.ask(question))
