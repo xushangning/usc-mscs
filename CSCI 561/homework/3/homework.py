@@ -1,5 +1,6 @@
-from typing import Dict, List, Union
+from typing import Dict, Any, List, Union, Iterable
 from string import ascii_letters
+from copy import deepcopy
 
 
 class KnowledgeBase:
@@ -10,17 +11,34 @@ class KnowledgeBase:
         '~': 3,
     }
     LOGICAL_OPERATORS = {'|', '&', '~'}
+    Substitution = Dict[int, Any]
+    Variable = int
+    FunctionApplication = list
+    ASTNode = Union[Variable, str, FunctionApplication]
 
     @staticmethod
     def _is_name(s: str):
         return s[0] in ascii_letters
 
-    @classmethod
-    def _is_complex_sentence(cls, node):
-        return isinstance(node, list) and node[0] in cls.LOGICAL_OPERATORS
+    @staticmethod
+    def _is_function(node: ASTNode):
+        """Check whether an AST node is a logical operator or a function application."""
+        return isinstance(node, list)
+
+    @staticmethod
+    def _is_variable_name(node: ASTNode):
+        return isinstance(node, str) and node[0].islower()
 
     @classmethod
-    def _is_atomic_sentence(cls, node):
+    def _is_variable(cls, node: ASTNode):
+        return isinstance(node, cls.Variable)
+
+    @classmethod
+    def _is_complex_sentence(cls, node: ASTNode):
+        return cls._is_function(node) and node[0] in cls.LOGICAL_OPERATORS
+
+    @classmethod
+    def _is_atomic_sentence(cls, node: ASTNode):
         return not cls._is_complex_sentence(node)
 
     @classmethod
@@ -53,16 +71,13 @@ class KnowledgeBase:
         return left_conjunction + right_conjunction if node[0] == '&' \
             else tuple(l + r for l in left_conjunction for r in right_conjunction)
 
-    def __init__(self):
-        self._clauses = []
-
     @classmethod
     def _parse(cls, sentence: str):
         """Parse a sentence into an AST using the shunting-yard algorithm.
-        Implications are replaced with disjunctions."""
+        Implications are replaced with disjunctions.
+
+        This method assumes that constants and variables only appear inside functions."""
         partial_name = ''
-        next_var_id = 0
-        var2id: Dict[str, int] = {}
         operand_stack = []
         function_stack: List[Union[str, List[str, int]]] = []
         """Each element is either a string representing an operator, or a list /
@@ -94,17 +109,11 @@ class KnowledgeBase:
 
             # c not being a letter ends a name.
             if partial_name:
-                if partial_name[0].islower():
-                    # a variable name
-                    var_id = var2id.setdefault(partial_name, next_var_id)
-                    if var_id == next_var_id:
-                        next_var_id += 1
-                    operand_stack.append(var_id)
-                elif c == '(':
+                if c == '(':
                     # a function name
                     function_stack.append([partial_name, 1])
                 else:
-                    # a constant
+                    # a constant or a variable name
                     operand_stack.append(partial_name)
                 partial_name = ''
 
@@ -146,6 +155,102 @@ class KnowledgeBase:
 
         return operand_stack[0]
 
+    @classmethod
+    def _substitute(cls, node: ASTNode, sub: Substitution):
+        """In-place substitution"""
+        if cls._is_variable(node):
+            return sub.get(node, node)
+        if cls._is_function(node):
+            for i in range(1, len(node)):
+                node[i] = cls._substitute(node[i], sub)
+        return node
+
+    @classmethod
+    def _occur_check_and_substitute(cls, var: int, node: ASTNode, sub: Substitution):
+        """Apply substitution to node and check whether var occurs in the
+        substituted node. If not, return the substituted node."""
+        subbed_node = cls._substitute(deepcopy(node), sub)
+        stack = [subbed_node]
+        while stack:
+            node = stack.pop()
+            if cls._is_function(node):
+                stack.extend(node[1:])
+            elif cls._is_variable(node) and node == var:
+                return None
+        return subbed_node
+
+    @classmethod
+    def _unify_var(cls, var: int, node, sub: Substitution) -> bool:
+        if var in sub:
+            return cls._unify(sub[var], node, sub)
+        if cls._is_variable_name(node) and node in sub:
+            return cls._unify(var, sub[node], sub)
+
+        var_assignment = cls._occur_check_and_substitute(var, node, sub)
+        if var_assignment is None:
+            return False
+        # Variables in sub can be divided into two categories: those that occur
+        # in node and those that do not. Now that var -> node passed the occur
+        # check, we know that variables occur in node don't contain var, but
+        # variables that do not occur in node may contain var. To make sub stay
+        # in normal form after adding var -> node, we need another round of
+        # substitution.
+        for v in sub:
+            sub[v] = cls._substitute(sub[v], {var: var_assignment})
+        sub[var] = var_assignment
+        return True
+
+    @classmethod
+    def _unify(cls, node1, node2, sub: Substitution) -> bool:
+        """
+        :param node1:
+        :param node2:
+        :param sub: a dict which will contains the substitution on return if
+        unification succeeds. The substitution will be in the so-called normal
+        form: If a variable is mapped to an expression in the substitution, that
+        expression will not contain any variable in the substitution. For
+        example, the substitution {0: 1, 1: 2} is not in normal form, but
+        {0: 2, 1: 2} is.
+        :return:
+        """
+        if node1 == node2:
+            return True
+        if cls._is_variable(node1):
+            return cls._unify_var(node1, node2, sub)
+        if cls._is_variable(node2):
+            return cls._unify_var(node2, node1, sub)
+        if cls._is_function(node1) and cls._is_function(node2):
+            if node1[0] != node2[0] or len(node1) != len(node2):
+                return False
+            for i in range(1, len(node1)):
+                if not cls._unify(node1[i], node2[i], sub):
+                    return False
+            return True
+
+        return False
+
+    def __init__(self):
+        self._next_var_id = 0
+        self._clauses = []
+
+    def _standardize_vars_apart(self, nodes: Iterable):
+        """This method assumes that variables are always contained in some function."""
+        var2id: Dict[str, int] = {}
+        for node in nodes:
+            stack = [node]
+            while stack:
+                node = stack.pop()
+                if self._is_function(node):
+                    for i in range(1, len(node)):
+                        if isinstance(node[i], str):
+                            if node[i][0].islower():
+                                # node[i] is a variable.
+                                node[i] = var2id.setdefault(node[i], self._next_var_id)
+                                if node[i] == self._next_var_id:
+                                    self._next_var_id += 1
+                        else:
+                            stack.append(node[i])
+
     def tell(self, sentence: str):
         ast = self._parse(sentence)
 
@@ -154,6 +259,8 @@ class KnowledgeBase:
         cnf = self._distribute(ast)
 
         for conjunct in cnf:
+            self._standardize_vars_apart(conjunct)
+
             positive_literals = []
             negative_literals = []
             for literal in conjunct:

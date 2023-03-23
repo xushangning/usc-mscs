@@ -8,7 +8,7 @@ class TestKnowledgeBase(unittest.TestCase):
         ast = KnowledgeBase._parse('~G(y, H(z)) => I(B) & J(C)')
         self.assertEqual([
             '|',
-            ['~', ['~', ['G', 0, ['H', 1]]]],
+            ['~', ['~', ['G', 'y', ['H', 'z']]]],
             ['&', ['I', 'B'], ['J', 'C']]
         ], ast)
 
@@ -27,6 +27,26 @@ class TestKnowledgeBase(unittest.TestCase):
             (('A', ['~', 'C']), ('A', 'D'), (['~', 'B'], ['~', 'C']), (['~', 'B'], 'D')),
             KnowledgeBase._distribute(['|', ['&', 'A', ['~', 'B']], ['&', ['~', 'C'], 'D']])
         )
+
+    def test_standardize_vars_apart(self):
+        kb = KnowledgeBase()
+        conjuncts = ['F', 'x'], ['~', ['F', 'y']]
+        kb._standardize_vars_apart(conjuncts)
+        self.assertEqual((['F', 0], ['~', ['F', 1]]), conjuncts)
+
+    def test_unify(self):
+        sub = {}
+        self.assertTrue(KnowledgeBase._unify(['F', 0, ['G', 0]], ['F', ['G', 1], 2], sub))
+        self.assertEqual({0: ['G', 1], 2: ['G', ['G', 1]]}, sub)
+
+        sub = {}
+        self.assertTrue(KnowledgeBase._unify(['F', 0, 1, 2, 3], ['F', 1, 2, 3, 4], sub))
+        self.assertEqual({0: 4, 1: 4, 2: 4, 3: 4}, sub)
+
+        self.assertFalse(KnowledgeBase._unify(['F', 0], ['F', ['F', 0]], {}))
+        self.assertFalse(KnowledgeBase._unify(
+            ['F', 0, ['G', 0]], ['F', ['G', 1], 1], {}
+        ))
 
 
 if __name__ == '__main__':
