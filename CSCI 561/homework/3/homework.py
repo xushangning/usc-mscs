@@ -1,5 +1,6 @@
-from typing import Dict, Any, List, Union
+from typing import Dict, Any, List, Union, Set, Tuple, FrozenSet, cast
 from string import ascii_letters
+import copy
 
 
 class KnowledgeBase:
@@ -14,6 +15,7 @@ class KnowledgeBase:
     Variable = int
     FunctionApplication = tuple
     ASTNode = Union[Variable, str, FunctionApplication]
+    Clause = Tuple[FrozenSet, FrozenSet]
 
     @staticmethod
     def _is_name(s: str):
@@ -127,7 +129,7 @@ class KnowledgeBase:
                     i += 1
 
                 order = cls.ORDER_OF_PRECEDENCE[c]
-                while function_stack and function_stack[-1] != '('\
+                while function_stack and function_stack[-1] != '(' \
                         and cls.ORDER_OF_PRECEDENCE[function_stack[-1]] >= order:
                     eval_stack_top()
 
@@ -139,7 +141,7 @@ class KnowledgeBase:
                     eval_stack_top()
 
                 function_stack.pop()
-                if function_stack and isinstance(function_stack[-1], list)\
+                if function_stack and isinstance(function_stack[-1], list) \
                         and cls._is_name(function_stack[-1][0]):
                     name, arity = function_stack.pop()
                     arguments = tuple(operand_stack[-arity:])
@@ -227,7 +229,7 @@ class KnowledgeBase:
 
     def __init__(self):
         self._next_var_id = 0
-        self._clauses = set()
+        self._clauses: Set[KnowledgeBase.Clause] = set()
 
     def _standardize_vars_apart_recursive(self, node, var2id: Dict[str, int]):
         if isinstance(node, str):
@@ -262,7 +264,61 @@ class KnowledgeBase:
                     positive_literals.append(literal)
             self._clauses.add((frozenset(negative_literals), frozenset(positive_literals)))
 
+    @classmethod
+    def _substitute_set(cls, atomic_sentence_set: FrozenSet, sub: Substitution):
+        return frozenset(cls._substitute(atomic_sentence, sub) for atomic_sentence in atomic_sentence_set)
+
+    @classmethod
+    def _binary_resolve(cls, clause1: Clause, clause2: Clause, resolvents: List[Tuple[int, Clause]]):
+        for i in range(2):
+            for atomic_sentence1 in clause1[i]:
+                for atomic_sentence2 in clause2[1 - i]:
+                    sub = {}
+                    if cls._unify(atomic_sentence1, atomic_sentence2, sub):
+                        resolvent = [None, None]
+                        resolvent[i] = cls._substitute_set(clause1[i] - {atomic_sentence1}, sub) \
+                                       | cls._substitute_set(clause2[i], sub)
+                        resolvent[1 - i] = cls._substitute_set(clause1[1 - i], sub) \
+                                           | cls._substitute_set(clause2[1 - i] - {atomic_sentence2}, sub)
+                        if not resolvent[0] and not resolvent[1]:
+                            return True
+                        resolvent = cast(cls.Clause, tuple(resolvent))
+                        resolvents.append((len(resolvent[0]) + len(resolvent[1]), resolvent))
+        return False
+
     def ask(self, query: str):
+        kb = copy.copy(self)
+        kb.tell(f'~({query})')
+
+        resolvents = kb._clauses
+        resolvents_with_lengths = []
+        prev_resolvents = [
+            (len(clause[0]) + len(clause[1]), clause) for clause in kb._clauses
+        ]
+        while prev_resolvents:
+            # unit preference
+            prev_resolvents.sort()
+            new_resolvents = []
+            for clause1 in resolvents_with_lengths:
+                for clause2 in prev_resolvents:
+                    if self._binary_resolve(clause1[1], clause2[1], new_resolvents):
+                        return True
+            for j in range(1, len(prev_resolvents)):
+                for i in range(j):
+                    if self._binary_resolve(prev_resolvents[i][1], prev_resolvents[j][1], new_resolvents):
+                        return True
+
+            resolvents_with_lengths.extend(prev_resolvents)
+            resolvents_with_lengths.sort()
+
+            for i in reversed(range(len(new_resolvents))):
+                clause = new_resolvents[i]
+                if clause[1] in resolvents:
+                    new_resolvents[i], new_resolvents[-1] = new_resolvents[-1], new_resolvents[i]
+                    new_resolvents.pop(-1)
+                else:
+                    resolvents.add(clause[1])
+            prev_resolvents = new_resolvents
         return False
 
 
@@ -275,4 +331,4 @@ if __name__ == '__main__':
         for _ in range(n_sentences):
             kb.tell(next(f_iter).rstrip('\n'))
 
-    print(kb.ask(question))
+    print('TRUE' if kb.ask(question) else 'FALSE')
