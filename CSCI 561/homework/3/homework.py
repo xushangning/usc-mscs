@@ -1,6 +1,5 @@
 from typing import Dict, Any, List, Union, Set, Tuple, FrozenSet, cast
 from string import ascii_letters
-import copy
 
 
 class KnowledgeBase:
@@ -269,7 +268,7 @@ class KnowledgeBase:
         return frozenset(cls._substitute(atomic_sentence, sub) for atomic_sentence in atomic_sentence_set)
 
     @classmethod
-    def _binary_resolve(cls, clause1: Clause, clause2: Clause, resolvents: List[Tuple[int, Clause]]):
+    def _binary_resolve(cls, clause1: Clause, clause2: Clause, resolvents: List[Clause]):
         for i in range(2):
             for atomic_sentence1 in clause1[i]:
                 for atomic_sentence2 in clause2[1 - i]:
@@ -283,42 +282,31 @@ class KnowledgeBase:
                         if not resolvent[0] and not resolvent[1]:
                             return True
                         resolvent = cast(cls.Clause, tuple(resolvent))
-                        resolvents.append((len(resolvent[0]) + len(resolvent[1]), resolvent))
+                        resolvents.append(resolvent)
         return False
 
     def ask(self, query: str):
-        kb = copy.copy(self)
+        kb = KnowledgeBase()
+        kb._clauses = self._clauses.copy()
         kb.tell(f'~({query})')
 
-        resolvents = kb._clauses
-        resolvents_with_lengths = []
-        prev_resolvents = [
-            (len(clause[0]) + len(clause[1]), clause) for clause in kb._clauses
-        ]
-        while prev_resolvents:
-            # unit preference
-            prev_resolvents.sort()
-            new_resolvents = []
-            for clause1 in resolvents_with_lengths:
-                for clause2 in prev_resolvents:
-                    if self._binary_resolve(clause1[1], clause2[1], new_resolvents):
-                        return True
-            for j in range(1, len(prev_resolvents)):
-                for i in range(j):
-                    if self._binary_resolve(prev_resolvents[i][1], prev_resolvents[j][1], new_resolvents):
+        # Try unit resolution first.
+        unit_clauses = [clause for clause in kb._clauses if len(clause[0]) + len(clause[1]) == 1]
+        while True:
+            resolvents = []
+            for c1 in unit_clauses:
+                for c2 in kb._clauses:
+                    if self._binary_resolve(c1, c2, resolvents):
                         return True
 
-            resolvents_with_lengths.extend(prev_resolvents)
-            resolvents_with_lengths.sort()
-
-            for i in reversed(range(len(new_resolvents))):
-                clause = new_resolvents[i]
-                if clause[1] in resolvents:
-                    new_resolvents[i], new_resolvents[-1] = new_resolvents[-1], new_resolvents[i]
-                    new_resolvents.pop(-1)
-                else:
-                    resolvents.add(clause[1])
-            prev_resolvents = new_resolvents
+            prev_len = len(kb._clauses)
+            for r in resolvents:
+                if r not in kb._clauses:
+                    if len(r[0]) + len(r[1]) == 1:
+                        unit_clauses.append(r)
+                    kb._clauses.add(r)
+            if len(kb._clauses) == prev_len:
+                break
         return False
 
 
