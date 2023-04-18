@@ -1,5 +1,6 @@
 from typing import Dict, Any, List, Union, Set, Tuple, FrozenSet, cast
 from string import ascii_letters
+from heapq import heappush, heappop
 
 
 class KnowledgeBase:
@@ -286,27 +287,41 @@ class KnowledgeBase:
         return False
 
     def ask(self, query: str):
-        kb = KnowledgeBase()
-        kb._clauses = self._clauses.copy()
-        kb.tell(f'~({query})')
+        set_of_support_kb = KnowledgeBase()
+        set_of_support_kb.tell(f'~({query})')
+        set_of_support_heap = [(len(c[0]) + len(c[1]), c) for c in set_of_support_kb._clauses]
+        unit_clauses = set(c for c in self._clauses if len(c[0]) + len(c[1]) == 1)
+        usable = self._clauses.copy()
+        while set_of_support_heap:
+            c = heappop(set_of_support_heap)[1]
+            for d in usable:
+                resolvents = []
+                if self._binary_resolve(c, d, resolvents):
+                    return True
+                for r in resolvents:
+                    if r in usable or r in set_of_support_kb._clauses:
+                        continue
 
-        # Try unit resolution first.
-        unit_clauses = [clause for clause in kb._clauses if len(clause[0]) + len(clause[1]) == 1]
-        while True:
-            resolvents = []
-            for c1 in unit_clauses:
-                for c2 in kb._clauses:
-                    if self._binary_resolve(c1, c2, resolvents):
-                        return True
+                    # Unit forward subsumption: whether the newly derived clause
+                    # can be subsumed by existing unit clauses.
+                    for u in unit_clauses:
+                        for i in range(2):
+                            for atomic_sentence1 in u[i]:
+                                for atomic_sentence2 in r[i]:
+                                    sub = {}
+                                    if self._unify(atomic_sentence1, atomic_sentence2, sub) \
+                                            and self._substitute(atomic_sentence1, sub) == atomic_sentence2:
+                                        break
+                                else:
+                                    break
+                    heappush(set_of_support_heap, (len(r[0]) + len(r[1]), r))
+                    set_of_support_kb._clauses.add(r)
 
-            prev_len = len(kb._clauses)
-            for r in resolvents:
-                if r not in kb._clauses:
-                    if len(r[0]) + len(r[1]) == 1:
-                        unit_clauses.append(r)
-                    kb._clauses.add(r)
-            if len(kb._clauses) == prev_len:
-                break
+            set_of_support_kb._clauses.remove(c)
+            if c not in usable:
+                usable.add(c)
+                if len(c[0]) + len(c[1]) == 1:
+                    unit_clauses.add(c)
         return False
 
     def __len__(self):
@@ -323,4 +338,4 @@ if __name__ == '__main__':
             kb.tell(next(f_iter).rstrip('\n'))
 
     with open('output.txt', 'w') as f:
-        print('TRUE' if kb.ask(question) or len(kb) >= 25 else 'FALSE', file=f)
+        print('TRUE' if kb.ask(question) else 'FALSE', file=f)
